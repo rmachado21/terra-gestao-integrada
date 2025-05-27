@@ -418,6 +418,59 @@ export type Database = {
           },
         ]
       }
+      processamentos: {
+        Row: {
+          colheita_id: string | null
+          created_at: string
+          data_processamento: string
+          id: string
+          lote: string
+          observacoes: string | null
+          perda_percentual: number | null
+          quantidade_entrada_kg: number
+          quantidade_saida_kg: number
+          tipo_processamento: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colheita_id?: string | null
+          created_at?: string
+          data_processamento: string
+          id?: string
+          lote: string
+          observacoes?: string | null
+          perda_percentual?: number | null
+          quantidade_entrada_kg: number
+          quantidade_saida_kg: number
+          tipo_processamento: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colheita_id?: string | null
+          created_at?: string
+          data_processamento?: string
+          id?: string
+          lote?: string
+          observacoes?: string | null
+          perda_percentual?: number | null
+          quantidade_entrada_kg?: number
+          quantidade_saida_kg?: number
+          tipo_processamento?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processamentos_colheita_id_fkey"
+            columns: ["colheita_id"]
+            isOneToOne: false
+            referencedRelation: "colheitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       produtos: {
         Row: {
           ativo: boolean | null

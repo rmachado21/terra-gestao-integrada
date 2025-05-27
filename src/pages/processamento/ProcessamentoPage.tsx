@@ -131,17 +131,6 @@ const ProcessamentoPage = () => {
 
   const createProcessamentoMutation = useMutation({
     mutationFn: async (data: any) => {
-      // Primeiro, verificar se a tabela processamentos existe
-      const { error: checkError } = await supabase
-        .from('processamentos')
-        .select('id')
-        .limit(1);
-      
-      if (checkError) {
-        // Se a tabela não existe, criar usando SQL
-        throw new Error('Tabela de processamentos não encontrada. É necessário criar a estrutura primeiro.');
-      }
-
       const { error } = await supabase
         .from('processamentos')
         .insert([{ ...data, user_id: user?.id }]);
@@ -180,13 +169,11 @@ const ProcessamentoPage = () => {
     
     const entradaKg = parseFloat(formData.quantidade_entrada_kg);
     const saidaKg = parseFloat(formData.quantidade_saida_kg);
-    const perdaPercentual = ((entradaKg - saidaKg) / entradaKg) * 100;
 
     const data = {
       ...formData,
       quantidade_entrada_kg: entradaKg,
       quantidade_saida_kg: saidaKg,
-      perda_percentual: perdaPercentual,
       lote: formData.lote || `LOTE-${Date.now()}`
     };
 
