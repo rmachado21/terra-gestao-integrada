@@ -29,7 +29,7 @@ interface Plantio {
   data_plantio: string;
   data_previsao_colheita: string;
   quantidade_mudas?: number;
-  status: string;
+  status: 'planejado' | 'plantado' | 'crescendo' | 'pronto_colheita' | 'colhido';
   observacoes?: string;
   areas?: {
     nome: string;
@@ -47,7 +47,7 @@ const statusColors = {
   crescendo: 'bg-yellow-100 text-yellow-800',
   pronto_colheita: 'bg-orange-100 text-orange-800',
   colhido: 'bg-gray-100 text-gray-800'
-};
+} as const;
 
 const statusLabels = {
   planejado: 'Planejado',
@@ -55,7 +55,7 @@ const statusLabels = {
   crescendo: 'Crescendo',
   pronto_colheita: 'Pronto para Colheita',
   colhido: 'Colhido'
-};
+} as const;
 
 const PlantiosPage = () => {
   const { user } = useAuth();
@@ -68,7 +68,7 @@ const PlantiosPage = () => {
     data_plantio: '',
     data_previsao_colheita: '',
     quantidade_mudas: '',
-    status: 'planejado',
+    status: 'planejado' as const,
     observacoes: ''
   });
 
@@ -128,7 +128,7 @@ const PlantiosPage = () => {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: 'planejado' | 'plantado' | 'crescendo' | 'pronto_colheita' | 'colhido' }) => {
       const { error } = await supabase
         .from('plantios')
         .update({ status })
@@ -310,8 +310,8 @@ const PlantiosPage = () => {
                     <Sprout className="h-4 w-4 mr-2 text-green-600" />
                     {plantio.variedade}
                   </span>
-                  <Badge className={statusColors[plantio.status as keyof typeof statusColors]}>
-                    {statusLabels[plantio.status as keyof typeof statusLabels]}
+                  <Badge className={statusColors[plantio.status]}>
+                    {statusLabels[plantio.status]}
                   </Badge>
                 </CardTitle>
                 <CardDescription className="flex items-center">
@@ -355,7 +355,9 @@ const PlantiosPage = () => {
                 <div className="mt-4">
                   <Select 
                     value={plantio.status} 
-                    onValueChange={(value) => updateStatusMutation.mutate({ id: plantio.id, status: value })}
+                    onValueChange={(value: 'planejado' | 'plantado' | 'crescendo' | 'pronto_colheita' | 'colhido') => 
+                      updateStatusMutation.mutate({ id: plantio.id, status: value })
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />

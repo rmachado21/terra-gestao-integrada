@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Sprout, 
-  Harvest, 
+  Package2, 
   Package, 
   ShoppingCart, 
   TrendingUp, 
@@ -37,9 +37,9 @@ const menuItems: MenuItem[] = [
   },
   {
     title: 'Produção',
-    icon: Harvest,
+    icon: Package2,
     children: [
-      { title: 'Colheitas', icon: Harvest, path: '/colheitas' },
+      { title: 'Colheitas', icon: Package2, path: '/colheitas' },
       { title: 'Processamento', icon: Package, path: '/processamento' }
     ]
   },
