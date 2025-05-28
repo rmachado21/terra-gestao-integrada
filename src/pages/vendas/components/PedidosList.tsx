@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Eye, Calendar, DollarSign } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Calendar, DollarSign, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import PedidoForm from './PedidoForm';
@@ -14,6 +14,7 @@ import PedidoDetalhes from './PedidoDetalhes';
 
 interface Pedido {
   id: string;
+  cliente_id: string | null;
   data_pedido: string;
   data_entrega: string | null;
   valor_total: number;
@@ -53,7 +54,7 @@ const PedidosList = () => {
         .order('created_at', { ascending: false });
 
       if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as 'pendente' | 'processando' | 'entregue' | 'cancelado');
       }
 
       const { data, error } = await query;

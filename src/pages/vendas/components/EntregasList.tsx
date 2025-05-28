@@ -53,7 +53,7 @@ const EntregasList = () => {
         .order('data_pedido', { ascending: false });
 
       if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as 'pendente' | 'processando' | 'entregue' | 'cancelado');
       }
 
       const { data, error } = await query;

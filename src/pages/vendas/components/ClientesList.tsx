@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,7 @@ interface Cliente {
   endereco: string | null;
   cidade: string | null;
   ativo: boolean;
+  observacoes: string | null;
   created_at: string;
 }
 
