@@ -55,6 +55,7 @@ const menuItems: MenuItem[] = [
     title: 'Vendas',
     icon: ShoppingCart,
     children: [
+      { title: 'Vendas', icon: ShoppingCart, path: '/vendas' },
       { title: 'Clientes', icon: ShoppingCart, path: '/clientes' },
       { title: 'Pedidos', icon: ShoppingCart, path: '/pedidos' }
     ]
