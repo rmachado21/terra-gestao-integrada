@@ -22,7 +22,7 @@ const EstoquePage = () => {
     queryFn: async () => {
       if (!user?.id) return null;
 
-      const [produtosRes, estoqueRes, alertasRes] = await Promise.all([
+      const [produtosRes, estoqueRes] = await Promise.all([
         supabase
           .from('produtos')
           .select('id')
@@ -30,13 +30,8 @@ const EstoquePage = () => {
           .eq('ativo', true),
         supabase
           .from('estoque')
-          .select('quantidade, quantidade_minima')
-          .eq('user_id', user.id),
-        supabase
-          .from('estoque')
           .select('quantidade, quantidade_minima, data_validade')
           .eq('user_id', user.id)
-          .lte('quantidade', supabase.rpc('quantidade_minima'))
       ]);
 
       const totalProdutos = produtosRes.data?.length || 0;
