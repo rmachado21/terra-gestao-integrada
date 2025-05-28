@@ -12,6 +12,7 @@ import AreasPage from "./pages/areas/AreasPage";
 import PlantiosPage from "./pages/plantios/PlantiosPage";
 import ColheitasPage from "./pages/colheitas/ColheitasPage";
 import ProcessamentoPage from "./pages/processamento/ProcessamentoPage";
+import EstoquePage from "./pages/estoque/EstoquePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -87,6 +88,19 @@ const App = () => (
                     <Sidebar />
                     <main className="flex-1 p-6">
                       <ProcessamentoPage />
+                    </main>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/estoque" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-gray-50">
+                  <Header />
+                  <div className="flex">
+                    <Sidebar />
+                    <main className="flex-1 p-6">
+                      <EstoquePage />
                     </main>
                   </div>
                 </div>
