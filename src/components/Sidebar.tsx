@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -46,10 +45,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'Estoque',
     icon: Package,
-    children: [
-      { title: 'Produtos', icon: Package, path: '/produtos' },
-      { title: 'Estoque', icon: BarChart3, path: '/estoque' }
-    ]
+    path: '/estoque'
   },
   {
     title: 'Vendas',
