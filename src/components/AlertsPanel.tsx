@@ -37,26 +37,22 @@ const AlertsPanel = () => {
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      high: "text-red-600 bg-red-50 border-red-200",
+      alta: "text-red-600 bg-red-50 border-red-200",
       critica: "text-red-600 bg-red-50 border-red-200",
-      medium: "text-yellow-600 bg-yellow-50 border-yellow-200",
       media: "text-yellow-600 bg-yellow-50 border-yellow-200",
-      low: "text-green-600 bg-green-50 border-green-200",
       baixa: "text-green-600 bg-green-50 border-green-200"
     };
-    return colors[priority as keyof typeof colors] || colors.medium;
+    return colors[priority as keyof typeof colors] || colors.media;
   };
 
   const getPriorityBadge = (priority: string) => {
     const badges = {
-      high: { label: "Urgente", variant: "destructive" as const },
+      alta: { label: "Urgente", variant: "destructive" as const },
       critica: { label: "Crítico", variant: "destructive" as const },
-      medium: { label: "Médio", variant: "secondary" as const },
       media: { label: "Médio", variant: "secondary" as const },
-      low: { label: "Baixo", variant: "outline" as const },
       baixa: { label: "Baixo", variant: "outline" as const }
     };
-    return badges[priority as keyof typeof badges] || badges.medium;
+    return badges[priority as keyof typeof badges] || badges.media;
   };
 
   const getAlertIcon = (type: string) => {
@@ -128,11 +124,11 @@ const AlertsPanel = () => {
       <CardContent>
         <div className="space-y-3">
           {alerts.map((alert, index) => {
-            const IconComponent = getAlertIcon(alert.tipo || alert.type);
-            const priority = alert.prioridade || alert.priority;
-            const title = alert.titulo || alert.title;
-            const message = alert.mensagem || alert.message;
-            const time = alert.time || 'Recente';
+            const IconComponent = getAlertIcon(alert.tipo);
+            const priority = alert.prioridade;
+            const title = alert.titulo;
+            const message = alert.mensagem;
+            const time = getTimeAgo(alert.created_at) || 'Recente';
             
             return (
               <div 
@@ -159,5 +155,22 @@ const AlertsPanel = () => {
     </Card>
   );
 };
+
+// Função auxiliar para calcular tempo relativo
+function getTimeAgo(dateString: string): string {
+  const agora = new Date();
+  const data = new Date(dateString);
+  const diffMs = agora.getTime() - data.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `${diffDays} dia${diffDays > 1 ? 's' : ''} atrás`;
+  } else if (diffHours > 0) {
+    return `${diffHours} hora${diffHours > 1 ? 's' : ''} atrás`;
+  } else {
+    return 'Agora';
+  }
+}
 
 export default AlertsPanel;

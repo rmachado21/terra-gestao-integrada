@@ -147,12 +147,12 @@ export const useDashboardData = () => {
           const produto = produtos.find(p => p.id === item.id);
           alertasCompletos.push({
             id: `estoque-${item.id}`,
-            title: "Estoque Crítico",
-            message: `${produto?.nome || 'Produto'} - apenas ${item.quantidade} unidades`,
-            priority: item.quantidade === 0 ? "high" : "medium",
-            icon: "AlertTriangle",
-            time: "Agora",
-            type: "estoque",
+            titulo: "Estoque Crítico",
+            mensagem: `${produto?.nome || 'Produto'} - apenas ${item.quantidade} unidades`,
+            prioridade: item.quantidade === 0 ? "critica" as const : "alta" as const,
+            tipo: "estoque",
+            created_at: new Date().toISOString(),
+            lido: false,
             route: "/estoque"
           });
         }
@@ -170,12 +170,12 @@ export const useDashboardData = () => {
       if (produtosVencendo > 0) {
         alertasCompletos.push({
           id: 'produtos-vencendo',
-          title: "Produtos Vencendo",
-          message: `${produtosVencendo} produtos vencem nos próximos 30 dias`,
-          priority: "medium",
-          icon: "Clock",
-          time: "Verificação automática",
-          type: "validade",
+          titulo: "Produtos Vencendo",
+          mensagem: `${produtosVencendo} produtos vencem nos próximos 30 dias`,
+          prioridade: "media" as const,
+          tipo: "validade",
+          created_at: new Date().toISOString(),
+          lido: false,
           route: "/estoque"
         });
       }
