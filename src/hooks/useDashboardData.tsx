@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -152,8 +151,7 @@ export const useDashboardData = () => {
             prioridade: item.quantidade === 0 ? "critica" as const : "alta" as const,
             tipo: "estoque",
             created_at: new Date().toISOString(),
-            lido: false,
-            route: "/estoque"
+            lido: false
           });
         }
       });
@@ -175,8 +173,7 @@ export const useDashboardData = () => {
           prioridade: "media" as const,
           tipo: "validade",
           created_at: new Date().toISOString(),
-          lido: false,
-          route: "/estoque"
+          lido: false
         });
       }
 
