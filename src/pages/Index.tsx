@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Navigation from "@/components/Navigation";
 import DashboardStats from "@/components/DashboardStats";
 import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
@@ -60,7 +58,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-orange-50">
-      <Navigation activeModule={activeModule} setActiveModule={setActiveModule} />
       
       <main className="container mx-auto px-4 py-8">
         {activeModule === "dashboard" && (
