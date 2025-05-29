@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,9 +72,6 @@ const EstoquePage = () => {
         </div>
       </div>
 
-      {/* Estatísticas */}
-      <EstoqueStats data={statsData} />
-
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
@@ -111,6 +109,9 @@ const EstoquePage = () => {
           <GestaoValidades />
         </TabsContent>
       </Tabs>
+
+      {/* Estatísticas - movidas para baixo */}
+      <EstoqueStats data={statsData} />
     </div>
   );
 };

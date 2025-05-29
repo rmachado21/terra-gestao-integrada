@@ -77,7 +77,7 @@ const VendasPage = () => {
         </div>
       </div>
 
-      {/* Tabs principais - movidas para cima */}
+      {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="clientes" className="flex items-center space-x-2">
@@ -98,9 +98,6 @@ const VendasPage = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Estatísticas - agora dentro das tabs */}
-        <VendasStats data={statsData} />
-
         <TabsContent value="clientes">
           <ClientesList />
         </TabsContent>
@@ -117,6 +114,9 @@ const VendasPage = () => {
           <RelatoriosVendas />
         </TabsContent>
       </Tabs>
+
+      {/* Estatísticas - movidas para baixo */}
+      <VendasStats data={statsData} />
     </div>
   );
 };
