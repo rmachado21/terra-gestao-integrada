@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -69,12 +68,11 @@ const VendasPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
-          <h1 className="text-3xl font-bold text-green-800">Módulo de Vendas</h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie clientes, pedidos, entregas e relatórios de vendas
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Módulo de Vendas</h1>
+          <p className="text-gray-600">Gerencie clientes, pedidos, entregas e relatórios de vendas</p>
         </div>
       </div>
 

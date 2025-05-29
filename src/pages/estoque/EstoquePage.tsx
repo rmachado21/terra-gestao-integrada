@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,12 +63,11 @@ const EstoquePage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <Package className="h-8 w-8 text-blue-600" />
         <div>
-          <h1 className="text-3xl font-bold text-green-800">Gestão de Estoque</h1>
-          <p className="text-gray-600 mt-2">
-            Controle produtos, movimentações e alertas do seu estoque
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
+          <p className="text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
         </div>
       </div>
 

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -194,12 +193,15 @@ const PlantiosPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center gap-3">
+        <Sprout className="h-8 w-8 text-green-600" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestão de Plantios</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Gestão de Plantios</h1>
           <p className="text-gray-600">Acompanhe todos os seus plantios e cronogramas</p>
         </div>
-        
+      </div>
+      
+      <div className="flex justify-end">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm} className="bg-green-600 hover:bg-green-700">
