@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,7 @@ import {
   Package2, 
   Package, 
   ShoppingCart, 
-  TrendingUp, 
-  Bell,
+  TrendingUp,
   ChevronDown,
   ChevronRight,
   MapPin,
@@ -55,11 +55,6 @@ const menuItems: MenuItem[] = [
     title: 'Financeiro',
     icon: TrendingUp,
     path: '/financeiro'
-  },
-  {
-    title: 'Alertas',
-    icon: Bell,
-    path: '/alertas'
   }
 ];
 

@@ -8,7 +8,7 @@ import DashboardStats from "@/components/DashboardStats";
 import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
 import AlertsPanel from "@/components/AlertsPanel";
-import { Sprout, Package, TrendingUp, Users, DollarSign, Bell, BarChart3 } from "lucide-react";
+import { Sprout, Package, TrendingUp, Users, DollarSign, BarChart3 } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -53,14 +53,6 @@ const Index = () => {
       color: "bg-yellow-500",
       description: "Controle de receitas e despesas",
       route: "/financeiro"
-    },
-    {
-      id: "alerts",
-      title: "Alertas",
-      icon: Bell,
-      color: "bg-red-500",
-      description: "Lembretes e tarefas",
-      route: "/alertas"
     }
   ];
 

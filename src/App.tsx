@@ -15,7 +15,6 @@ import ProcessamentoPage from "./pages/processamento/ProcessamentoPage";
 import EstoquePage from "./pages/estoque/EstoquePage";
 import VendasPage from "./pages/vendas/VendasPage";
 import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
-import AlertasPage from "./pages/alertas/AlertasPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -130,19 +129,6 @@ const App = () => (
                     <Sidebar />
                     <main className="flex-1 p-6">
                       <FinanceiroPage />
-                    </main>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            } />
-            <Route path="/alertas" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-gray-50">
-                  <Header />
-                  <div className="flex">
-                    <Sidebar />
-                    <main className="flex-1 p-6">
-                      <AlertasPage />
                     </main>
                   </div>
                 </div>
