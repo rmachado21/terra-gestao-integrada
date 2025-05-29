@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,9 @@ import {
   ChevronDown,
   ChevronRight,
   MapPin,
-  Calendar
+  Calendar,
+  Menu,
+  X
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -65,6 +68,7 @@ const menuItems: MenuItem[] = [
 
 const Sidebar = () => {
   const [expandedItems, setExpandedItems] = useState<string[]>(['Planejamento & Plantio']);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -77,6 +81,11 @@ const Sidebar = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsMobileOpen(false); // Fechar menu mobile após navegação
+  };
 
   const renderMenuItem = (item: MenuItem, level = 0) => {
     const isExpanded = expandedItems.includes(item.title);
@@ -96,14 +105,14 @@ const Sidebar = () => {
             if (hasChildren) {
               toggleExpanded(item.title);
             } else if (item.path) {
-              navigate(item.path);
+              handleNavigation(item.path);
             }
           }}
         >
-          <item.icon className="mr-2 h-4 w-4" />
-          <span className="flex-1 text-left">{item.title}</span>
+          <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+          <span className="flex-1 text-left truncate">{item.title}</span>
           {hasChildren && (
-            isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+            isExpanded ? <ChevronDown className="h-4 w-4 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 flex-shrink-0" />
           )}
         </Button>
         
@@ -117,13 +126,37 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-full">
-      <ScrollArea className="h-full px-3 py-4">
-        <div className="space-y-2">
-          {menuItems.map(item => renderMenuItem(item))}
-        </div>
-      </ScrollArea>
-    </div>
+    <>
+      {/* Mobile Menu Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="lg:hidden fixed top-20 left-4 z-50 bg-white shadow-md"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+      >
+        {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+      </Button>
+
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={cn(
+        "fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:transform-none",
+        isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <ScrollArea className="h-full px-3 py-4">
+          <div className="space-y-2">
+            {menuItems.map(item => renderMenuItem(item))}
+          </div>
+        </ScrollArea>
+      </div>
+    </>
   );
 };
 
