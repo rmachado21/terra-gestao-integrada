@@ -1,52 +1,48 @@
 
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 const AlertsPanel = () => {
-  const alerts = [
-    {
-      title: "Estoque Crítico",
-      message: "Mandioca embalada 2kg - apenas 45 unidades",
-      priority: "high",
-      icon: AlertTriangle,
-      time: "Agora"
-    },
-    {
-      title: "Colheita Pronta",
-      message: "Setor A está pronto para colheita",
-      priority: "medium",
-      icon: Clock,
-      time: "1h atrás"
-    },
-    {
-      title: "Produtos Vencendo",
-      message: "3 produtos vencem nos próximos 5 dias",
-      priority: "medium",
-      icon: Clock,
-      time: "2h atrás"
-    },
-    {
-      title: "Manutenção Agendada",
-      message: "Equipamento de processamento - 30/05",
-      priority: "low",
-      icon: CheckCircle,
-      time: "1 dia atrás"
-    },
-    {
-      title: "Pagamento Pendente",
-      message: "Padaria São José - R$ 280,00",
-      priority: "medium",
-      icon: Clock,
-      time: "2 dias atrás"
-    }
-  ];
+  const navigate = useNavigate();
+  const { data: dashboardData, isLoading } = useDashboardData();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <AlertTriangle className="h-5 w-5 text-orange-600" />
+            <span>Alertas e Lembretes</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse p-3 rounded-lg border">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const alerts = dashboardData?.alertas || [];
 
   const getPriorityColor = (priority: string) => {
     const colors = {
       high: "text-red-600 bg-red-50 border-red-200",
+      critica: "text-red-600 bg-red-50 border-red-200",
       medium: "text-yellow-600 bg-yellow-50 border-yellow-200",
-      low: "text-green-600 bg-green-50 border-green-200"
+      media: "text-yellow-600 bg-yellow-50 border-yellow-200",
+      low: "text-green-600 bg-green-50 border-green-200",
+      baixa: "text-green-600 bg-green-50 border-green-200"
     };
     return colors[priority as keyof typeof colors] || colors.medium;
   };
@@ -54,11 +50,72 @@ const AlertsPanel = () => {
   const getPriorityBadge = (priority: string) => {
     const badges = {
       high: { label: "Urgente", variant: "destructive" as const },
+      critica: { label: "Crítico", variant: "destructive" as const },
       medium: { label: "Médio", variant: "secondary" as const },
-      low: { label: "Baixo", variant: "outline" as const }
+      media: { label: "Médio", variant: "secondary" as const },
+      low: { label: "Baixo", variant: "outline" as const },
+      baixa: { label: "Baixo", variant: "outline" as const }
     };
     return badges[priority as keyof typeof badges] || badges.medium;
   };
+
+  const getAlertIcon = (type: string) => {
+    const icons = {
+      estoque: AlertTriangle,
+      validade: Clock,
+      colheita: CheckCircle,
+      financeiro: Clock,
+      manutencao: CheckCircle
+    };
+    return icons[type as keyof typeof icons] || AlertTriangle;
+  };
+
+  const handleAlertClick = (alert: any) => {
+    if (alert.route) {
+      navigate(alert.route);
+    } else {
+      // Navegar baseado no tipo do alerta
+      switch (alert.tipo) {
+        case 'estoque':
+          navigate('/estoque');
+          break;
+        case 'validade':
+          navigate('/estoque');
+          break;
+        case 'colheita':
+          navigate('/colheitas');
+          break;
+        case 'financeiro':
+          navigate('/financeiro');
+          break;
+        case 'plantio':
+          navigate('/plantios');
+          break;
+        default:
+          navigate('/alertas');
+      }
+    }
+  };
+
+  if (alerts.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span>Alertas e Lembretes</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-500">
+            <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
+            <p className="font-medium">Tudo certo!</p>
+            <p className="text-sm mt-2">Não há alertas pendentes no momento.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -70,24 +127,33 @@ const AlertsPanel = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {alerts.map((alert, index) => (
-            <div 
-              key={index} 
-              className={`p-3 rounded-lg border ${getPriorityColor(alert.priority)}`}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <alert.icon className="h-4 w-4" />
-                  <span className="font-medium text-sm">{alert.title}</span>
+          {alerts.map((alert, index) => {
+            const IconComponent = getAlertIcon(alert.tipo || alert.type);
+            const priority = alert.prioridade || alert.priority;
+            const title = alert.titulo || alert.title;
+            const message = alert.mensagem || alert.message;
+            const time = alert.time || 'Recente';
+            
+            return (
+              <div 
+                key={alert.id || index} 
+                className={`p-3 rounded-lg border cursor-pointer hover:shadow-md transition-all ${getPriorityColor(priority)}`}
+                onClick={() => handleAlertClick(alert)}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <IconComponent className="h-4 w-4" />
+                    <span className="font-medium text-sm">{title}</span>
+                  </div>
+                  <Badge variant={getPriorityBadge(priority).variant} className="text-xs">
+                    {getPriorityBadge(priority).label}
+                  </Badge>
                 </div>
-                <Badge variant={getPriorityBadge(alert.priority).variant} className="text-xs">
-                  {getPriorityBadge(alert.priority).label}
-                </Badge>
+                <p className="text-sm opacity-90">{message}</p>
+                <p className="text-xs opacity-70 mt-1">{time}</p>
               </div>
-              <p className="text-sm opacity-90">{alert.message}</p>
-              <p className="text-xs opacity-70 mt-1">{alert.time}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
