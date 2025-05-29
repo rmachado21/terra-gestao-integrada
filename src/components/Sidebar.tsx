@@ -12,8 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   MapPin,
-  Calendar,
-  BarChart3
+  Calendar
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -55,10 +54,7 @@ const menuItems: MenuItem[] = [
   {
     title: 'Financeiro',
     icon: TrendingUp,
-    children: [
-      { title: 'Movimentações', icon: TrendingUp, path: '/financeiro' },
-      { title: 'Relatórios', icon: BarChart3, path: '/relatorios' }
-    ]
+    path: '/financeiro'
   },
   {
     title: 'Alertas',
