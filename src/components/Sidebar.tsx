@@ -13,7 +13,8 @@ import {
   ChevronRight,
   MapPin,
   Menu,
-  X
+  X,
+  Home
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -25,6 +26,11 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  {
+    title: 'Dashboard',
+    icon: Home,
+    path: '/'
+  },
   {
     title: 'Planejamento & Plantio',
     icon: Sprout,
