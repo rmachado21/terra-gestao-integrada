@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -76,10 +77,7 @@ const VendasPage = () => {
         </div>
       </div>
 
-      {/* Estatísticas */}
-      <VendasStats data={statsData} />
-
-      {/* Tabs principais */}
+      {/* Tabs principais - movidas para cima */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="clientes" className="flex items-center space-x-2">
@@ -99,6 +97,9 @@ const VendasPage = () => {
             <span>Relatórios</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Estatísticas - agora dentro das tabs */}
+        <VendasStats data={statsData} />
 
         <TabsContent value="clientes">
           <ClientesList />
