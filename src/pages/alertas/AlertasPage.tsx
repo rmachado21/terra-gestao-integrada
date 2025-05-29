@@ -9,8 +9,8 @@ import { Bell, Settings, Users, BarChart3 } from 'lucide-react';
 
 const AlertasPage = () => {
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
         <Bell className="h-8 w-8 text-orange-600" />
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Sistema de Alertas</h1>
