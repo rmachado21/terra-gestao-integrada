@@ -15,7 +15,8 @@ import {
   DollarSign,
   Search,
   Filter,
-  Clock
+  Clock,
+  Bell
 } from 'lucide-react';
 
 const AlertasList = () => {
