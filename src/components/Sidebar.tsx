@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import {
   ChevronDown,
   ChevronRight,
   MapPin,
-  Calendar,
   Menu,
   X
 } from 'lucide-react';
@@ -32,8 +30,7 @@ const menuItems: MenuItem[] = [
     icon: Sprout,
     children: [
       { title: 'Áreas', icon: MapPin, path: '/areas' },
-      { title: 'Plantios', icon: Sprout, path: '/plantios' },
-      { title: 'Cronograma', icon: Calendar, path: '/cronograma' }
+      { title: 'Plantios', icon: Sprout, path: '/plantios' }
     ]
   },
   {

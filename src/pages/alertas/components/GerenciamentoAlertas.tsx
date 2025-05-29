@@ -72,6 +72,33 @@ const GerenciamentoAlertas = () => {
     ]
   };
 
+  const toggleUsuarioAtivo = (id: number) => {
+    setUsuarios(prev => prev.map(usuario => 
+      usuario.id === id ? { ...usuario, ativo: !usuario.ativo } : usuario
+    ));
+  };
+
+  const updateConfiguracaoEmail = (field: string, value: any) => {
+    setConfiguracaoCanais(prev => ({
+      ...prev,
+      email: { ...prev.email, [field]: value }
+    }));
+  };
+
+  const updateConfiguracaoSms = (field: string, value: any) => {
+    setConfiguracaoCanais(prev => ({
+      ...prev,
+      sms: { ...prev.sms, [field]: value }
+    }));
+  };
+
+  const updateConfiguracaoSistema = (field: string, value: any) => {
+    setConfiguracaoCanais(prev => ({
+      ...prev,
+      sistema: { ...prev.sistema, [field]: value }
+    }));
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="usuarios" className="w-full">
@@ -101,7 +128,10 @@ const GerenciamentoAlertas = () => {
                         <p className="text-sm text-gray-600">{usuario.telefone}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Switch checked={usuario.ativo} />
+                        <Switch 
+                          checked={usuario.ativo}
+                          onCheckedChange={() => toggleUsuarioAtivo(usuario.id)}
+                        />
                         <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -147,23 +177,38 @@ const GerenciamentoAlertas = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label>Canal Email</Label>
-                  <Switch checked={configuracaoCanais.email.ativo} />
+                  <Switch 
+                    checked={configuracaoCanais.email.ativo}
+                    onCheckedChange={(checked) => updateConfiguracaoEmail('ativo', checked)}
+                  />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="servidor">Servidor SMTP</Label>
-                    <Input id="servidor" value={configuracaoCanais.email.servidor} />
+                    <Input 
+                      id="servidor" 
+                      value={configuracaoCanais.email.servidor}
+                      onChange={(e) => updateConfiguracaoEmail('servidor', e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="porta">Porta</Label>
-                    <Input id="porta" value={configuracaoCanais.email.porta} />
+                    <Input 
+                      id="porta" 
+                      value={configuracaoCanais.email.porta}
+                      onChange={(e) => updateConfiguracaoEmail('porta', parseInt(e.target.value) || 587)}
+                    />
                   </div>
                 </div>
                 
                 <div>
                   <Label htmlFor="usuario">Usuário</Label>
-                  <Input id="usuario" value={configuracaoCanais.email.usuario} />
+                  <Input 
+                    id="usuario" 
+                    value={configuracaoCanais.email.usuario}
+                    onChange={(e) => updateConfiguracaoEmail('usuario', e.target.value)}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -179,17 +224,29 @@ const GerenciamentoAlertas = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label>Canal SMS</Label>
-                  <Switch checked={configuracaoCanais.sms.ativo} />
+                  <Switch 
+                    checked={configuracaoCanais.sms.ativo}
+                    onCheckedChange={(checked) => updateConfiguracaoSms('ativo', checked)}
+                  />
                 </div>
                 
                 <div>
                   <Label htmlFor="provedor">Provedor</Label>
-                  <Input id="provedor" value={configuracaoCanais.sms.provedor} />
+                  <Input 
+                    id="provedor" 
+                    value={configuracaoCanais.sms.provedor}
+                    onChange={(e) => updateConfiguracaoSms('provedor', e.target.value)}
+                  />
                 </div>
                 
                 <div>
                   <Label htmlFor="chaveApi">Chave da API</Label>
-                  <Input id="chaveApi" type="password" value={configuracaoCanais.sms.chaveApi} />
+                  <Input 
+                    id="chaveApi" 
+                    type="password" 
+                    value={configuracaoCanais.sms.chaveApi}
+                    onChange={(e) => updateConfiguracaoSms('chaveApi', e.target.value)}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -205,17 +262,28 @@ const GerenciamentoAlertas = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label>Notificações do Sistema</Label>
-                  <Switch checked={configuracaoCanais.sistema.ativo} />
+                  <Switch 
+                    checked={configuracaoCanais.sistema.ativo}
+                    onCheckedChange={(checked) => updateConfiguracaoSistema('ativo', checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <Label>Persistir Alertas</Label>
-                  <Switch checked={configuracaoCanais.sistema.persistir} />
+                  <Switch 
+                    checked={configuracaoCanais.sistema.persistir}
+                    onCheckedChange={(checked) => updateConfiguracaoSistema('persistir', checked)}
+                  />
                 </div>
                 
                 <div>
                   <Label htmlFor="retencao">Tempo de Retenção (dias)</Label>
-                  <Input id="retencao" type="number" value={configuracaoCanais.sistema.tempoRetencao} />
+                  <Input 
+                    id="retencao" 
+                    type="number" 
+                    value={configuracaoCanais.sistema.tempoRetencao}
+                    onChange={(e) => updateConfiguracaoSistema('tempoRetencao', parseInt(e.target.value) || 30)}
+                  />
                 </div>
               </CardContent>
             </Card>

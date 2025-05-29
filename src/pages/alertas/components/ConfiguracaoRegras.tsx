@@ -85,7 +85,16 @@ const ConfiguracaoRegras = () => {
     }
   };
 
+  const handleNovaRegraChange = (field: string, value: any) => {
+    setNovaRegra(prev => ({ ...prev, [field]: value }));
+  };
+
   const adicionarRegra = () => {
+    if (!novaRegra.nome.trim() || !novaRegra.modulo) {
+      console.warn('Nome e módulo são obrigatórios');
+      return;
+    }
+    
     const novaId = Math.max(...regras.map(r => r.id)) + 1;
     setRegras([...regras, { ...novaRegra, id: novaId }]);
     setNovaRegra({
@@ -126,7 +135,7 @@ const ConfiguracaoRegras = () => {
               <Input
                 id="nome"
                 value={novaRegra.nome}
-                onChange={(e) => setNovaRegra({...novaRegra, nome: e.target.value})}
+                onChange={(e) => handleNovaRegraChange('nome', e.target.value)}
                 placeholder="Ex: Estoque Baixo"
               />
             </div>
@@ -135,7 +144,7 @@ const ConfiguracaoRegras = () => {
               <Label htmlFor="modulo">Módulo</Label>
               <Select 
                 value={novaRegra.modulo} 
-                onValueChange={(value) => setNovaRegra({...novaRegra, modulo: value})}
+                onValueChange={(value) => handleNovaRegraChange('modulo', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o módulo" />
@@ -156,7 +165,7 @@ const ConfiguracaoRegras = () => {
             <Input
               id="condicao"
               value={novaRegra.condicao}
-              onChange={(e) => setNovaRegra({...novaRegra, condicao: e.target.value})}
+              onChange={(e) => handleNovaRegraChange('condicao', e.target.value)}
               placeholder="Ex: quantidade <= quantidade_minima"
             />
           </div>
@@ -166,7 +175,7 @@ const ConfiguracaoRegras = () => {
               <Label htmlFor="prioridade">Prioridade</Label>
               <Select 
                 value={novaRegra.prioridade} 
-                onValueChange={(value) => setNovaRegra({...novaRegra, prioridade: value})}
+                onValueChange={(value) => handleNovaRegraChange('prioridade', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -195,7 +204,7 @@ const ConfiguracaoRegras = () => {
             <Textarea
               id="descricao"
               value={novaRegra.descricao}
-              onChange={(e) => setNovaRegra({...novaRegra, descricao: e.target.value})}
+              onChange={(e) => handleNovaRegraChange('descricao', e.target.value)}
               placeholder="Descreva quando esta regra deve ser acionada"
               rows={3}
             />
@@ -257,7 +266,11 @@ const ConfiguracaoRegras = () => {
                 </div>
                 
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setEditandoRegra(regra.id)}
+                  >
                     <Edit className="h-4 w-4 mr-1" />
                     Editar
                   </Button>
