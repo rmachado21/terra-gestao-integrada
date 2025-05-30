@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { Plus, Pencil, Trash2, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Produto {
   id: string;
@@ -29,6 +31,7 @@ const ProdutosList = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduto, setEditingProduto] = useState<Produto | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,10 +63,8 @@ const ProdutosList = () => {
     enabled: !!user?.id
   });
 
-  // Buscar categorias únicas
   const categorias = [...new Set(produtos?.map(p => p.categoria).filter(Boolean))];
 
-  // Filtrar produtos
   const produtosFiltrados = produtos?.filter(produto => {
     const matchesSearch = produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          produto.categoria?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -71,7 +72,6 @@ const ProdutosList = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Mutation para criar/atualizar produto
   const produtoMutation = useMutation({
     mutationFn: async (data: any) => {
       if (editingProduto) {
@@ -106,7 +106,6 @@ const ProdutosList = () => {
     }
   });
 
-  // Mutation para excluir produto
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -310,58 +309,107 @@ const ProdutosList = () => {
           </div>
         </div>
 
-        {/* Tabela com scroll horizontal */}
+        {/* Conteúdo adaptativo */}
         {produtosFiltrados && produtosFiltrados.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table className="min-w-[600px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Nome</TableHead>
-                  <TableHead className="min-w-[120px]">Categoria</TableHead>
-                  <TableHead className="min-w-[80px]">Unidade</TableHead>
-                  <TableHead className="min-w-[100px]">Preço</TableHead>
-                  <TableHead className="min-w-[80px]">Status</TableHead>
-                  <TableHead className="min-w-[120px]">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <>
+            {/* Versão Mobile - Cards */}
+            {isMobile ? (
+              <div className="space-y-4">
                 {produtosFiltrados.map((produto) => (
-                  <TableRow key={produto.id}>
-                    <TableCell className="font-medium">{produto.nome}</TableCell>
-                    <TableCell>
-                      {produto.categoria && (
-                        <Badge variant="secondary">{produto.categoria}</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{produto.unidade_medida}</TableCell>
-                    <TableCell>
-                      {produto.preco_venda ? `R$ ${produto.preco_venda.toFixed(2)}` : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={produto.ativo ? "default" : "secondary"}>
-                        {produto.ativo ? 'Ativo' : 'Inativo'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(produto)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deleteMutation.mutate(produto.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  <Card key={produto.id} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg">{produto.nome}</h3>
+                          <p className="text-sm text-gray-600">{produto.unidade_medida}</p>
+                        </div>
+                        <div className="flex space-x-2 ml-4">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(produto)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteMutation.mutate(produto.id)}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {produto.categoria && (
+                          <Badge variant="secondary">{produto.categoria}</Badge>
+                        )}
+                        <Badge variant={produto.ativo ? "default" : "secondary"}>
+                          {produto.ativo ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </div>
+                      
+                      {produto.preco_venda && (
+                        <p className="text-sm font-medium">
+                          Preço: R$ {produto.preco_venda.toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
+            ) : (
+              /* Versão Desktop - Tabela */
+              <div className="overflow-x-auto">
+                <Table className="min-w-[600px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[150px]">Nome</TableHead>
+                      <TableHead className="min-w-[120px]">Categoria</TableHead>
+                      <TableHead className="min-w-[80px]">Unidade</TableHead>
+                      <TableHead className="min-w-[100px]">Preço</TableHead>
+                      <TableHead className="min-w-[80px]">Status</TableHead>
+                      <TableHead className="min-w-[120px]">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {produtosFiltrados.map((produto) => (
+                      <TableRow key={produto.id}>
+                        <TableCell className="font-medium">{produto.nome}</TableCell>
+                        <TableCell>
+                          {produto.categoria && (
+                            <Badge variant="secondary">{produto.categoria}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{produto.unidade_medida}</TableCell>
+                        <TableCell>
+                          {produto.preco_venda ? `R$ ${produto.preco_venda.toFixed(2)}` : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={produto.ativo ? "default" : "secondary"}>
+                            {produto.ativo ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => handleEdit(produto)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteMutation.mutate(produto.id)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-8 text-gray-500">
             {produtos?.length === 0 
