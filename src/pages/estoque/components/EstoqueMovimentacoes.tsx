@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -210,7 +209,7 @@ const EstoqueMovimentacoes = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <CardTitle className="flex items-center space-x-2">
             <Package className="h-5 w-5" />
             <span>Controle de Estoque</span>
@@ -218,12 +217,12 @@ const EstoqueMovimentacoes = () => {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
+              <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Movimentação
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Nova Movimentação</DialogTitle>
               </DialogHeader>
@@ -318,7 +317,7 @@ const EstoqueMovimentacoes = () => {
                   />
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button type="button" variant="outline" onClick={handleCloseDialog} className="flex-1">
                     Cancelar
                   </Button>
@@ -342,71 +341,75 @@ const EstoqueMovimentacoes = () => {
           />
         </div>
 
-        {/* Tabela de estoque */}
+        {/* Tabela com scroll horizontal */}
         {estoqueFiltrado && estoqueFiltrado.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Produto</TableHead>
-                <TableHead>Lote</TableHead>
-                <TableHead>Quantidade</TableHead>
-                <TableHead>Qtd. Mínima</TableHead>
-                <TableHead>Validade</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {estoqueFiltrado.map((item) => {
-                const isLowStock = item.quantidade_minima > 0 && item.quantidade <= item.quantidade_minima;
-                const isExpiringSoon = item.data_validade ? 
-                  new Date(item.data_validade) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
-                
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">
-                      {item.produtos?.nome}
-                      <div className="text-sm text-gray-500">
-                        {item.produtos?.unidade_medida}
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.lote || '-'}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <span>{item.quantidade}</span>
-                        <span className="text-gray-500">{item.produtos?.unidade_medida}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.quantidade_minima}</TableCell>
-                    <TableCell>
-                      {item.data_validade ? 
-                        format(new Date(item.data_validade), 'dd/MM/yyyy', { locale: ptBR }) : 
-                        '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col space-y-1">
-                        {isLowStock && (
-                          <Badge variant="destructive" className="text-xs">
-                            Estoque Baixo
-                          </Badge>
-                        )}
-                        {isExpiringSoon && (
-                          <Badge variant="secondary" className="text-xs">
-                            Vencendo
-                          </Badge>
-                        )}
-                        {!isLowStock && !isExpiringSoon && (
-                          <Badge variant="default" className="text-xs">
-                            Normal
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[700px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Produto</TableHead>
+                  <TableHead className="min-w-[100px]">Lote</TableHead>
+                  <TableHead className="min-w-[120px]">Quantidade</TableHead>
+                  <TableHead className="min-w-[100px]">Qtd. Mínima</TableHead>
+                  <TableHead className="min-w-[100px]">Validade</TableHead>
+                  <TableHead className="min-w-[120px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {estoqueFiltrado.map((item) => {
+                  const isLowStock = item.quantidade_minima > 0 && item.quantidade <= item.quantidade_minima;
+                  const isExpiringSoon = item.data_validade ? 
+                    new Date(item.data_validade) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
+                  
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        <div className="min-w-0">
+                          <div className="truncate">{item.produtos?.nome}</div>
+                          <div className="text-sm text-gray-500 truncate">
+                            {item.produtos?.unidade_medida}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.lote || '-'}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{item.quantidade}</span>
+                          <span className="text-xs text-gray-500">{item.produtos?.unidade_medida}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.quantidade_minima}</TableCell>
+                      <TableCell className="text-sm">
+                        {item.data_validade ? 
+                          format(new Date(item.data_validade), 'dd/MM/yyyy', { locale: ptBR }) : 
+                          '-'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col space-y-1">
+                          {isLowStock && (
+                            <Badge variant="destructive" className="text-xs">
+                              Estoque Baixo
+                            </Badge>
+                          )}
+                          {isExpiringSoon && (
+                            <Badge variant="secondary" className="text-xs">
+                              Vencendo
+                            </Badge>
+                          )}
+                          {!isLowStock && !isExpiringSoon && (
+                            <Badge variant="default" className="text-xs">
+                              Normal
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
             {estoque?.length === 0 

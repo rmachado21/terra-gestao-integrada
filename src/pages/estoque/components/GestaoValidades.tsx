@@ -153,17 +153,17 @@ const GestaoValidades = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Estatísticas de validade */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Estatísticas de validade responsivas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total com Validade</p>
-                <p className="text-2xl font-bold">{produtos?.length || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total com Validade</p>
+                <p className="text-xl sm:text-2xl font-bold">{produtos?.length || 0}</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -171,11 +171,11 @@ const GestaoValidades = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Produtos Vencidos</p>
-                <p className="text-2xl font-bold text-red-600">{stats.vencido || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Produtos Vencidos</p>
+                <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.vencido || 0}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -183,11 +183,11 @@ const GestaoValidades = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Vencendo (30 dias)</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.vencendo || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Vencendo (30 dias)</p>
+                <p className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.vencendo || 0}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -195,11 +195,11 @@ const GestaoValidades = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Em Bom Estado</p>
-                <p className="text-2xl font-bold text-green-600">{stats.normal || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Em Bom Estado</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">{stats.normal || 0}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
@@ -215,8 +215,8 @@ const GestaoValidades = () => {
         </CardHeader>
         
         <CardContent>
-          {/* Filtros */}
-          <div className="flex space-x-4 mb-6">
+          {/* Filtros responsivos */}
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
             <div className="flex-1">
               <Input
                 placeholder="Buscar por produto ou lote..."
@@ -224,7 +224,7 @@ const GestaoValidades = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="w-48">
+            <div className="w-full sm:w-48">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue />
@@ -239,56 +239,63 @@ const GestaoValidades = () => {
             </div>
           </div>
 
-          {/* Tabela */}
+          {/* Tabela com scroll horizontal */}
           {produtosFiltrados && produtosFiltrados.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Lote</TableHead>
-                  <TableHead>Quantidade</TableHead>
-                  <TableHead>Data de Validade</TableHead>
-                  <TableHead>Dias para Vencer</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {produtosFiltrados.map((produto) => {
-                  const StatusIcon = getStatusIcon(produto.status);
-                  const statusColor = getStatusColor(produto.status);
-                  const badge = getStatusBadge(produto.status);
-                  
-                  return (
-                    <TableRow key={produto.id}>
-                      <TableCell className="font-medium">
-                        {produto.produto_nome}
-                        <div className="text-sm text-gray-500">
-                          {produto.unidade_medida}
-                        </div>
-                      </TableCell>
-                      <TableCell>{produto.lote || '-'}</TableCell>
-                      <TableCell>
-                        {produto.quantidade} {produto.unidade_medida}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(produto.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
-                      </TableCell>
-                      <TableCell>
-                        <div className={`flex items-center space-x-2 ${statusColor}`}>
-                          <StatusIcon className="h-4 w-4" />
-                          <span>{formatDiasParaVencer(produto.dias_para_vencer)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={badge.variant}>
-                          {badge.label}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <Table className="min-w-[800px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[150px]">Produto</TableHead>
+                    <TableHead className="min-w-[100px]">Lote</TableHead>
+                    <TableHead className="min-w-[120px]">Quantidade</TableHead>
+                    <TableHead className="min-w-[120px]">Data de Validade</TableHead>
+                    <TableHead className="min-w-[150px]">Dias para Vencer</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {produtosFiltrados.map((produto) => {
+                    const StatusIcon = getStatusIcon(produto.status);
+                    const statusColor = getStatusColor(produto.status);
+                    const badge = getStatusBadge(produto.status);
+                    
+                    return (
+                      <TableRow key={produto.id}>
+                        <TableCell className="font-medium">
+                          <div className="min-w-0">
+                            <div className="truncate">{produto.produto_nome}</div>
+                            <div className="text-sm text-gray-500 truncate">
+                              {produto.unidade_medida}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{produto.lote || '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{produto.quantidade}</span>
+                            <span className="text-xs text-gray-500">{produto.unidade_medida}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {format(new Date(produto.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
+                        </TableCell>
+                        <TableCell>
+                          <div className={`flex items-center space-x-2 ${statusColor}`}>
+                            <StatusIcon className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-sm truncate">{formatDiasParaVencer(produto.dias_para_vencer)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={badge.variant} className="text-xs">
+                            {badge.label}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               {produtos?.length === 0 

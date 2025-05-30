@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -184,7 +183,7 @@ const ProdutosList = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <CardTitle className="flex items-center space-x-2">
             <Package className="h-5 w-5" />
             <span>Produtos Cadastrados</span>
@@ -192,12 +191,12 @@ const ProdutosList = () => {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
+              <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingProduto ? 'Editar Produto' : 'Novo Produto'}
@@ -270,7 +269,7 @@ const ProdutosList = () => {
                   />
                 </div>
                 
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                   <Button type="button" variant="outline" onClick={handleCloseDialog} className="flex-1">
                     Cancelar
                   </Button>
@@ -285,8 +284,8 @@ const ProdutosList = () => {
       </CardHeader>
       
       <CardContent>
-        {/* Filtros */}
-        <div className="flex space-x-4 mb-6">
+        {/* Filtros responsivos */}
+        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
           <div className="flex-1">
             <Input
               placeholder="Buscar produtos..."
@@ -294,7 +293,7 @@ const ProdutosList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger>
                 <SelectValue />
@@ -311,56 +310,58 @@ const ProdutosList = () => {
           </div>
         </div>
 
-        {/* Tabela de produtos */}
+        {/* Tabela com scroll horizontal */}
         {produtosFiltrados && produtosFiltrados.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Unidade</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {produtosFiltrados.map((produto) => (
-                <TableRow key={produto.id}>
-                  <TableCell className="font-medium">{produto.nome}</TableCell>
-                  <TableCell>
-                    {produto.categoria && (
-                      <Badge variant="secondary">{produto.categoria}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{produto.unidade_medida}</TableCell>
-                  <TableCell>
-                    {produto.preco_venda ? `R$ ${produto.preco_venda.toFixed(2)}` : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={produto.ativo ? "default" : "secondary"}>
-                      {produto.ativo ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(produto)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => deleteMutation.mutate(produto.id)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[600px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Nome</TableHead>
+                  <TableHead className="min-w-[120px]">Categoria</TableHead>
+                  <TableHead className="min-w-[80px]">Unidade</TableHead>
+                  <TableHead className="min-w-[100px]">Preço</TableHead>
+                  <TableHead className="min-w-[80px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {produtosFiltrados.map((produto) => (
+                  <TableRow key={produto.id}>
+                    <TableCell className="font-medium">{produto.nome}</TableCell>
+                    <TableCell>
+                      {produto.categoria && (
+                        <Badge variant="secondary">{produto.categoria}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>{produto.unidade_medida}</TableCell>
+                    <TableCell>
+                      {produto.preco_venda ? `R$ ${produto.preco_venda.toFixed(2)}` : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={produto.ativo ? "default" : "secondary"}>
+                        {produto.ativo ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(produto)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => deleteMutation.mutate(produto.id)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
             {produtos?.length === 0 
