@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Edit, Eye, Calendar, DollarSign, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import PedidoForm from './PedidoForm';
 import PedidoDetalhes from './PedidoDetalhes';
 
@@ -28,6 +29,8 @@ interface Pedido {
 
 const PedidosList = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
@@ -76,6 +79,38 @@ const PedidosList = () => {
     },
     enabled: !!user?.id
   });
+
+  // Mutation para atualizar status do pedido
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ pedidoId, newStatus }: { pedidoId: string; newStatus: string }) => {
+      const { error } = await supabase
+        .from('pedidos')
+        .update({ status: newStatus })
+        .eq('id', pedidoId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      toast({
+        title: "Status atualizado",
+        description: "O status do pedido foi atualizado com sucesso.",
+      });
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar status:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar o status do pedido.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleStatusChange = (pedidoId: string, newStatus: string) => {
+    updateStatusMutation.mutate({ pedidoId, newStatus });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -191,7 +226,7 @@ const PedidosList = () => {
                         </Badge>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2 text-sm text-gray-600">
                         <div className="flex items-center space-x-1">
                           <span className="font-medium">Cliente:</span>
                           <span>{pedido.cliente?.nome || 'Cliente não informado'}</span>
@@ -204,12 +239,34 @@ const PedidosList = () => {
                           <DollarSign className="h-4 w-4" />
                           <span>R$ {pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        {pedido.data_entrega && (
+                        {pedido.data_entrega ? (
                           <div className="flex items-center space-x-1">
                             <span className="font-medium">Entrega:</span>
                             <span>{new Date(pedido.data_entrega).toLocaleDateString('pt-BR')}</span>
                           </div>
+                        ) : (
+                          <div className="flex items-center space-x-1 text-gray-400">
+                            <span>Sem data de entrega</span>
+                          </div>
                         )}
+                        <div className="flex items-center space-x-1">
+                          <span className="font-medium">Status:</span>
+                          <Select
+                            value={pedido.status}
+                            onValueChange={(value) => handleStatusChange(pedido.id, value)}
+                            disabled={updateStatusMutation.isPending}
+                          >
+                            <SelectTrigger className="w-32 h-7 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendente">Pendente</SelectItem>
+                              <SelectItem value="processando">Processando</SelectItem>
+                              <SelectItem value="entregue">Entregue</SelectItem>
+                              <SelectItem value="cancelado">Cancelado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                     
