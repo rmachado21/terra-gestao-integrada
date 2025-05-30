@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,17 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Package, Calendar, Barcode, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 interface ProcessamentoItem {
   id: string;
   colheita_id: string;
@@ -43,7 +33,6 @@ interface ProcessamentoItem {
     };
   };
 }
-
 interface ColheitaDisponivel {
   id: string;
   quantidade_kg: number;
@@ -51,17 +40,19 @@ interface ColheitaDisponivel {
   area_nome: string;
   data_colheita: string;
 }
-
 const tipoProcessamentoColors = {
   'Lavagem': 'bg-blue-100 text-blue-800',
   'Secagem': 'bg-yellow-100 text-yellow-800',
   'Empacotamento': 'bg-green-100 text-green-800',
   'Beneficiamento': 'bg-purple-100 text-purple-800'
 } as const;
-
 const ProcessamentoPage = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -73,13 +64,16 @@ const ProcessamentoPage = () => {
     quantidade_saida_kg: '',
     observacoes: ''
   });
-
-  const { data: processamentos, isLoading } = useQuery({
+  const {
+    data: processamentos,
+    isLoading
+  } = useQuery({
     queryKey: ['processamentos'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('processamentos')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('processamentos').select(`
           *,
           colheitas(
             quantidade_kg,
@@ -88,9 +82,9 @@ const ProcessamentoPage = () => {
               areas(nome)
             )
           )
-        `)
-        .order('data_processamento', { ascending: false });
-      
+        `).order('data_processamento', {
+        ascending: false
+      });
       if (error) {
         console.log('Erro ao buscar processamentos:', error);
         return [];
@@ -99,13 +93,15 @@ const ProcessamentoPage = () => {
     },
     enabled: !!user
   });
-
-  const { data: colheitasDisponiveis } = useQuery({
+  const {
+    data: colheitasDisponiveis
+  } = useQuery({
     queryKey: ['colheitas-processamento'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('colheitas')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('colheitas').select(`
           id,
           quantidade_kg,
           data_colheita,
@@ -113,10 +109,9 @@ const ProcessamentoPage = () => {
             variedade,
             areas(nome)
           )
-        `)
-        .eq('destino', 'processamento')
-        .order('data_colheita', { ascending: false });
-      
+        `).eq('destino', 'processamento').order('data_colheita', {
+        ascending: false
+      });
       if (error) throw error;
       return data.map(c => ({
         id: c.id,
@@ -128,22 +123,27 @@ const ProcessamentoPage = () => {
     },
     enabled: !!user
   });
-
   const createProcessamentoMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('processamentos')
-        .insert([{ ...data, user_id: user?.id }]);
-      
+      const {
+        error
+      } = await supabase.from('processamentos').insert([{
+        ...data,
+        user_id: user?.id
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['processamentos'] });
-      toast({ title: 'Processamento registrado com sucesso!' });
+      queryClient.invalidateQueries({
+        queryKey: ['processamentos']
+      });
+      toast({
+        title: 'Processamento registrado com sucesso!'
+      });
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Erro ao registrar processamento',
         description: error.message,
@@ -151,7 +151,6 @@ const ProcessamentoPage = () => {
       });
     }
   });
-
   const resetForm = () => {
     setFormData({
       colheita_id: '',
@@ -163,54 +162,44 @@ const ProcessamentoPage = () => {
       observacoes: ''
     });
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     const entradaKg = parseFloat(formData.quantidade_entrada_kg);
     const saidaKg = parseFloat(formData.quantidade_saida_kg);
-
     const data = {
       ...formData,
       quantidade_entrada_kg: entradaKg,
       quantidade_saida_kg: saidaKg,
       lote: formData.lote || `LOTE-${Date.now()}`
     };
-
     createProcessamentoMutation.mutate(data);
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
-
   const calcularEstatisticas = () => {
     if (!processamentos || processamentos.length === 0) {
-      return { total: 0, perdaMedia: 0, eficienciaMedia: 0 };
+      return {
+        total: 0,
+        perdaMedia: 0,
+        eficienciaMedia: 0
+      };
     }
-    
     const perdaMedia = processamentos.reduce((sum, p) => sum + (p.perda_percentual || 0), 0) / processamentos.length;
     const eficienciaMedia = 100 - perdaMedia;
-
     return {
       total: processamentos.length,
       perdaMedia: perdaMedia.toFixed(1),
       eficienciaMedia: eficienciaMedia.toFixed(1)
     };
   };
-
   const estatisticas = calcularEstatisticas();
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
+    return <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Controle de Processamento</h1>
@@ -235,16 +224,17 @@ const ProcessamentoPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="colheita_id">Colheita</Label>
-                <Select value={formData.colheita_id} onValueChange={(value) => setFormData({...formData, colheita_id: value})}>
+                <Select value={formData.colheita_id} onValueChange={value => setFormData({
+                ...formData,
+                colheita_id: value
+              })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma colheita" />
                   </SelectTrigger>
                   <SelectContent>
-                    {colheitasDisponiveis?.map((colheita) => (
-                      <SelectItem key={colheita.id} value={colheita.id}>
+                    {colheitasDisponiveis?.map(colheita => <SelectItem key={colheita.id} value={colheita.id}>
                         {colheita.variedade} - {colheita.area_nome} ({colheita.quantidade_kg} kg)
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -252,29 +242,27 @@ const ProcessamentoPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="lote">Lote</Label>
-                  <Input
-                    id="lote"
-                    value={formData.lote}
-                    onChange={(e) => setFormData({...formData, lote: e.target.value})}
-                    placeholder="Ex: LOTE-001 (opcional)"
-                  />
+                  <Input id="lote" value={formData.lote} onChange={e => setFormData({
+                  ...formData,
+                  lote: e.target.value
+                })} placeholder="Ex: LOTE-001 (opcional)" />
                 </div>
                 
                 <div>
                   <Label htmlFor="data_processamento">Data do Processamento</Label>
-                  <Input
-                    id="data_processamento"
-                    type="date"
-                    value={formData.data_processamento}
-                    onChange={(e) => setFormData({...formData, data_processamento: e.target.value})}
-                    required
-                  />
+                  <Input id="data_processamento" type="date" value={formData.data_processamento} onChange={e => setFormData({
+                  ...formData,
+                  data_processamento: e.target.value
+                })} required />
                 </div>
               </div>
               
               <div>
                 <Label htmlFor="tipo_processamento">Tipo de Processamento</Label>
-                <Select value={formData.tipo_processamento} onValueChange={(value) => setFormData({...formData, tipo_processamento: value})}>
+                <Select value={formData.tipo_processamento} onValueChange={value => setFormData({
+                ...formData,
+                tipo_processamento: value
+              })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -290,37 +278,27 @@ const ProcessamentoPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="quantidade_entrada_kg">Qtd. Entrada (kg)</Label>
-                  <Input
-                    id="quantidade_entrada_kg"
-                    type="number"
-                    step="0.01"
-                    value={formData.quantidade_entrada_kg}
-                    onChange={(e) => setFormData({...formData, quantidade_entrada_kg: e.target.value})}
-                    required
-                  />
+                  <Input id="quantidade_entrada_kg" type="number" step="0.01" value={formData.quantidade_entrada_kg} onChange={e => setFormData({
+                  ...formData,
+                  quantidade_entrada_kg: e.target.value
+                })} required />
                 </div>
                 
                 <div>
                   <Label htmlFor="quantidade_saida_kg">Qtd. Saída (kg)</Label>
-                  <Input
-                    id="quantidade_saida_kg"
-                    type="number"
-                    step="0.01"
-                    value={formData.quantidade_saida_kg}
-                    onChange={(e) => setFormData({...formData, quantidade_saida_kg: e.target.value})}
-                    required
-                  />
+                  <Input id="quantidade_saida_kg" type="number" step="0.01" value={formData.quantidade_saida_kg} onChange={e => setFormData({
+                  ...formData,
+                  quantidade_saida_kg: e.target.value
+                })} required />
                 </div>
               </div>
               
               <div>
                 <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  value={formData.observacoes}
-                  onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
-                  placeholder="Informações sobre o processamento..."
-                />
+                <Textarea id="observacoes" value={formData.observacoes} onChange={e => setFormData({
+                ...formData,
+                observacoes: e.target.value
+              })} placeholder="Informações sobre o processamento..." />
               </div>
               
               <DialogFooter>
@@ -334,7 +312,7 @@ const ProcessamentoPage = () => {
       </div>
 
       <Tabs defaultValue="processamentos" className="space-y-4">
-        <TabsList>
+        <TabsList className="bg-slate-900">
           <TabsTrigger value="processamentos">Processamentos</TabsTrigger>
           <TabsTrigger value="rastreabilidade">Rastreabilidade</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
@@ -342,8 +320,7 @@ const ProcessamentoPage = () => {
 
         <TabsContent value="processamentos">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {processamentos?.map((processamento) => (
-              <Card key={processamento.id}>
+            {processamentos?.map(processamento => <Card key={processamento.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center">
@@ -383,17 +360,13 @@ const ProcessamentoPage = () => {
                       </div>
                     </div>
                     
-                    {processamento.observacoes && (
-                      <p><strong>Obs:</strong> {processamento.observacoes}</p>
-                    )}
+                    {processamento.observacoes && <p><strong>Obs:</strong> {processamento.observacoes}</p>}
                   </div>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
-          {(!processamentos || processamentos.length === 0) && (
-            <Card>
+          {(!processamentos || processamentos.length === 0) && <Card>
               <CardContent className="text-center py-8">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -402,16 +375,12 @@ const ProcessamentoPage = () => {
                 <p className="text-gray-600 mb-4">
                   Comece registrando seu primeiro processamento
                 </p>
-                <Button 
-                  onClick={() => setIsDialogOpen(true)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
+                <Button onClick={() => setIsDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Registrar Primeiro Processamento
                 </Button>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </TabsContent>
 
         <TabsContent value="rastreabilidade">
@@ -424,8 +393,7 @@ const ProcessamentoPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {processamentos?.map((processamento) => (
-                  <div key={processamento.id} className="border-l-4 border-green-500 pl-4 mb-4 last:mb-0">
+                {processamentos?.map(processamento => <div key={processamento.id} className="border-l-4 border-green-500 pl-4 mb-4 last:mb-0">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">{processamento.lote}</h4>
                       <Badge variant="outline">{processamento.tipo_processamento}</Badge>
@@ -433,10 +401,9 @@ const ProcessamentoPage = () => {
                     <div className="text-sm text-gray-600 mt-1">
                       <p>Origem: {processamento.colheitas?.plantios?.variedade} - {processamento.colheitas?.plantios?.areas?.nome}</p>
                       <p>Processado em: {formatDate(processamento.data_processamento)}</p>
-                      <p>Rendimento: {((processamento.quantidade_saida_kg / processamento.quantidade_entrada_kg) * 100).toFixed(1)}%</p>
+                      <p>Rendimento: {(processamento.quantidade_saida_kg / processamento.quantidade_entrada_kg * 100).toFixed(1)}%</p>
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </CardContent>
             </Card>
           </div>
@@ -485,8 +452,6 @@ const ProcessamentoPage = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default ProcessamentoPage;
