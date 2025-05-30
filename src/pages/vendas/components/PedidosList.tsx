@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,7 +81,7 @@ const PedidosList = () => {
 
   // Mutation para atualizar status do pedido
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ pedidoId, newStatus }: { pedidoId: string; newStatus: string }) => {
+    mutationFn: async ({ pedidoId, newStatus }: { pedidoId: string; newStatus: 'pendente' | 'processando' | 'entregue' | 'cancelado' }) => {
       const { error } = await supabase
         .from('pedidos')
         .update({ status: newStatus })
@@ -109,7 +108,7 @@ const PedidosList = () => {
   });
 
   const handleStatusChange = (pedidoId: string, newStatus: string) => {
-    updateStatusMutation.mutate({ pedidoId, newStatus });
+    updateStatusMutation.mutate({ pedidoId, newStatus: newStatus as 'pendente' | 'processando' | 'entregue' | 'cancelado' });
   };
 
   const getStatusColor = (status: string) => {
