@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,39 +9,24 @@ import PedidosList from './components/PedidosList';
 import EntregasList from './components/EntregasList';
 import RelatoriosVendas from './components/RelatoriosVendas';
 import VendasStats from './components/VendasStats';
-
 const VendasPage = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [activeTab, setActiveTab] = useState('clientes');
 
   // Buscar estatísticas gerais de vendas
-  const { data: statsData } = useQuery({
+  const {
+    data: statsData
+  } = useQuery({
     queryKey: ['vendas-stats', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-
-      const [clientesRes, pedidosRes, entregasRes] = await Promise.all([
-        supabase
-          .from('clientes')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('ativo', true),
-        supabase
-          .from('pedidos')
-          .select('valor_total, status, data_pedido')
-          .eq('user_id', user.id),
-        supabase
-          .from('pedidos')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('status', 'entregue')
-      ]);
-
+      const [clientesRes, pedidosRes, entregasRes] = await Promise.all([supabase.from('clientes').select('id').eq('user_id', user.id).eq('ativo', true), supabase.from('pedidos').select('valor_total, status, data_pedido').eq('user_id', user.id), supabase.from('pedidos').select('id').eq('user_id', user.id).eq('status', 'entregue')]);
       const totalClientes = clientesRes.data?.length || 0;
       const totalPedidos = pedidosRes.data?.length || 0;
       const pedidosPendentes = pedidosRes.data?.filter(p => p.status === 'pendente').length || 0;
       const entregasRealizadas = entregasRes.data?.length || 0;
-      
       const faturamentoTotal = pedidosRes.data?.reduce((sum, pedido) => {
         return sum + (pedido.valor_total || 0);
       }, 0) || 0;
@@ -54,7 +38,6 @@ const VendasPage = () => {
         const dataPedido = new Date(pedido.data_pedido);
         return dataPedido >= inicioMes;
       }).reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0) || 0;
-
       return {
         totalClientes,
         totalPedidos,
@@ -66,9 +49,7 @@ const VendasPage = () => {
     },
     enabled: !!user?.id
   });
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
@@ -79,7 +60,7 @@ const VendasPage = () => {
 
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4 bg-slate-900">
           <TabsTrigger value="clientes" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
             <span>Clientes</span>
@@ -117,8 +98,6 @@ const VendasPage = () => {
 
       {/* Estatísticas - movidas para baixo */}
       <VendasStats data={statsData} />
-    </div>
-  );
+    </div>;
 };
-
 export default VendasPage;
