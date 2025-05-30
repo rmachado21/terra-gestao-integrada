@@ -62,7 +62,7 @@ const EstoquePage = () => {
             <span>Produtos</span>
           </TabsTrigger>
           <TabsTrigger value="movimentacoes">
-            <span>Movimentações</span>
+            <span>Estoque</span>
           </TabsTrigger>
           <TabsTrigger value="alertas">
             <span>Alertas</span>
