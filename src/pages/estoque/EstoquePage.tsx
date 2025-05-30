@@ -65,33 +65,35 @@ const EstoquePage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Package className="h-8 w-8 text-blue-600" />
+        <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
-          <p className="text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
+          <p className="text-sm sm:text-base text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
         </div>
       </div>
 
-      {/* Tabs principais */}
+      {/* Tabs principais - responsivas com scroll */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="produtos" className="flex items-center space-x-2">
-            <Package className="h-4 w-4" />
-            <span>Produtos</span>
-          </TabsTrigger>
-          <TabsTrigger value="movimentacoes" className="flex items-center space-x-2">
-            <TrendingUp className="h-4 w-4" />
-            <span>Movimentações</span>
-          </TabsTrigger>
-          <TabsTrigger value="alertas" className="flex items-center space-x-2">
-            <AlertTriangle className="h-4 w-4" />
-            <span>Alertas</span>
-          </TabsTrigger>
-          <TabsTrigger value="validades" className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4" />
-            <span>Validades</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto">
+          <TabsList className="inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground min-w-max">
+            <TabsTrigger value="produtos" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span>Produtos</span>
+            </TabsTrigger>
+            <TabsTrigger value="movimentacoes" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span>Movimentações</span>
+            </TabsTrigger>
+            <TabsTrigger value="alertas" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium">
+              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span>Alertas</span>
+            </TabsTrigger>
+            <TabsTrigger value="validades" className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span>Validades</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="produtos">
           <ProdutosList />
@@ -110,7 +112,7 @@ const EstoquePage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Estatísticas - movidas para baixo */}
+      {/* Estatísticas */}
       <EstoqueStats data={statsData} />
     </div>
   );
