@@ -63,41 +63,35 @@ const EstoquePage = () => {
   });
 
   return (
-    <div className="space-y-4 p-4 sm:p-6">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Package className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+        <Package className="h-8 w-8 text-blue-600" />
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
-          <p className="text-sm sm:text-base text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
+          <h1 className="text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
+          <p className="text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
         </div>
       </div>
 
-      {/* Tabs principais - responsivas */}
+      {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="overflow-x-auto">
-          <TabsList className="grid w-full min-w-max grid-cols-4 sm:min-w-0">
-            <TabsTrigger value="produtos" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Produtos</span>
-              <span className="xs:hidden">Prod</span>
-            </TabsTrigger>
-            <TabsTrigger value="movimentacoes" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Movimentações</span>
-              <span className="xs:hidden">Mov</span>
-            </TabsTrigger>
-            <TabsTrigger value="alertas" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Alertas</span>
-              <span className="xs:hidden">Alert</span>
-            </TabsTrigger>
-            <TabsTrigger value="validades" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Validades</span>
-              <span className="xs:hidden">Val</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="produtos" className="flex items-center space-x-2">
+            <Package className="h-4 w-4" />
+            <span>Produtos</span>
+          </TabsTrigger>
+          <TabsTrigger value="movimentacoes" className="flex items-center space-x-2">
+            <TrendingUp className="h-4 w-4" />
+            <span>Movimentações</span>
+          </TabsTrigger>
+          <TabsTrigger value="alertas" className="flex items-center space-x-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>Alertas</span>
+          </TabsTrigger>
+          <TabsTrigger value="validades" className="flex items-center space-x-2">
+            <Calendar className="h-4 w-4" />
+            <span>Validades</span>
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="produtos">
           <ProdutosList />
