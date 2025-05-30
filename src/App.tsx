@@ -53,7 +53,7 @@ const App = () => <QueryClientProvider client={queryClient}>
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6">
+                    <main className="flex-1 p-6 bg-lime-100">
                       <PlantiosPage />
                     </main>
                   </div>
