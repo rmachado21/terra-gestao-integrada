@@ -60,7 +60,7 @@ const VendasPage = () => {
 
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-900">
+        <TabsList className="grid w-full grid-cols-4 bg-green-950">
           <TabsTrigger value="clientes" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
             <span>Clientes</span>
