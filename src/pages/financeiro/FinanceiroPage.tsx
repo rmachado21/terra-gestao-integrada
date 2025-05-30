@@ -16,7 +16,7 @@ const FinanceiroPage = () => {
       </div>
 
       <Tabs defaultValue="lancamentos" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-orange-950">
+        <TabsList className="grid w-full grid-cols-3 bg-slate-900">
           <TabsTrigger value="lancamentos" className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
             Lançamentos
