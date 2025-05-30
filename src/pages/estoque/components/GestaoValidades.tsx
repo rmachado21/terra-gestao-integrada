@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Calendar, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -25,6 +25,7 @@ interface ProdutoValidade {
 
 const GestaoValidades = () => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('todos');
 
@@ -239,63 +240,118 @@ const GestaoValidades = () => {
             </div>
           </div>
 
-          {/* Tabela com scroll horizontal */}
+          {/* Conteúdo adaptativo */}
           {produtosFiltrados && produtosFiltrados.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table className="min-w-[800px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[150px]">Produto</TableHead>
-                    <TableHead className="min-w-[100px]">Lote</TableHead>
-                    <TableHead className="min-w-[120px]">Quantidade</TableHead>
-                    <TableHead className="min-w-[120px]">Data de Validade</TableHead>
-                    <TableHead className="min-w-[150px]">Dias para Vencer</TableHead>
-                    <TableHead className="min-w-[100px]">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+            <>
+              {/* Versão Mobile - Cards */}
+              {isMobile ? (
+                <div className="space-y-4">
                   {produtosFiltrados.map((produto) => {
                     const StatusIcon = getStatusIcon(produto.status);
                     const statusColor = getStatusColor(produto.status);
                     const badge = getStatusBadge(produto.status);
                     
                     return (
-                      <TableRow key={produto.id}>
-                        <TableCell className="font-medium">
-                          <div className="min-w-0">
-                            <div className="truncate">{produto.produto_nome}</div>
-                            <div className="text-sm text-gray-500 truncate">
-                              {produto.unidade_medida}
+                      <Card key={produto.id} className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg">{produto.produto_nome}</h3>
+                              <p className="text-sm text-gray-600">{produto.unidade_medida}</p>
                             </div>
+                            <Badge variant={badge.variant} className="text-xs ml-4">
+                              {badge.label}
+                            </Badge>
                           </div>
-                        </TableCell>
-                        <TableCell>{produto.lote || '-'}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span>{produto.quantidade}</span>
-                            <span className="text-xs text-gray-500">{produto.unidade_medida}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {format(new Date(produto.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
-                        </TableCell>
-                        <TableCell>
+                          
                           <div className={`flex items-center space-x-2 ${statusColor}`}>
                             <StatusIcon className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm truncate">{formatDiasParaVencer(produto.dias_para_vencer)}</span>
+                            <span className="text-sm font-medium">{formatDiasParaVencer(produto.dias_para_vencer)}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={badge.variant} className="text-xs">
-                            {badge.label}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
+                          
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-500">Quantidade:</span>
+                              <p className="font-medium">{produto.quantidade} {produto.unidade_medida}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Validade:</span>
+                              <p className="font-medium">
+                                {format(new Date(produto.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {produto.lote && (
+                            <div className="text-sm">
+                              <span className="text-gray-500">Lote:</span>
+                              <Badge variant="outline" className="ml-2">{produto.lote}</Badge>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
                     );
                   })}
-                </TableBody>
-              </Table>
-            </div>
+                </div>
+              ) : (
+                /* Versão Desktop - Tabela */
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[800px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[150px]">Produto</TableHead>
+                        <TableHead className="min-w-[100px]">Lote</TableHead>
+                        <TableHead className="min-w-[120px]">Quantidade</TableHead>
+                        <TableHead className="min-w-[120px]">Data de Validade</TableHead>
+                        <TableHead className="min-w-[150px]">Dias para Vencer</TableHead>
+                        <TableHead className="min-w-[100px]">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {produtosFiltrados.map((produto) => {
+                        const StatusIcon = getStatusIcon(produto.status);
+                        const statusColor = getStatusColor(produto.status);
+                        const badge = getStatusBadge(produto.status);
+                        
+                        return (
+                          <TableRow key={produto.id}>
+                            <TableCell className="font-medium">
+                              <div className="min-w-0">
+                                <div className="truncate">{produto.produto_nome}</div>
+                                <div className="text-sm text-gray-500 truncate">
+                                  {produto.unidade_medida}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{produto.lote || '-'}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span>{produto.quantidade}</span>
+                                <span className="text-xs text-gray-500">{produto.unidade_medida}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {format(new Date(produto.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
+                            </TableCell>
+                            <TableCell>
+                              <div className={`flex items-center space-x-2 ${statusColor}`}>
+                                <StatusIcon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-sm truncate">{formatDiasParaVencer(produto.dias_para_vencer)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={badge.variant} className="text-xs">
+                                {badge.label}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-8 text-gray-500">
               {produtos?.length === 0 

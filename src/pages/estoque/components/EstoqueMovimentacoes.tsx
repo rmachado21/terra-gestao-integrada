@@ -13,6 +13,7 @@ import { Plus, TrendingUp, TrendingDown, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -34,6 +35,7 @@ const EstoqueMovimentacoes = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -341,52 +343,43 @@ const EstoqueMovimentacoes = () => {
           />
         </div>
 
-        {/* Tabela com scroll horizontal */}
+        {/* Conteúdo adaptativo */}
         {estoqueFiltrado && estoqueFiltrado.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table className="min-w-[700px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Produto</TableHead>
-                  <TableHead className="min-w-[100px]">Lote</TableHead>
-                  <TableHead className="min-w-[120px]">Quantidade</TableHead>
-                  <TableHead className="min-w-[100px]">Qtd. Mínima</TableHead>
-                  <TableHead className="min-w-[100px]">Validade</TableHead>
-                  <TableHead className="min-w-[120px]">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <>
+            {/* Versão Mobile - Cards */}
+            {isMobile ? (
+              <div className="space-y-4">
                 {estoqueFiltrado.map((item) => {
                   const isLowStock = item.quantidade_minima > 0 && item.quantidade <= item.quantidade_minima;
                   const isExpiringSoon = item.data_validade ? 
                     new Date(item.data_validade) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
                   
                   return (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        <div className="min-w-0">
-                          <div className="truncate">{item.produtos?.nome}</div>
-                          <div className="text-sm text-gray-500 truncate">
-                            {item.produtos?.unidade_medida}
+                    <Card key={item.id} className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{item.produtos?.nome}</h3>
+                            <p className="text-sm text-gray-600">{item.produtos?.unidade_medida}</p>
+                          </div>
+                          <div className="ml-4">
+                            <p className="text-lg font-bold">{item.quantidade}</p>
+                            <p className="text-xs text-gray-500">{item.produtos?.unidade_medida}</p>
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>{item.lote || '-'}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{item.quantidade}</span>
-                          <span className="text-xs text-gray-500">{item.produtos?.unidade_medida}</span>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {item.lote && (
+                            <Badge variant="outline">Lote: {item.lote}</Badge>
+                          )}
+                          {item.data_validade && (
+                            <Badge variant="outline">
+                              Venc: {format(new Date(item.data_validade), 'dd/MM/yyyy', { locale: ptBR })}
+                            </Badge>
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell>{item.quantidade_minima}</TableCell>
-                      <TableCell className="text-sm">
-                        {item.data_validade ? 
-                          format(new Date(item.data_validade), 'dd/MM/yyyy', { locale: ptBR }) : 
-                          '-'
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col space-y-1">
+                        
+                        <div className="flex flex-wrap gap-2">
                           {isLowStock && (
                             <Badge variant="destructive" className="text-xs">
                               Estoque Baixo
@@ -403,13 +396,88 @@ const EstoqueMovimentacoes = () => {
                             </Badge>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
+                        
+                        {item.quantidade_minima > 0 && (
+                          <div className="text-sm text-gray-600">
+                            <span>Qtd. Mínima: {item.quantidade_minima}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
                   );
                 })}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
+            ) : (
+              /* Versão Desktop - Tabela */
+              <div className="overflow-x-auto">
+                <Table className="min-w-[700px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[150px]">Produto</TableHead>
+                      <TableHead className="min-w-[100px]">Lote</TableHead>
+                      <TableHead className="min-w-[120px]">Quantidade</TableHead>
+                      <TableHead className="min-w-[100px]">Qtd. Mínima</TableHead>
+                      <TableHead className="min-w-[100px]">Validade</TableHead>
+                      <TableHead className="min-w-[120px]">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {estoqueFiltrado.map((item) => {
+                      const isLowStock = item.quantidade_minima > 0 && item.quantidade <= item.quantidade_minima;
+                      const isExpiringSoon = item.data_validade ? 
+                        new Date(item.data_validade) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
+                      
+                      return (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">
+                            <div className="min-w-0">
+                              <div className="truncate">{item.produtos?.nome}</div>
+                              <div className="text-sm text-gray-500 truncate">
+                                {item.produtos?.unidade_medida}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{item.lote || '-'}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span>{item.quantidade}</span>
+                              <span className="text-xs text-gray-500">{item.produtos?.unidade_medida}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{item.quantidade_minima}</TableCell>
+                          <TableCell className="text-sm">
+                            {item.data_validade ? 
+                              format(new Date(item.data_validade), 'dd/MM/yyyy', { locale: ptBR }) : 
+                              '-'
+                            }
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col space-y-1">
+                              {isLowStock && (
+                                <Badge variant="destructive" className="text-xs">
+                                  Estoque Baixo
+                                </Badge>
+                              )}
+                              {isExpiringSoon && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Vencendo
+                                </Badge>
+                              )}
+                              {!isLowStock && !isExpiringSoon && (
+                                <Badge variant="default" className="text-xs">
+                                  Normal
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-8 text-gray-500">
             {estoque?.length === 0 
