@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,17 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Package2, Calendar, MapPin, Weight, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 interface Colheita {
   id: string;
   plantio_id: string;
@@ -38,7 +28,6 @@ interface Colheita {
     };
   };
 }
-
 interface PlantioOption {
   id: string;
   variedade: string;
@@ -46,23 +35,24 @@ interface PlantioOption {
   data_previsao_colheita: string;
   status: string;
 }
-
 const qualidadeColors = {
   'Excelente': 'bg-green-100 text-green-800',
   'Boa': 'bg-blue-100 text-blue-800',
   'Regular': 'bg-yellow-100 text-yellow-800',
   'Ruim': 'bg-red-100 text-red-800'
 } as const;
-
 const destinoColors = {
   'venda': 'bg-green-100 text-green-800',
   'processamento': 'bg-blue-100 text-blue-800',
   'estoque': 'bg-gray-100 text-gray-800'
 } as const;
-
 const ColheitasPage = () => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -73,42 +63,44 @@ const ColheitasPage = () => {
     destino: 'venda',
     observacoes: ''
   });
-
-  const { data: colheitas, isLoading } = useQuery({
+  const {
+    data: colheitas,
+    isLoading
+  } = useQuery({
     queryKey: ['colheitas'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('colheitas')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('colheitas').select(`
           *,
           plantios(
             variedade,
             areas(nome)
           )
-        `)
-        .order('data_colheita', { ascending: false });
-      
+        `).order('data_colheita', {
+        ascending: false
+      });
       if (error) throw error;
       return data as Colheita[];
     },
     enabled: !!user
   });
-
-  const { data: plantiosDisponiveis } = useQuery({
+  const {
+    data: plantiosDisponiveis
+  } = useQuery({
     queryKey: ['plantios-disponiveis'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('plantios')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('plantios').select(`
           id,
           variedade,
           data_previsao_colheita,
           status,
           areas(nome)
-        `)
-        .in('status', ['crescendo', 'pronto_colheita'])
-        .order('data_previsao_colheita');
-      
+        `).in('status', ['crescendo', 'pronto_colheita']).order('data_previsao_colheita');
       if (error) throw error;
       return data.map(p => ({
         id: p.id,
@@ -120,23 +112,30 @@ const ColheitasPage = () => {
     },
     enabled: !!user
   });
-
   const createColheitaMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('colheitas')
-        .insert([{ ...data, user_id: user?.id }]);
-      
+      const {
+        error
+      } = await supabase.from('colheitas').insert([{
+        ...data,
+        user_id: user?.id
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['colheitas'] });
-      queryClient.invalidateQueries({ queryKey: ['plantios-disponiveis'] });
-      toast({ title: 'Colheita registrada com sucesso!' });
+      queryClient.invalidateQueries({
+        queryKey: ['colheitas']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plantios-disponiveis']
+      });
+      toast({
+        title: 'Colheita registrada com sucesso!'
+      });
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Erro ao registrar colheita',
         description: error.message,
@@ -144,7 +143,6 @@ const ColheitasPage = () => {
       });
     }
   });
-
   const resetForm = () => {
     setFormData({
       plantio_id: '',
@@ -155,25 +153,23 @@ const ColheitasPage = () => {
       observacoes: ''
     });
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     const data = {
       ...formData,
       quantidade_kg: parseFloat(formData.quantidade_kg)
     };
-
     createColheitaMutation.mutate(data);
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
-
   const calcularEstatisticas = () => {
-    if (!colheitas) return { total: 0, mediaQualidade: 0, totalKg: 0 };
-    
+    if (!colheitas) return {
+      total: 0,
+      mediaQualidade: 0,
+      totalKg: 0
+    };
     const totalKg = colheitas.reduce((sum, c) => sum + c.quantidade_kg, 0);
     const qualidadeScores = {
       'Excelente': 4,
@@ -181,30 +177,20 @@ const ColheitasPage = () => {
       'Regular': 2,
       'Ruim': 1
     };
-    
-    const mediaQualidade = colheitas.length > 0 
-      ? colheitas.reduce((sum, c) => sum + (qualidadeScores[c.qualidade as keyof typeof qualidadeScores] || 2), 0) / colheitas.length
-      : 0;
-
+    const mediaQualidade = colheitas.length > 0 ? colheitas.reduce((sum, c) => sum + (qualidadeScores[c.qualidade as keyof typeof qualidadeScores] || 2), 0) / colheitas.length : 0;
     return {
       total: colheitas.length,
       mediaQualidade: mediaQualidade.toFixed(1),
       totalKg
     };
   };
-
   const estatisticas = calcularEstatisticas();
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
+    return <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gestão de Colheitas</h1>
@@ -229,17 +215,18 @@ const ColheitasPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="plantio_id">Plantio</Label>
-                <Select value={formData.plantio_id} onValueChange={(value) => setFormData({...formData, plantio_id: value})}>
+                <Select value={formData.plantio_id} onValueChange={value => setFormData({
+                ...formData,
+                plantio_id: value
+              })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um plantio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {plantiosDisponiveis?.map((plantio) => (
-                      <SelectItem key={plantio.id} value={plantio.id}>
+                    {plantiosDisponiveis?.map(plantio => <SelectItem key={plantio.id} value={plantio.id}>
                         {plantio.variedade} - {plantio.area_nome} 
                         {plantio.status === 'pronto_colheita' && ' (Pronto!)'}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -247,33 +234,28 @@ const ColheitasPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="data_colheita">Data da Colheita</Label>
-                  <Input
-                    id="data_colheita"
-                    type="date"
-                    value={formData.data_colheita}
-                    onChange={(e) => setFormData({...formData, data_colheita: e.target.value})}
-                    required
-                  />
+                  <Input id="data_colheita" type="date" value={formData.data_colheita} onChange={e => setFormData({
+                  ...formData,
+                  data_colheita: e.target.value
+                })} required />
                 </div>
                 
                 <div>
                   <Label htmlFor="quantidade_kg">Quantidade (kg)</Label>
-                  <Input
-                    id="quantidade_kg"
-                    type="number"
-                    step="0.01"
-                    value={formData.quantidade_kg}
-                    onChange={(e) => setFormData({...formData, quantidade_kg: e.target.value})}
-                    placeholder="Ex: 150.5"
-                    required
-                  />
+                  <Input id="quantidade_kg" type="number" step="0.01" value={formData.quantidade_kg} onChange={e => setFormData({
+                  ...formData,
+                  quantidade_kg: e.target.value
+                })} placeholder="Ex: 150.5" required />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="qualidade">Qualidade</Label>
-                  <Select value={formData.qualidade} onValueChange={(value) => setFormData({...formData, qualidade: value})}>
+                  <Select value={formData.qualidade} onValueChange={value => setFormData({
+                  ...formData,
+                  qualidade: value
+                })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -288,7 +270,10 @@ const ColheitasPage = () => {
                 
                 <div>
                   <Label htmlFor="destino">Destino</Label>
-                  <Select value={formData.destino} onValueChange={(value) => setFormData({...formData, destino: value})}>
+                  <Select value={formData.destino} onValueChange={value => setFormData({
+                  ...formData,
+                  destino: value
+                })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -303,12 +288,10 @@ const ColheitasPage = () => {
               
               <div>
                 <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  value={formData.observacoes}
-                  onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
-                  placeholder="Informações adicionais sobre a colheita..."
-                />
+                <Textarea id="observacoes" value={formData.observacoes} onChange={e => setFormData({
+                ...formData,
+                observacoes: e.target.value
+              })} placeholder="Informações adicionais sobre a colheita..." />
               </div>
               
               <DialogFooter>
@@ -322,15 +305,14 @@ const ColheitasPage = () => {
       </div>
 
       <Tabs defaultValue="colheitas" className="space-y-4">
-        <TabsList>
+        <TabsList className="bg-slate-900">
           <TabsTrigger value="colheitas">Colheitas</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="colheitas">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {colheitas?.map((colheita) => (
-              <Card key={colheita.id}>
+            {colheitas?.map(colheita => <Card key={colheita.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center">
@@ -361,22 +343,17 @@ const ColheitasPage = () => {
                     <div className="flex items-center justify-between">
                       <span>Destino:</span>
                       <Badge className={destinoColors[colheita.destino as keyof typeof destinoColors]}>
-                        {colheita.destino === 'venda' ? 'Venda' : 
-                         colheita.destino === 'processamento' ? 'Processamento' : 'Estoque'}
+                        {colheita.destino === 'venda' ? 'Venda' : colheita.destino === 'processamento' ? 'Processamento' : 'Estoque'}
                       </Badge>
                     </div>
                     
-                    {colheita.observacoes && (
-                      <p><strong>Obs:</strong> {colheita.observacoes}</p>
-                    )}
+                    {colheita.observacoes && <p><strong>Obs:</strong> {colheita.observacoes}</p>}
                   </div>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
-          {colheitas?.length === 0 && (
-            <Card>
+          {colheitas?.length === 0 && <Card>
               <CardContent className="text-center py-8">
                 <Package2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -385,16 +362,12 @@ const ColheitasPage = () => {
                 <p className="text-gray-600 mb-4">
                   Comece registrando sua primeira colheita
                 </p>
-                <Button 
-                  onClick={() => setIsDialogOpen(true)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
+                <Button onClick={() => setIsDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
                   <Plus className="h-4 w-4 mr-2" />
                   Registrar Primeira Colheita
                 </Button>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </TabsContent>
 
         <TabsContent value="estatisticas">
@@ -440,8 +413,6 @@ const ColheitasPage = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default ColheitasPage;
