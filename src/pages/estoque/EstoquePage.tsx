@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, AlertTriangle, TrendingUp, Calendar } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import ProdutosList from './components/ProdutosList';
@@ -71,27 +71,20 @@ const EstoquePage = () => {
         </div>
       </div>
 
-      {/* Estatísticas */}
-      <EstoqueStats data={statsData} />
-
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="produtos">
-            <Package className="h-4 w-4 mr-2" />
-            Produtos
+            <span>Produtos</span>
           </TabsTrigger>
           <TabsTrigger value="movimentacoes">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Movimentações
+            <span>Movimentações</span>
           </TabsTrigger>
           <TabsTrigger value="alertas">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Alertas
+            <span>Alertas</span>
           </TabsTrigger>
           <TabsTrigger value="validades">
-            <Calendar className="h-4 w-4 mr-2" />
-            Validades
+            <span>Validades</span>
           </TabsTrigger>
         </TabsList>
 
@@ -111,6 +104,9 @@ const EstoquePage = () => {
           <GestaoValidades />
         </TabsContent>
       </Tabs>
+
+      {/* Estatísticas - movidas para baixo */}
+      <EstoqueStats data={statsData} />
     </div>
   );
 };
