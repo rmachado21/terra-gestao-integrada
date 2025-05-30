@@ -26,7 +26,7 @@ const Header = () => {
                 </Button>}
               <div className="hidden sm:flex items-center space-x-2">
                 <User className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-700 truncate max-w-32 lg:max-w-none">
+                <span className="text-sm text-gray-400 truncate max-w-32 lg:max-w-none">
                   {user.email}
                 </span>
               </div>
