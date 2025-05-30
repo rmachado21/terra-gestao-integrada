@@ -202,7 +202,7 @@ const EstoqueMovimentacoes = () => {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto bg-yellow-950 hover:bg-yellow-800">
+              <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto bg-orange-900 hover:bg-orange-800">
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Movimentação
               </Button>
