@@ -53,7 +53,7 @@ const VendasPage = () => {
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Módulo de Vendas</h1>
+          <h1 className="font-bold text-gray-900 text-2xl">Módulo de Vendas</h1>
           <p className="text-gray-600">Gerencie clientes, pedidos, entregas e relatórios de vendas</p>
         </div>
       </div>
