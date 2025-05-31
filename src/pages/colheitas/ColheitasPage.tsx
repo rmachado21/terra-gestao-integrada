@@ -305,7 +305,7 @@ const ColheitasPage = () => {
       </div>
 
       <Tabs defaultValue="colheitas" className="space-y-4">
-        <TabsList className="bg-green-950">
+        <TabsList className="bg-stone-200">
           <TabsTrigger value="colheitas">Colheitas</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
         </TabsList>
