@@ -312,7 +312,7 @@ const ProcessamentoPage = () => {
       </div>
 
       <Tabs defaultValue="processamentos" className="space-y-4">
-        <TabsList className="bg-green-950">
+        <TabsList className="bg-green-100">
           <TabsTrigger value="processamentos">Processamentos</TabsTrigger>
           <TabsTrigger value="rastreabilidade">Rastreabilidade</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
