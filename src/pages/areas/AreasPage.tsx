@@ -184,7 +184,7 @@ const AreasPage = () => {
   }
   return <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <MapPin className="h-8 w-8 text-teal-600" />
+        <MapPin className="h-8 w-8 text-teal-600 px-0 mx-0 my-0 py-0" />
         <div>
           <h1 className="font-bold text-gray-900 text-2xl">Gestão de Áreas</h1>
           <p className="text-gray-600">Gerencie os setores e áreas de plantio</p>
