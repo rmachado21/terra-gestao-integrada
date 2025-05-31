@@ -50,7 +50,7 @@ const EstoquePage = () => {
       <div className="flex items-center gap-3">
         <Package className="h-8 w-8 text-blue-600" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestão de Estoque</h1>
+          <h1 className="font-bold text-gray-900 text-2xl">Gestão de Estoque</h1>
           <p className="text-gray-600">Controle produtos, movimentações e alertas do seu estoque</p>
         </div>
       </div>
