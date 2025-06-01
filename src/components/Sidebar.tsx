@@ -9,8 +9,6 @@ import {
   Package, 
   ShoppingCart, 
   TrendingUp,
-  ChevronDown,
-  ChevronRight,
   MapPin,
   Menu,
   X,
@@ -21,8 +19,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 interface MenuItem {
   title: string;
   icon: any;
-  path?: string;
-  children?: MenuItem[];
+  path: string;
 }
 
 const menuItems: MenuItem[] = [
@@ -32,20 +29,24 @@ const menuItems: MenuItem[] = [
     path: '/'
   },
   {
-    title: 'Planejamento & Plantio',
+    title: 'Áreas',
+    icon: MapPin,
+    path: '/areas'
+  },
+  {
+    title: 'Plantios',
     icon: Sprout,
-    children: [
-      { title: 'Áreas', icon: MapPin, path: '/areas' },
-      { title: 'Plantios', icon: Sprout, path: '/plantios' }
-    ]
+    path: '/plantios'
+  },
+  {
+    title: 'Colheitas',
+    icon: Package2,
+    path: '/colheitas'
   },
   {
     title: 'Produção',
-    icon: Package2,
-    children: [
-      { title: 'Colheitas', icon: Package2, path: '/colheitas' },
-      { title: 'Processamento', icon: Package, path: '/processamento' }
-    ]
+    icon: Package,
+    path: '/processamento'
   },
   {
     title: 'Estoque',
@@ -65,62 +66,15 @@ const menuItems: MenuItem[] = [
 ];
 
 const Sidebar = () => {
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Planejamento & Plantio']);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const toggleExpanded = (title: string) => {
-    setExpandedItems(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    );
-  };
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleNavigation = (path: string) => {
     navigate(path);
     setIsMobileOpen(false); // Fechar menu mobile após navegação
-  };
-
-  const renderMenuItem = (item: MenuItem, level = 0) => {
-    const isExpanded = expandedItems.includes(item.title);
-    const hasChildren = item.children && item.children.length > 0;
-
-    return (
-      <div key={item.title}>
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start mb-1 h-auto py-2",
-            level === 0 ? "font-medium" : "text-sm",
-            level > 0 && "ml-4",
-            item.path && isActive(item.path) && "bg-green-100 text-green-800"
-          )}
-          onClick={() => {
-            if (hasChildren) {
-              toggleExpanded(item.title);
-            } else if (item.path) {
-              handleNavigation(item.path);
-            }
-          }}
-        >
-          <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
-          <span className="flex-1 text-left truncate">{item.title}</span>
-          {hasChildren && (
-            isExpanded ? <ChevronDown className="h-4 w-4 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 flex-shrink-0" />
-          )}
-        </Button>
-        
-        {hasChildren && isExpanded && (
-          <div className="ml-2">
-            {item.children?.map(child => renderMenuItem(child, level + 1))}
-          </div>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -150,7 +104,20 @@ const Sidebar = () => {
       )}>
         <ScrollArea className="h-full px-3 py-4">
           <div className="space-y-2">
-            {menuItems.map(item => renderMenuItem(item))}
+            {menuItems.map(item => (
+              <Button
+                key={item.title}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start mb-1 h-auto py-2 font-medium",
+                  isActive(item.path) && "bg-green-100 text-green-800"
+                )}
+                onClick={() => handleNavigation(item.path)}
+              >
+                <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="flex-1 text-left truncate">{item.title}</span>
+              </Button>
+            ))}
           </div>
         </ScrollArea>
       </div>
