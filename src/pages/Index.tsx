@@ -8,27 +8,19 @@ import DashboardStats from "@/components/DashboardStats";
 import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
 import AlertsPanel from "@/components/AlertsPanel";
-import { Sprout, Package, TrendingUp, Users, DollarSign, BarChart3 } from "lucide-react";
+import { Sprout, Package, TrendingUp, Users, DollarSign, BarChart3, ShoppingCart } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
 
   const modules = [
     {
-      id: "planting",
-      title: "Planejamento e Plantio",
-      icon: Sprout,
-      color: "bg-green-500",
-      description: "Controle de plantios e cronograma",
-      route: "/plantios"
-    },
-    {
-      id: "production",
-      title: "Produção",
-      icon: Package,
-      color: "bg-orange-500",
-      description: "Monitoramento de colheitas",
-      route: "/colheitas"
+      id: "sales",
+      title: "Vendas",
+      icon: ShoppingCart,
+      color: "bg-purple-500",
+      description: "Clientes e pedidos",
+      route: "/vendas?tab=pedidos"
     },
     {
       id: "stock",
@@ -36,15 +28,15 @@ const Index = () => {
       icon: Package,
       color: "bg-blue-500",
       description: "Gestão de produtos e lotes",
-      route: "/estoque"
+      route: "/estoque?tab=estoque"
     },
     {
-      id: "sales",
-      title: "Vendas",
-      icon: TrendingUp,
-      color: "bg-purple-500",
-      description: "Clientes e pedidos",
-      route: "/vendas"
+      id: "production",
+      title: "Produção",
+      icon: Package,
+      color: "bg-orange-500",
+      description: "Processamento e rastreabilidade",
+      route: "/processamento"
     },
     {
       id: "financial",
@@ -52,7 +44,7 @@ const Index = () => {
       icon: DollarSign,
       color: "bg-yellow-500",
       description: "Controle de receitas e despesas",
-      route: "/financeiro"
+      route: "/financeiro?tab=lancamentos"
     }
   ];
 
@@ -76,7 +68,7 @@ const Index = () => {
       {/* Módulos do Sistema */}
       <div className="space-y-4">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Módulos do Sistema</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
           {modules.map((module) => (
             <Card 
               key={module.id}
