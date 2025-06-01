@@ -9,11 +9,10 @@ import PedidosList from './components/PedidosList';
 import EntregasList from './components/EntregasList';
 import RelatoriosVendas from './components/RelatoriosVendas';
 import VendasStats from './components/VendasStats';
+
 const VendasPage = () => {
-  const {
-    user
-  } = useAuth();
-  const [activeTab, setActiveTab] = useState('clientes');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('pedidos');
 
   // Buscar estatísticas gerais de vendas
   const {
@@ -49,7 +48,8 @@ const VendasPage = () => {
     },
     enabled: !!user?.id
   });
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
@@ -61,13 +61,13 @@ const VendasPage = () => {
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4 bg-stone-200">
-          <TabsTrigger value="clientes" className="flex items-center space-x-2">
-            <Users className="h-4 w-4" />
-            <span>Clientes</span>
-          </TabsTrigger>
           <TabsTrigger value="pedidos" className="flex items-center space-x-2">
             <ShoppingCart className="h-4 w-4" />
             <span>Pedidos</span>
+          </TabsTrigger>
+          <TabsTrigger value="clientes" className="flex items-center space-x-2">
+            <Users className="h-4 w-4" />
+            <span>Clientes</span>
           </TabsTrigger>
           <TabsTrigger value="entregas" className="flex items-center space-x-2">
             <Truck className="h-4 w-4" />
@@ -79,12 +79,12 @@ const VendasPage = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="clientes">
-          <ClientesList />
-        </TabsContent>
-
         <TabsContent value="pedidos">
           <PedidosList />
+        </TabsContent>
+
+        <TabsContent value="clientes">
+          <ClientesList />
         </TabsContent>
 
         <TabsContent value="entregas">
@@ -98,6 +98,8 @@ const VendasPage = () => {
 
       {/* Estatísticas - movidas para baixo */}
       <VendasStats data={statsData} />
-    </div>;
+    </div>
+  );
 };
+
 export default VendasPage;

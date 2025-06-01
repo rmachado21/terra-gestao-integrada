@@ -1,11 +1,9 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import DashboardStats from "@/components/DashboardStats";
-import QuickActions from "@/components/QuickActions";
 import RecentActivities from "@/components/RecentActivities";
 import AlertsPanel from "@/components/AlertsPanel";
 import { Sprout, Package, TrendingUp, Users, DollarSign, BarChart3, ShoppingCart } from "lucide-react";
@@ -61,9 +59,6 @@ const Index = () => {
 
       {/* Dashboard Stats */}
       <DashboardStats />
-
-      {/* Quick Actions */}
-      <QuickActions />
 
       {/* Módulos do Sistema */}
       <div className="space-y-4">

@@ -9,11 +9,10 @@ import EstoqueMovimentacoes from './components/EstoqueMovimentacoes';
 import AlertasEstoque from './components/AlertasEstoque';
 import GestaoValidades from './components/GestaoValidades';
 import EstoqueStats from './components/EstoqueStats';
+
 const EstoquePage = () => {
-  const {
-    user
-  } = useAuth();
-  const [activeTab, setActiveTab] = useState('produtos');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('estoque');
 
   // Buscar estatísticas gerais do estoque
   const {
@@ -46,7 +45,8 @@ const EstoquePage = () => {
     },
     enabled: !!user?.id
   });
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Package className="h-8 w-8 text-blue-600" />
         <div>
@@ -58,39 +58,41 @@ const EstoquePage = () => {
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4 bg-stone-200">
-          <TabsTrigger value="produtos">
-            <span>Produtos</span>
-          </TabsTrigger>
-          <TabsTrigger value="movimentacoes">
+          <TabsTrigger value="estoque">
             <span>Estoque</span>
           </TabsTrigger>
-          <TabsTrigger value="alertas">
-            <span>Alertas</span>
+          <TabsTrigger value="produtos">
+            <span>Produtos</span>
           </TabsTrigger>
           <TabsTrigger value="validades">
             <span>Validades</span>
           </TabsTrigger>
+          <TabsTrigger value="alertas">
+            <span>Alertas</span>
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="estoque">
+          <EstoqueMovimentacoes />
+        </TabsContent>
 
         <TabsContent value="produtos">
           <ProdutosList />
         </TabsContent>
 
-        <TabsContent value="movimentacoes">
-          <EstoqueMovimentacoes />
+        <TabsContent value="validades">
+          <GestaoValidades />
         </TabsContent>
 
         <TabsContent value="alertas">
           <AlertasEstoque />
         </TabsContent>
-
-        <TabsContent value="validades">
-          <GestaoValidades />
-        </TabsContent>
       </Tabs>
 
       {/* Estatísticas - movidas para baixo */}
       <EstoqueStats data={statsData} />
-    </div>;
+    </div>
+  );
 };
+
 export default EstoquePage;
