@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 interface ProcessamentoItem {
   id: string;
   colheita_id: string;
@@ -201,9 +202,12 @@ const ProcessamentoPage = () => {
   }
   return <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Controle de Processamento</h1>
-          <p className="text-gray-600">Gerencie o processamento e rastreabilidade dos lotes</p>
+        <div className="flex items-center gap-3">
+          <Package className="h-8 w-8 text-orange-500" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Controle de Processamento</h1>
+            <p className="text-gray-600">Gerencie o processamento e rastreabilidade dos lotes</p>
+          </div>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 interface Colheita {
   id: string;
   plantio_id: string;
@@ -192,9 +193,12 @@ const ColheitasPage = () => {
   }
   return <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestão de Colheitas</h1>
-          <p className="text-gray-600">Registre e acompanhe as colheitas da sua produção</p>
+        <div className="flex items-center gap-3">
+          <Package2 className="h-8 w-8 text-green-700" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Gestão de Colheitas</h1>
+            <p className="text-gray-600">Registre e acompanhe as colheitas da sua produção</p>
+          </div>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
