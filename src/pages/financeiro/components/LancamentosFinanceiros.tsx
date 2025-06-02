@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, TrendingUp, TrendingDown, Calendar, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
 interface MovimentacaoFinanceira {
   id: string;
   descricao: string;
@@ -23,12 +21,10 @@ interface MovimentacaoFinanceira {
   data_movimentacao: string;
   observacoes?: string;
 }
-
 const categorias = {
   receita: ['Vendas', 'Subsídios', 'Investimentos', 'Outros'],
   despesa: ['Sementes', 'Fertilizantes', 'Equipamentos', 'Combustível', 'Mão de obra', 'Outros']
 };
-
 const LancamentosFinanceiros = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -39,40 +35,44 @@ const LancamentosFinanceiros = () => {
     data_movimentacao: new Date().toISOString().split('T')[0],
     observacoes: ''
   });
-
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: movimentacoes = [], isLoading } = useQuery({
+  const {
+    data: movimentacoes = [],
+    isLoading
+  } = useQuery({
     queryKey: ['movimentacoes-financeiras'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('movimentacoes_financeiras')
-        .select('*')
-        .order('data_movimentacao', { ascending: false });
-      
+      const {
+        data,
+        error
+      } = await supabase.from('movimentacoes_financeiras').select('*').order('data_movimentacao', {
+        ascending: false
+      });
       if (error) throw error;
       return data as MovimentacaoFinanceira[];
     }
   });
-
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('movimentacoes_financeiras')
-        .insert([{
-          ...data,
-          valor: parseFloat(data.valor),
-          user_id: (await supabase.auth.getUser()).data.user?.id
-        }]);
-      
+      const {
+        error
+      } = await supabase.from('movimentacoes_financeiras').insert([{
+        ...data,
+        valor: parseFloat(data.valor),
+        user_id: (await supabase.auth.getUser()).data.user?.id
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['movimentacoes-financeiras'] });
+      queryClient.invalidateQueries({
+        queryKey: ['movimentacoes-financeiras']
+      });
       toast({
         title: "Sucesso!",
-        description: "Lançamento financeiro registrado com sucesso.",
+        description: "Lançamento financeiro registrado com sucesso."
       });
       setShowForm(false);
       setFormData({
@@ -88,40 +88,29 @@ const LancamentosFinanceiros = () => {
       toast({
         title: "Erro!",
         description: "Erro ao registrar lançamento: " + error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.descricao || !formData.valor || !formData.categoria) {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos obrigatórios.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
     createMutation.mutate(formData);
   };
-
-  const totalReceitas = movimentacoes
-    .filter(m => m.tipo === 'receita')
-    .reduce((sum, m) => sum + m.valor, 0);
-
-  const totalDespesas = movimentacoes
-    .filter(m => m.tipo === 'despesa')
-    .reduce((sum, m) => sum + m.valor, 0);
-
+  const totalReceitas = movimentacoes.filter(m => m.tipo === 'receita').reduce((sum, m) => sum + m.valor, 0);
+  const totalDespesas = movimentacoes.filter(m => m.tipo === 'despesa').reduce((sum, m) => sum + m.valor, 0);
   const saldo = totalReceitas - totalDespesas;
-
   if (isLoading) {
     return <div className="text-center py-4">Carregando...</div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Resumo Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -130,7 +119,9 @@ const LancamentosFinanceiros = () => {
               <div>
                 <p className="text-sm text-gray-600">Total Receitas</p>
                 <p className="text-2xl font-bold text-green-600">
-                  R$ {totalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {totalReceitas.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
@@ -144,7 +135,9 @@ const LancamentosFinanceiros = () => {
               <div>
                 <p className="text-sm text-gray-600">Total Despesas</p>
                 <p className="text-2xl font-bold text-red-600">
-                  R$ {totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {totalDespesas.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
                 </p>
               </div>
               <TrendingDown className="h-8 w-8 text-red-600" />
@@ -158,7 +151,9 @@ const LancamentosFinanceiros = () => {
               <div>
                 <p className="text-sm text-gray-600">Saldo</p>
                 <p className={`text-2xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {saldo.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-blue-600" />
@@ -170,15 +165,14 @@ const LancamentosFinanceiros = () => {
       {/* Botão Adicionar */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Movimentações Recentes</h3>
-        <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2">
+        <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
           <Plus className="h-4 w-4" />
           Novo Lançamento
         </Button>
       </div>
 
       {/* Formulário */}
-      {showForm && (
-        <Card>
+      {showForm && <Card>
           <CardHeader>
             <CardTitle>Novo Lançamento Financeiro</CardTitle>
           </CardHeader>
@@ -187,32 +181,27 @@ const LancamentosFinanceiros = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="descricao">Descrição *</Label>
-                  <Input
-                    id="descricao"
-                    value={formData.descricao}
-                    onChange={(e) => setFormData({...formData, descricao: e.target.value})}
-                    placeholder="Ex: Venda de hortaliças"
-                  />
+                  <Input id="descricao" value={formData.descricao} onChange={e => setFormData({
+                ...formData,
+                descricao: e.target.value
+              })} placeholder="Ex: Venda de hortaliças" />
                 </div>
 
                 <div>
                   <Label htmlFor="valor">Valor (R$) *</Label>
-                  <Input
-                    id="valor"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor}
-                    onChange={(e) => setFormData({...formData, valor: e.target.value})}
-                    placeholder="0,00"
-                  />
+                  <Input id="valor" type="number" step="0.01" value={formData.valor} onChange={e => setFormData({
+                ...formData,
+                valor: e.target.value
+              })} placeholder="0,00" />
                 </div>
 
                 <div>
                   <Label htmlFor="tipo">Tipo *</Label>
-                  <Select 
-                    value={formData.tipo} 
-                    onValueChange={(value: 'receita' | 'despesa') => setFormData({...formData, tipo: value, categoria: ''})}
-                  >
+                  <Select value={formData.tipo} onValueChange={(value: 'receita' | 'despesa') => setFormData({
+                ...formData,
+                tipo: value,
+                categoria: ''
+              })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -225,40 +214,34 @@ const LancamentosFinanceiros = () => {
 
                 <div>
                   <Label htmlFor="categoria">Categoria *</Label>
-                  <Select 
-                    value={formData.categoria} 
-                    onValueChange={(value) => setFormData({...formData, categoria: value})}
-                  >
+                  <Select value={formData.categoria} onValueChange={value => setFormData({
+                ...formData,
+                categoria: value
+              })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {categorias[formData.tipo].map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
+                      {categorias[formData.tipo].map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
                   <Label htmlFor="data">Data *</Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    value={formData.data_movimentacao}
-                    onChange={(e) => setFormData({...formData, data_movimentacao: e.target.value})}
-                  />
+                  <Input id="data" type="date" value={formData.data_movimentacao} onChange={e => setFormData({
+                ...formData,
+                data_movimentacao: e.target.value
+              })} />
                 </div>
               </div>
 
               <div>
                 <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  value={formData.observacoes}
-                  onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
-                  placeholder="Informações adicionais..."
-                />
+                <Textarea id="observacoes" value={formData.observacoes} onChange={e => setFormData({
+              ...formData,
+              observacoes: e.target.value
+            })} placeholder="Informações adicionais..." />
               </div>
 
               <div className="flex gap-2 justify-end">
@@ -271,45 +254,36 @@ const LancamentosFinanceiros = () => {
               </div>
             </form>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Lista de Movimentações */}
       <div className="space-y-3">
-        {movimentacoes.length === 0 ? (
-          <Card>
+        {movimentacoes.length === 0 ? <Card>
             <CardContent className="p-8 text-center">
               <p className="text-gray-500">Nenhuma movimentação registrada ainda.</p>
             </CardContent>
-          </Card>
-        ) : (
-          movimentacoes.map((mov) => (
-            <Card key={mov.id} className="hover:shadow-md transition-shadow">
+          </Card> : movimentacoes.map(mov => <Card key={mov.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {mov.tipo === 'receita' ? (
-                      <TrendingUp className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <TrendingDown className="h-5 w-5 text-red-600" />
-                    )}
+                    {mov.tipo === 'receita' ? <TrendingUp className="h-5 w-5 text-green-600" /> : <TrendingDown className="h-5 w-5 text-red-600" />}
                     <div>
                       <h4 className="font-medium">{mov.descricao}</h4>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar className="h-3 w-3" />
-                        {format(new Date(mov.data_movimentacao), 'dd/MM/yyyy', { locale: ptBR })}
+                        {format(new Date(mov.data_movimentacao), 'dd/MM/yyyy', {
+                    locale: ptBR
+                  })}
                         <Badge variant="outline">{mov.categoria}</Badge>
                       </div>
-                      {mov.observacoes && (
-                        <p className="text-sm text-gray-500 mt-1">{mov.observacoes}</p>
-                      )}
+                      {mov.observacoes && <p className="text-sm text-gray-500 mt-1">{mov.observacoes}</p>}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-lg font-semibold ${
-                      mov.tipo === 'receita' ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {mov.tipo === 'receita' ? '+' : '-'} R$ {mov.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    <p className={`text-lg font-semibold ${mov.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
+                      {mov.tipo === 'receita' ? '+' : '-'} R$ {mov.valor.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2
+                })}
                     </p>
                     <Badge variant={mov.tipo === 'receita' ? 'default' : 'destructive'}>
                       {mov.tipo === 'receita' ? 'Receita' : 'Despesa'}
@@ -317,12 +291,8 @@ const LancamentosFinanceiros = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))
-        )}
+            </Card>)}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LancamentosFinanceiros;
