@@ -20,48 +20,57 @@ interface MenuItem {
   title: string;
   icon: any;
   path: string;
+  color: string;
 }
 
 const menuItems: MenuItem[] = [
   {
     title: 'Dashboard',
     icon: Home,
-    path: '/'
+    path: '/',
+    color: 'text-gray-600'
   },
   {
     title: 'Áreas',
     icon: MapPin,
-    path: '/areas'
+    path: '/areas',
+    color: 'text-emerald-500'
   },
   {
     title: 'Plantios',
     icon: Sprout,
-    path: '/plantios'
+    path: '/plantios',
+    color: 'text-green-600'
   },
   {
     title: 'Colheitas',
     icon: Package2,
-    path: '/colheitas'
+    path: '/colheitas',
+    color: 'text-green-700'
   },
   {
     title: 'Produção',
     icon: Package,
-    path: '/processamento'
+    path: '/processamento',
+    color: 'text-orange-500'
   },
   {
     title: 'Estoque',
     icon: Package,
-    path: '/estoque'
+    path: '/estoque',
+    color: 'text-blue-500'
   },
   {
     title: 'Vendas',
     icon: ShoppingCart,
-    path: '/vendas'
+    path: '/vendas',
+    color: 'text-purple-500'
   },
   {
     title: 'Financeiro',
     icon: TrendingUp,
-    path: '/financeiro'
+    path: '/financeiro',
+    color: 'text-yellow-600'
   }
 ];
 
@@ -114,7 +123,7 @@ const Sidebar = () => {
                 )}
                 onClick={() => handleNavigation(item.path)}
               >
-                <item.icon className="mr-2 h-4 w-4 flex-shrink-0" />
+                <item.icon className={cn("mr-2 h-4 w-4 flex-shrink-0", item.color)} />
                 <span className="flex-1 text-left truncate">{item.title}</span>
               </Button>
             ))}
