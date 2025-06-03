@@ -33,11 +33,26 @@ const RecentActivities = () => {
 
   const getTypeBadge = (type: string) => {
     const badges = {
-      production: { label: "Produção", variant: "default" as const },
-      sale: { label: "Venda", variant: "secondary" as const },
-      stock: { label: "Estoque", variant: "outline" as const },
-      planting: { label: "Plantio", variant: "default" as const },
-      financial: { label: "Financeiro", variant: "secondary" as const }
+      production: { 
+        label: "Produção", 
+        className: "bg-orange-500 text-white border-orange-500 hover:bg-orange-600" 
+      },
+      sale: { 
+        label: "Venda", 
+        className: "bg-purple-500 text-white border-purple-500 hover:bg-purple-600" 
+      },
+      stock: { 
+        label: "Estoque", 
+        className: "bg-blue-500 text-white border-blue-500 hover:bg-blue-600" 
+      },
+      planting: { 
+        label: "Plantio", 
+        className: "bg-green-500 text-white border-green-500 hover:bg-green-600" 
+      },
+      financial: { 
+        label: "Financeiro", 
+        className: "bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600" 
+      }
     };
     return badges[type as keyof typeof badges] || badges.production;
   };
@@ -74,7 +89,7 @@ const RecentActivities = () => {
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-1">
                   <p className="font-medium text-sm">{activity.action}</p>
-                  <Badge variant={getTypeBadge(activity.type).variant} className="text-xs">
+                  <Badge className={getTypeBadge(activity.type).className}>
                     {getTypeBadge(activity.type).label}
                   </Badge>
                 </div>
