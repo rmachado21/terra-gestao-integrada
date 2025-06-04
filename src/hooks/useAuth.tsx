@@ -14,54 +14,166 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Função para limpar estado de autenticação
+const cleanupAuthState = () => {
+  try {
+    // Remove tokens do localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove tokens do sessionStorage se existir
+    if (typeof sessionStorage !== 'undefined') {
+      Object.keys(sessionStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao limpar estado de autenticação:', error);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener first
+    let mounted = true;
+
+    // Configurar listener de estado de autenticação primeiro
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state change:', event, session?.user?.email);
+
+        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          if (event === 'SIGNED_OUT') {
+            cleanupAuthState();
+          }
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
     );
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Verificar sessão existente
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Erro ao obter sessão:', error);
+          cleanupAuthState();
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Erro na inicialização da autenticação:', error);
+        cleanupAuthState();
+        setSession(null);
+        setUser(null);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      // Limpar estado antes de fazer login
+      cleanupAuthState();
+      
+      // Tentar logout global primeiro
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continuar mesmo se o logout falhar
+        console.log('Logout preventivo falhou, continuando...');
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      // Forçar atualização da página para garantir estado limpo
+      if (data.user) {
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
+      }
+
+      return { error: null };
+    } catch (error) {
+      console.error('Erro no signIn:', error);
+      return { error };
+    }
   };
 
   const signUp = async (email: string, password: string, nome: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          nome,
+    try {
+      cleanupAuthState();
+      
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            nome,
+          },
+          emailRedirectTo: redirectUrl,
         },
-      },
-    });
-    return { error };
+      });
+      return { error };
+    } catch (error) {
+      console.error('Erro no signUp:', error);
+      return { error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      cleanupAuthState();
+      
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Erro no logout, continuando...');
+      }
+      
+      // Forçar redirecionamento
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Erro no signOut:', error);
+      // Mesmo com erro, redirecionar
+      window.location.href = '/auth';
+    }
   };
 
   return (

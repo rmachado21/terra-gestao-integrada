@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,8 +18,11 @@ import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
+
 const queryClient = new QueryClient();
-const App = () => <QueryClientProvider client={queryClient}>
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -26,98 +30,116 @@ const App = () => <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<ProtectedRoute>
+            <Route path="/" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <Index />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/areas" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/areas" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <AreasPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/plantios" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/plantios" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <PlantiosPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/colheitas" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/colheitas" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <ColheitasPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/processamento" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/processamento" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <ProcessamentoPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/estoque" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/estoque" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <EstoquePage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/vendas" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/vendas" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <VendasPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
-            <Route path="/financeiro" element={<ProtectedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/financeiro" element={
+              <ProtectedRoute>
                 <div className="min-h-screen bg-gray-50">
                   <Header />
                   <div className="flex">
                     <Sidebar />
-                    <main className="flex-1 p-6 bg-gradient-to-br from-grey-100 to-grey-200">
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <FinanceiroPage />
                     </main>
                   </div>
                 </div>
-              </ProtectedRoute>} />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>;
+  </QueryClientProvider>
+);
+
 export default App;
