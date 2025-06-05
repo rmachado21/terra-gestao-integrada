@@ -1,11 +1,13 @@
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useProfile } from '@/hooks/useProfile';
 import { LogOut, User, Home, Leaf, Sprout, Settings } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -50,7 +52,7 @@ const Header = () => {
             <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-md">
               <User className="h-4 w-4 text-gray-500" />
               <span className="text-sm text-gray-600 font-medium max-w-32 lg:max-w-none truncate">
-                {user.email}
+                {profile?.nome || user.email}
               </span>
             </div>
             
