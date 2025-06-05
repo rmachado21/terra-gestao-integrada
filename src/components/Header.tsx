@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, User, Home, Leaf, Sprout } from 'lucide-react';
+import { LogOut, User, Home, Leaf, Sprout, Settings } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -53,6 +53,16 @@ const Header = () => {
                 {user.email}
               </span>
             </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/profile')} 
+              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline font-medium">Perfil</span>
+            </Button>
             
             <Button 
               variant="outline" 

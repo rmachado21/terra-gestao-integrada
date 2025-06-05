@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ProfilePage from "./pages/ProfilePage";
 import AreasPage from "./pages/areas/AreasPage";
 import PlantiosPage from "./pages/plantios/PlantiosPage";
 import ColheitasPage from "./pages/colheitas/ColheitasPage";
@@ -38,6 +38,19 @@ const App = () => (
                     <Sidebar />
                     <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
                       <Index />
+                    </main>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-gray-50">
+                  <Header />
+                  <div className="flex">
+                    <Sidebar />
+                    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
+                      <ProfilePage />
                     </main>
                   </div>
                 </div>
