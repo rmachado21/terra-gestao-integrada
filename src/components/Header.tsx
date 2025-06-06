@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { LogOut, User, Home, Settings, Sprout, TreePine } from 'lucide-react';
+import { LogOut, User, Home, Settings, Sprout, Gear } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -23,9 +23,9 @@ const Header = () => {
           >
             <div className="relative flex items-center justify-center">
               <div className="bg-gradient-to-br from-green-600 to-green-700 p-2 rounded-lg shadow-md">
-                <TreePine className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                <Gear className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <Sprout className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500 absolute -top-1 -right-1 bg-white rounded-full p-0.5" />
+              <Sprout className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500 absolute -top-0.5 -right-0.5 bg-white rounded-full p-0.5" />
             </div>
             <div className="flex flex-col justify-center">
               <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent leading-none text-left">
