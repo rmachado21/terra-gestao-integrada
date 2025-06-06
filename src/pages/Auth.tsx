@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,46 +7,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Leaf } from 'lucide-react';
-
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { signIn, signUp } = useAuth();
-  const { toast } = useToast();
+  const {
+    signIn,
+    signUp
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       if (isLogin) {
-        const { error } = await signIn(email, password);
+        const {
+          error
+        } = await signIn(email, password);
         if (error) {
           toast({
             title: "Erro no login",
             description: error.message,
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           navigate('/');
         }
       } else {
-        const { error } = await signUp(email, password, nome);
+        const {
+          error
+        } = await signUp(email, password, nome);
         if (error) {
           toast({
             title: "Erro no cadastro",
             description: error.message,
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           toast({
             title: "Cadastro realizado",
-            description: "Verifique seu email para confirmar a conta",
+            description: "Verifique seu email para confirmar a conta"
           });
           setIsLogin(true);
         }
@@ -56,85 +60,52 @@ const Auth = () => {
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Leaf className="h-12 w-12 text-green-600" />
           </div>
-          <CardTitle className="text-2xl font-bold text-green-800">
-            Bem da Terra
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-green-800">Gestor Raiz</CardTitle>
           <CardDescription>
             {isLogin ? 'Faça login em sua conta' : 'Crie sua conta de administrador'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
+            {!isLogin && <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  type="text"
-                  placeholder="Digite seu nome"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
-                />
-              </div>
-            )}
+                <Input id="nome" type="text" placeholder="Digite seu nome" value={nome} onChange={e => setNome(e.target.value)} required />
+              </div>}
             
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Digite seu email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <Input id="email" type="email" placeholder="Digite seu email" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Digite sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <Input id="password" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
             
             <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
-              {loading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Cadastrar')}
+              {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Cadastrar'}
             </Button>
           </form>
           
           <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-green-600 hover:text-green-700 text-sm underline"
-            >
+            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-green-600 hover:text-green-700 text-sm underline">
               {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
             </button>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
