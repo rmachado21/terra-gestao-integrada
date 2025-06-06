@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,33 +24,43 @@ const Header = () => {
             <div className="flex items-center space-x-3">
               {/* Nova Logo SVG */}
               <div className="relative">
-                <svg width="40" height="40" viewBox="0 0 40 40" className="drop-shadow-sm">
-                  {/* Engrenagem de fundo */}
-                  <path
-                    d="M20 4L22.5 9.5L28.5 8L28 14L34 16L30.5 21.5L35 26L29 28L28.5 34L22.5 32L20 37.5L17.5 32L11.5 34L12 28L6 26L9.5 21.5L5 16L11 14L11.5 8L17.5 9.5L20 4Z"
-                    fill="#4B5563"
-                    className="opacity-90"
-                  />
-                  {/* Círculo central */}
-                  <circle cx="20" cy="20" r="10" fill="#16A34A" />
-                  {/* Folhas/Planta */}
-                  <path
-                    d="M16 16C16 18 18 20 20 20C22 20 24 18 24 16C24 14 22 12 20 12C18 12 16 14 16 16Z"
-                    fill="#FFFFFF"
-                  />
-                  <path
-                    d="M18 18L20 20L22 18"
-                    stroke="#FFFFFF"
-                    strokeWidth="1.5"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M20 20L20 24"
-                    stroke="#FFFFFF"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
+                <svg width="44" height="44" viewBox="0 0 44 44" className="drop-shadow-md">
+                  {/* Engrenagem externa */}
+                  <g transform="translate(22,22)">
+                    {/* Dentes da engrenagem */}
+                    <path
+                      d="M0,-18 L3,-16 L3,-14 L6,-12 L4,-9 L6,-6 L9,-4 L12,-6 L14,-3 L16,-3 L18,0 L16,3 L14,3 L12,6 L9,4 L6,6 L4,9 L6,12 L3,14 L3,16 L0,18 L-3,16 L-3,14 L-6,12 L-4,9 L-6,6 L-9,4 L-12,6 L-14,3 L-16,3 L-18,0 L-16,-3 L-14,-3 L-12,-6 L-9,-4 L-6,-6 L-4,-9 L-6,-12 L-3,-14 L-3,-16 L0,-18Z"
+                      fill="#6B7280"
+                      className="opacity-90"
+                    />
+                    
+                    {/* Círculo interno da engrenagem */}
+                    <circle cx="0" cy="0" r="12" fill="#16A34A" />
+                    
+                    {/* Folha principal - lado esquerdo */}
+                    <path
+                      d="M-8,-2 Q-12,-6 -8,-10 Q-4,-6 -4,-2 Q-8,2 -8,-2Z"
+                      fill="#22C55E"
+                    />
+                    
+                    {/* Folha secundária - lado direito */}
+                    <path
+                      d="M4,-2 Q8,-6 12,-2 Q8,2 4,2 Q4,-2 4,-2Z"
+                      fill="#22C55E"
+                    />
+                    
+                    {/* Haste central */}
+                    <rect x="-1" y="-2" width="2" height="8" fill="#15803D" />
+                    
+                    {/* Detalhes das folhas - nervuras */}
+                    <path d="M-8,-2 L-6,0" stroke="#15803D" strokeWidth="0.8" fill="none" />
+                    <path d="M-8,-4 L-6,-2" stroke="#15803D" strokeWidth="0.8" fill="none" />
+                    <path d="M8,-2 L6,0" stroke="#15803D" strokeWidth="0.8" fill="none" />
+                    <path d="M8,-4 L6,-2" stroke="#15803D" strokeWidth="0.8" fill="none" />
+                    
+                    {/* Centro da engrenagem */}
+                    <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
+                  </g>
                 </svg>
               </div>
               
