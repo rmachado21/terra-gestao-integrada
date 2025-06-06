@@ -126,28 +126,24 @@ const ProcessamentoPage = () => {
   });
   const createProcessamentoMutation = useMutation({
     mutationFn: async (data: any) => {
-      const {
-        error
-      } = await supabase.from('processamentos').insert([{
-        ...data,
-        user_id: user?.id
-      }]);
+      const { error } = await supabase
+        .from('processamentos')
+        .insert([{ ...data, user_id: user?.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['processamentos']
-      });
+      queryClient.invalidateQueries({ queryKey: ['processamentos'] });
       toast({
         title: 'Processamento registrado com sucesso!'
       });
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao registrar processamento',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }

@@ -10,6 +10,7 @@ import { Plus, MapPin, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+
 interface Area {
   id: string;
   nome: string;
@@ -20,6 +21,7 @@ interface Area {
   ativa: boolean;
   created_at: string;
 }
+
 const AreasPage = () => {
   const {
     user
@@ -58,10 +60,9 @@ const AreasPage = () => {
     mutationFn: async (data: any) => {
       const {
         error
-      } = await supabase.from('areas').insert([{
-        ...data,
-        user_id: user?.id
-      }]);
+      } = await supabase
+        .from('areas')
+        .insert([{ ...data, user_id: user?.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -74,10 +75,11 @@ const AreasPage = () => {
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao criar área',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
@@ -92,7 +94,10 @@ const AreasPage = () => {
     }) => {
       const {
         error
-      } = await supabase.from('areas').update(data).eq('id', id);
+      } = await supabase
+        .from('areas')
+        .update(data)
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -105,10 +110,11 @@ const AreasPage = () => {
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao atualizar área',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
@@ -117,7 +123,10 @@ const AreasPage = () => {
     mutationFn: async (id: string) => {
       const {
         error
-      } = await supabase.from('areas').delete().eq('id', id);
+      } = await supabase
+        .from('areas')
+        .delete()
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -128,10 +137,11 @@ const AreasPage = () => {
         title: 'Área removida com sucesso!'
       });
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao remover área',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }

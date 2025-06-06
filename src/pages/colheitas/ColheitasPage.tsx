@@ -115,31 +115,25 @@ const ColheitasPage = () => {
   });
   const createColheitaMutation = useMutation({
     mutationFn: async (data: any) => {
-      const {
-        error
-      } = await supabase.from('colheitas').insert([{
-        ...data,
-        user_id: user?.id
-      }]);
+      const { error } = await supabase
+        .from('colheitas')
+        .insert([{ ...data, user_id: user?.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['colheitas']
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['plantios-disponiveis']
-      });
+      queryClient.invalidateQueries({ queryKey: ['colheitas'] });
+      queryClient.invalidateQueries({ queryKey: ['plantios-disponiveis'] });
       toast({
         title: 'Colheita registrada com sucesso!'
       });
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao registrar colheita',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }

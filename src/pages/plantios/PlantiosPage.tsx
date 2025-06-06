@@ -97,59 +97,47 @@ const PlantiosPage = () => {
   });
   const createPlantioMutation = useMutation({
     mutationFn: async (data: any) => {
-      const {
-        error
-      } = await supabase.from('plantios').insert([{
-        ...data,
-        user_id: user?.id
-      }]);
+      const { error } = await supabase
+        .from('plantios')
+        .insert([{ ...data, user_id: user?.id }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['plantios']
-      });
+      queryClient.invalidateQueries({ queryKey: ['plantios'] });
       toast({
         title: 'Plantio registrado com sucesso!'
       });
       setIsDialogOpen(false);
       resetForm();
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao registrar plantio',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
   });
   const updateStatusMutation = useMutation({
-    mutationFn: async ({
-      id,
-      status
-    }: {
-      id: string;
-      status: 'planejado' | 'plantado' | 'crescendo' | 'pronto_colheita' | 'colhido';
-    }) => {
-      const {
-        error
-      } = await supabase.from('plantios').update({
-        status
-      }).eq('id', id);
+    mutationFn: async ({ id, status }: { id: string; status: 'planejado' | 'plantado' | 'crescendo' | 'pronto_colheita' | 'colhido' }) => {
+      const { error } = await supabase
+        .from('plantios')
+        .update({ status })
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['plantios']
-      });
+      queryClient.invalidateQueries({ queryKey: ['plantios'] });
       toast({
         title: 'Status atualizado com sucesso!'
       });
     },
-    onError: error => {
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
         title: 'Erro ao atualizar status',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       });
     }
