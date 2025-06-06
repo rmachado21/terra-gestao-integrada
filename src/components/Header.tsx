@@ -1,8 +1,9 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { LogOut, User, Home, Settings, Sprout, gear } from 'lucide-react';
+import { LogOut, User, Home, Settings, Sprout, Cog } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Header = () => {
@@ -23,7 +24,7 @@ const Header = () => {
           >
             <div className="relative flex items-center justify-center">
               <div className="bg-gradient-to-br from-green-600 to-green-700 p-2 rounded-lg shadow-md">
-                {React.createElement(gear, { className: "h-5 w-5 sm:h-6 sm:w-6 text-white" })}
+                <Cog className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <Sprout className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500 absolute -top-0.5 -right-0.5 bg-white rounded-full p-0.5" />
             </div>
