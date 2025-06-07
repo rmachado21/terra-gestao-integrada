@@ -2,6 +2,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { secureLogger } from '@/lib/security';
 
 interface AuthContextType {
   user: User | null;
@@ -33,7 +34,7 @@ const cleanupAuthState = () => {
       });
     }
   } catch (error) {
-    console.error('Erro ao limpar estado de autenticação:', error);
+    secureLogger.error('Erro ao limpar estado de autenticação:', error);
   }
 };
 
@@ -50,12 +51,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         if (!mounted) return;
 
-        console.log('Auth state change:', event, session?.user?.email);
+        secureLogger.info('Auth state change:', { event, email: session?.user?.email });
 
         if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
           if (event === 'SIGNED_OUT') {
             cleanupAuthState();
+            secureLogger.security('user_signed_out');
           }
+        }
+
+        if (event === 'SIGNED_IN') {
+          secureLogger.security('user_signed_in', { 
+            userId: session?.user?.id,
+            email: session?.user?.email 
+          });
         }
 
         setSession(session);
@@ -70,16 +79,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Erro ao obter sessão:', error);
+          secureLogger.error('Erro ao obter sessão:', error);
           cleanupAuthState();
           setSession(null);
           setUser(null);
         } else {
           setSession(session);
           setUser(session?.user ?? null);
+          if (session) {
+            secureLogger.security('session_restored', { userId: session.user.id });
+          }
         }
       } catch (error) {
-        console.error('Erro na inicialização da autenticação:', error);
+        secureLogger.error('Erro na inicialização da autenticação:', error);
         cleanupAuthState();
         setSession(null);
         setUser(null);
@@ -108,7 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Continuar mesmo se o logout falhar
-        console.log('Logout preventivo falhou, continuando...');
+        secureLogger.info('Logout preventivo falhou, continuando...');
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -117,11 +129,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
+        secureLogger.security('signin_failed', { email, error: error.message });
         return { error };
       }
 
       // Forçar atualização da página para garantir estado limpo
       if (data.user) {
+        secureLogger.security('signin_success', { userId: data.user.id, email });
         setTimeout(() => {
           window.location.href = '/';
         }, 100);
@@ -129,7 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       return { error: null };
     } catch (error) {
-      console.error('Erro no signIn:', error);
+      secureLogger.error('Erro no signIn:', error);
       return { error };
     }
   };
@@ -150,27 +164,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           emailRedirectTo: redirectUrl,
         },
       });
+
+      if (error) {
+        secureLogger.security('signup_failed', { email, error: error.message });
+      } else {
+        secureLogger.security('signup_success', { email });
+      }
+
       return { error };
     } catch (error) {
-      console.error('Erro no signUp:', error);
+      secureLogger.error('Erro no signUp:', error);
       return { error };
     }
   };
 
   const signOut = async () => {
     try {
+      secureLogger.security('signout_initiated');
       cleanupAuthState();
       
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
-        console.log('Erro no logout, continuando...');
+        secureLogger.info('Erro no logout, continuando...');
       }
       
       // Forçar redirecionamento
       window.location.href = '/auth';
     } catch (error) {
-      console.error('Erro no signOut:', error);
+      secureLogger.error('Erro no signOut:', error);
       // Mesmo com erro, redirecionar
       window.location.href = '/auth';
     }

@@ -10,12 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useProfile } from '@/hooks/useProfile';
 import { useEffect } from 'react';
 import { Loader2, User } from 'lucide-react';
+import { nameSchema, phoneSchema } from '@/lib/security';
 
 const profileSchema = z.object({
-  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100, 'Nome muito longo'),
-  telefone: z.string().optional().refine((val) => !val || val.length >= 10, {
-    message: 'Telefone deve ter pelo menos 10 dígitos'
-  }),
+  nome: nameSchema,
+  telefone: phoneSchema,
   cargo: z.string().max(100, 'Cargo muito longo').optional(),
   bio: z.string().max(500, 'Bio deve ter no máximo 500 caracteres').optional(),
 });

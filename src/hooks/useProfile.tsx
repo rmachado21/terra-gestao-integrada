@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { secureLogger } from '@/lib/security';
 
 interface Profile {
   id: string;
@@ -37,7 +38,7 @@ export const useProfile = () => {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        secureLogger.error('Error fetching profile:', error);
         toast({
           title: "Erro",
           description: "Erro ao carregar perfil",
@@ -45,9 +46,10 @@ export const useProfile = () => {
         });
       } else {
         setProfile(data);
+        secureLogger.info('Profile loaded successfully');
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      secureLogger.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ export const useProfile = () => {
         .eq('id', user.id);
 
       if (error) {
-        console.error('Error updating profile:', error);
+        secureLogger.error('Error updating profile:', error);
         toast({
           title: "Erro",
           description: "Erro ao atualizar perfil",
@@ -79,6 +81,7 @@ export const useProfile = () => {
       // Update local state optimistically
       setProfile(prev => prev ? { ...prev, ...updates } : null);
       
+      secureLogger.security('profile_updated', { userId: user.id });
       toast({
         title: "Sucesso",
         description: "Perfil atualizado com sucesso",
@@ -86,7 +89,7 @@ export const useProfile = () => {
       
       return true;
     } catch (error) {
-      console.error('Error updating profile:', error);
+      secureLogger.error('Error updating profile:', error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar perfil",
