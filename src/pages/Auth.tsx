@@ -155,7 +155,7 @@ const Auth = () => {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
-              src="/lovable-uploads/87eeaac2-5e25-4e43-9454-c65b7ca3b6c6.png" 
+              src="/lovable-uploads/3a6201d1-e46d-452f-bb15-83e1e6fe48a6.png" 
               alt="Gestor Raiz Logo" 
               className="h-12 w-auto object-contain" 
             />
