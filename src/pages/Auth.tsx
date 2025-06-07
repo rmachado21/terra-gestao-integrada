@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -64,50 +65,13 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            {/* Nova Logo SVG */}
-            <svg width="60" height="60" viewBox="0 0 44 44" className="drop-shadow-lg">
-              {/* Engrenagem externa */}
-              <g transform="translate(22,22)">
-                {/* Dentes da engrenagem */}
-                <path
-                  d="M0,-18 L3,-16 L3,-14 L6,-12 L4,-9 L6,-6 L9,-4 L12,-6 L14,-3 L16,-3 L18,0 L16,3 L14,3 L12,6 L9,4 L6,6 L4,9 L6,12 L3,14 L3,16 L0,18 L-3,16 L-3,14 L-6,12 L-4,9 L-6,6 L-9,4 L-12,6 L-14,3 L-16,3 L-18,0 L-16,-3 L-14,-3 L-12,-6 L-9,-4 L-6,-6 L-4,-9 L-6,-12 L-3,-14 L-3,-16 L0,-18Z"
-                  fill="#6B7280"
-                  className="opacity-90"
-                />
-                
-                {/* Círculo interno da engrenagem */}
-                <circle cx="0" cy="0" r="12" fill="#16A34A" />
-                
-                {/* Folha principal - lado esquerdo */}
-                <path
-                  d="M-8,-2 Q-12,-6 -8,-10 Q-4,-6 -4,-2 Q-8,2 -8,-2Z"
-                  fill="#22C55E"
-                />
-                
-                {/* Folha secundária - lado direito */}
-                <path
-                  d="M4,-2 Q8,-6 12,-2 Q8,2 4,2 Q4,-2 4,-2Z"
-                  fill="#22C55E"
-                />
-                
-                {/* Haste central */}
-                <rect x="-1" y="-2" width="2" height="8" fill="#15803D" />
-                
-                {/* Detalhes das folhas - nervuras */}
-                <path d="M-8,-2 L-6,0" stroke="#15803D" strokeWidth="0.8" fill="none" />
-                <path d="M-8,-4 L-6,-2" stroke="#15803D" strokeWidth="0.8" fill="none" />
-                <path d="M8,-2 L6,0" stroke="#15803D" strokeWidth="0.8" fill="none" />
-                <path d="M8,-4 L6,-2" stroke="#15803D" strokeWidth="0.8" fill="none" />
-                
-                {/* Centro da engrenagem */}
-                <circle cx="0" cy="0" r="3" fill="#FFFFFF" />
-              </g>
-            </svg>
+            {/* Nova Logo */}
+            <img 
+              src="/lovable-uploads/fa5f3e07-c28f-40bc-9dff-9ef5e6da7dda.png" 
+              alt="Gestor Raiz Logo" 
+              className="h-16 w-auto object-contain"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">
-            <span className="text-green-600">GESTOR</span>
-            <span className="text-gray-700 ml-1">RAIZ</span>
-          </CardTitle>
           <CardDescription>
             {isLogin ? 'Faça login em sua conta' : 'Crie sua conta de administrador'}
           </CardDescription>
