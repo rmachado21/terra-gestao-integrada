@@ -52,7 +52,7 @@ const Index = () => {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">Painel</h1>
           <p className="text-sm sm:text-base text-gray-600">Visão geral do sistema de gestão integrado</p>
         </div>
       </div>
@@ -62,7 +62,7 @@ const Index = () => {
 
       {/* Módulos do Sistema */}
       <div className="space-y-4">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Módulos do Sistema</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Acesso Rápido</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {modules.map(module => (
             <Card 
