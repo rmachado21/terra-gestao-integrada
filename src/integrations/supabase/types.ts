@@ -321,6 +321,42 @@ export type Database = {
           },
         ]
       }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          ip_address: unknown | null
+          token: string
+          used: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: unknown | null
+          token: string
+          used?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: unknown | null
+          token?: string
+          used?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pedidos: {
         Row: {
           cliente_id: string | null
@@ -551,7 +587,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_password_reset_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       prioridade_alerta: "baixa" | "media" | "alta" | "critica"

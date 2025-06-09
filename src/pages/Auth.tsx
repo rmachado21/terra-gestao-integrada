@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useSafeSecurity } from '@/components/SecurityProvider';
 import { emailSchema, passwordSchema, nameSchema, secureLogger } from '@/lib/security';
 import { z } from 'zod';
+import PasswordResetRequest from '@/components/PasswordResetRequest';
+import PasswordResetForm from '@/components/PasswordResetForm';
+
+type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
+
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const {
@@ -29,6 +36,7 @@ const Auth = () => {
     isBlocked
   } = useSafeSecurity();
   const navigate = useNavigate();
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     try {
@@ -45,7 +53,7 @@ const Auth = () => {
         newErrors.password = error.errors[0].message;
       }
     }
-    if (!isLogin) {
+    if (mode === 'register') {
       try {
         nameSchema.parse(nome);
       } catch (error) {
@@ -57,6 +65,7 @@ const Auth = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isBlocked) {
@@ -82,7 +91,7 @@ const Auth = () => {
     }
     setLoading(true);
     try {
-      if (isLogin) {
+      if (mode === 'login') {
         secureLogger.security('login_attempt', {
           email
         });
@@ -107,7 +116,7 @@ const Auth = () => {
         } else {
           navigate('/');
         }
-      } else {
+      } else if (mode === 'register') {
         secureLogger.security('signup_attempt', {
           email
         });
@@ -131,7 +140,7 @@ const Auth = () => {
             title: "Cadastro realizado",
             description: "Verifique seu email para confirmar a conta"
           });
-          setIsLogin(true);
+          setMode('login');
         }
       }
     } catch (error) {
@@ -145,7 +154,45 @@ const Auth = () => {
       setLoading(false);
     }
   };
-  return <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+
+  const handleResetSuccess = () => {
+    toast({
+      title: "Senha Alterada",
+      description: "Sua senha foi alterada com sucesso. Faça login com a nova senha.",
+    });
+    setMode('login');
+    setEmail('');
+    setPassword('');
+  };
+
+  if (mode === 'reset-request') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+        <PasswordResetRequest
+          onBack={() => setMode('login')}
+          onEmailSent={(email) => {
+            setResetEmail(email);
+            setMode('reset-form');
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (mode === 'reset-form') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+        <PasswordResetForm
+          email={resetEmail}
+          onBack={() => setMode('reset-request')}
+          onSuccess={handleResetSuccess}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -153,7 +200,7 @@ const Auth = () => {
           </div>
           
           <CardDescription>
-            {isLogin ? 'Faça login em sua conta' : 'Crie sua conta de administrador'}
+            {mode === 'login' ? 'Faça login em sua conta' : 'Crie sua conta de administrador'}
           </CardDescription>
           {isBlocked && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-2">
               Acesso temporariamente bloqueado por segurança
@@ -161,7 +208,7 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && <div className="space-y-2">
+            {mode === 'register' && <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
                 <Input id="nome" type="text" placeholder="Digite seu nome" value={nome} onChange={e => setNome(e.target.value)} required disabled={loading || isBlocked} />
                 {errors.nome && <p className="text-sm text-red-600">{errors.nome}</p>}
@@ -177,23 +224,41 @@ const Auth = () => {
               <Label htmlFor="password">Senha</Label>
               <Input id="password" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading || isBlocked} />
               {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
-              {!isLogin && <p className="text-xs text-gray-600 mt-1">
+              {mode === 'register' && <p className="text-xs text-gray-600 mt-1">
                   Senha deve conter: 8+ caracteres, maiúscula, minúscula, número e símbolo
                 </p>}
             </div>
             
             <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
-              {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Cadastrar'}
+              {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Cadastrar'}
             </Button>
           </form>
           
-          <div className="mt-4 text-center">
-            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-green-600 hover:text-green-700 text-sm underline" disabled={loading || isBlocked}>
-              {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
+          <div className="mt-4 text-center space-y-2">
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => setMode('reset-request')}
+                className="text-green-600 hover:text-green-700 text-sm underline block mx-auto"
+                disabled={loading || isBlocked}
+              >
+                Esqueci minha senha
+              </button>
+            )}
+            
+            <button 
+              type="button" 
+              onClick={() => setMode(mode === 'login' ? 'register' : 'login')} 
+              className="text-green-600 hover:text-green-700 text-sm underline" 
+              disabled={loading || isBlocked}
+            >
+              {mode === 'login' ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
             </button>
           </div>
         </CardContent>
       </Card>
-    </div>;
+    </div>
+  );
 };
+
 export default Auth;
