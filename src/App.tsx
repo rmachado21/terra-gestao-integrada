@@ -159,6 +159,19 @@ const App = () => (
                   </div>
                 </ProtectedRoute>
               } />
+              <Route path="/admin/users" element={
+                <AdminRoute requireSuperAdmin={true}>
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <div className="flex">
+                      <Sidebar />
+                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
+                        <UsersPage />
+                      </main>
+                    </div>
+                  </div>
+                </AdminRoute>
+              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SecurityProvider>
