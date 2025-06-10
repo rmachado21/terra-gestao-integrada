@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_user_id: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       alertas: {
         Row: {
           created_at: string | null
@@ -548,6 +575,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ativo: boolean | null
           avatar_url: string | null
           bio: string | null
           cargo: string | null
@@ -559,6 +587,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ativo?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           cargo?: string | null
@@ -570,6 +599,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ativo?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           cargo?: string | null
@@ -582,6 +612,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -591,8 +645,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_user_active: {
+        Args: { _user_id?: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "super_admin" | "admin" | "user"
       prioridade_alerta: "baixa" | "media" | "alta" | "critica"
       status_pedido: "pendente" | "processando" | "entregue" | "cancelado"
       status_plantio:
@@ -717,6 +787,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["super_admin", "admin", "user"],
       prioridade_alerta: ["baixa", "media", "alta", "critica"],
       status_pedido: ["pendente", "processando", "entregue", "cancelado"],
       status_plantio: [

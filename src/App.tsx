@@ -17,7 +17,9 @@ import ProcessamentoPage from "./pages/processamento/ProcessamentoPage";
 import EstoquePage from "./pages/estoque/EstoquePage";
 import VendasPage from "./pages/vendas/VendasPage";
 import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
+import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 

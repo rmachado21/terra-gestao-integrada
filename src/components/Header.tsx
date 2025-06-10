@@ -1,14 +1,15 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { LogOut, User, Home, Settings } from 'lucide-react';
+import { LogOut, User, Home, Settings, Shield } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
+  const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
@@ -51,7 +52,24 @@ const Header = () => {
               <span className="text-sm text-gray-600 font-medium max-w-32 lg:max-w-none truncate">
                 {profile?.nome || user.email}
               </span>
+              {isSuperAdmin && (
+                <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-medium">
+                  Super Admin
+                </span>
+              )}
             </div>
+            
+            {isSuperAdmin && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/admin/users')} 
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline font-medium">Admin</span>
+              </Button>
+            )}
             
             <Button 
               variant="outline" 

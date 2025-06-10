@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,6 +64,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             userId: session?.user?.id,
             email: session?.user?.email 
           });
+          
+          // Verificar se o usuário está ativo
+          if (session?.user) {
+            setTimeout(async () => {
+              try {
+                const { data: profileData, error } = await supabase
+                  .from('profiles')
+                  .select('ativo')
+                  .eq('id', session.user.id)
+                  .single();
+                
+                if (error || !profileData?.ativo) {
+                  secureLogger.security('inactive_user_blocked', { userId: session.user.id });
+                  await supabase.auth.signOut();
+                  return;
+                }
+              } catch (error) {
+                secureLogger.error('Error checking user status:', error);
+              }
+            }, 0);
+          }
         }
 
         setSession(session);
@@ -88,6 +108,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(session?.user ?? null);
           if (session) {
             secureLogger.security('session_restored', { userId: session.user.id });
+            
+            // Verificar se o usuário está ativo
+            try {
+              const { data: profileData, error } = await supabase
+                .from('profiles')
+                .select('ativo')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (error || !profileData?.ativo) {
+                secureLogger.security('inactive_user_blocked', { userId: session.user.id });
+                await supabase.auth.signOut();
+                setSession(null);
+                setUser(null);
+              }
+            } catch (error) {
+              secureLogger.error('Error checking user status:', error);
+            }
           }
         }
       } catch (error) {
