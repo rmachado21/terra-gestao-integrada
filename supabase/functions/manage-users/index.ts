@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'list_users':
+        // Buscar todos os profiles com suas roles (se existirem)
         const { data: users, error: listError } = await supabase
           .from('profiles')
           .select(`
@@ -48,12 +49,23 @@ Deno.serve(async (req) => {
             email,
             ativo,
             created_at,
-            user_roles!inner(role)
+            user_roles(role)
           `)
           .order('created_at', { ascending: false })
 
-        if (listError) throw listError
-        result = users
+        if (listError) {
+          console.error('Error fetching users:', listError)
+          throw listError
+        }
+
+        // Transformar os dados para garantir que sempre temos uma array de roles
+        const transformedUsers = users.map(user => ({
+          ...user,
+          user_roles: user.user_roles.length > 0 ? user.user_roles : [{ role: 'user' }]
+        }))
+
+        console.log('Users fetched successfully:', transformedUsers.length)
+        result = transformedUsers
         break
 
       case 'toggle_user_status':
@@ -76,7 +88,7 @@ Deno.serve(async (req) => {
         break
 
       case 'change_user_role':
-        // Primeiro, remover role atual
+        // Primeiro, remover role atual se existir
         await supabase
           .from('user_roles')
           .delete()
@@ -128,7 +140,7 @@ Deno.serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in manage-users function:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: error.message.includes('Unauthorized') || error.message.includes('Access denied') ? 403 : 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

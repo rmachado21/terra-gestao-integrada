@@ -31,17 +31,23 @@ export const useAdminUsers = () => {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('Fetching users...');
       const { data, error } = await supabase.functions.invoke('manage-users', {
         body: { action: 'list_users' }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      console.log('Users fetched successfully:', data);
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: "Erro",
-        description: "Erro ao carregar usuários",
+        description: "Erro ao carregar usuários. Verifique se você tem permissões de Super Admin.",
         variant: "destructive",
       });
     } finally {
@@ -51,6 +57,7 @@ export const useAdminUsers = () => {
 
   const toggleUserStatus = useCallback(async (userId: string, active: boolean) => {
     try {
+      console.log(`Toggling user ${userId} status to ${active}`);
       const { data, error } = await supabase.functions.invoke('manage-users', {
         body: { 
           action: 'toggle_user_status',
@@ -85,6 +92,7 @@ export const useAdminUsers = () => {
 
   const changeUserRole = useCallback(async (userId: string, newRole: UserRole) => {
     try {
+      console.log(`Changing user ${userId} role to ${newRole}`);
       const { data, error } = await supabase.functions.invoke('manage-users', {
         body: { 
           action: 'change_user_role',
@@ -121,11 +129,13 @@ export const useAdminUsers = () => {
 
   const fetchAdminLogs = useCallback(async () => {
     try {
+      console.log('Fetching admin logs...');
       const { data, error } = await supabase.functions.invoke('manage-users', {
         body: { action: 'get_admin_logs' }
       });
 
       if (error) throw error;
+      console.log('Admin logs fetched successfully:', data);
       setLogs(data || []);
     } catch (error) {
       console.error('Error fetching admin logs:', error);
