@@ -25,13 +25,22 @@ Deno.serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
-    // Verificar se o usuário é super_admin
-    const { data: isSuperAdmin, error: roleError } = await supabase
-      .rpc('is_super_admin')
+    console.log('Authenticated user:', user.id, user.email)
+
+    // Verificar se o usuário é super_admin diretamente na tabela user_roles
+    const { data: userRoles, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'super_admin')
+      .single()
     
-    if (roleError || !isSuperAdmin) {
+    if (roleError || !userRoles) {
+      console.log('User is not super admin:', user.email)
       throw new Error('Access denied: Super Admin required')
     }
+
+    console.log('Super admin verified:', user.email)
 
     const { action, targetUserId, newRole, active } = await req.json()
 
@@ -40,6 +49,7 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'list_users':
+        console.log('Fetching all users...')
         // Buscar todos os profiles com suas roles (se existirem)
         const { data: users, error: listError } = await supabase
           .from('profiles')
@@ -69,6 +79,7 @@ Deno.serve(async (req) => {
         break
 
       case 'toggle_user_status':
+        console.log(`Toggling user ${targetUserId} status to ${active}`)
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ ativo: active })
@@ -88,6 +99,7 @@ Deno.serve(async (req) => {
         break
 
       case 'change_user_role':
+        console.log(`Changing user ${targetUserId} role to ${newRole}`)
         // Primeiro, remover role atual se existir
         await supabase
           .from('user_roles')
@@ -117,6 +129,7 @@ Deno.serve(async (req) => {
         break
 
       case 'get_admin_logs':
+        console.log('Fetching admin logs...')
         const { data: logs, error: logsError } = await supabase
           .from('admin_logs')
           .select(`
