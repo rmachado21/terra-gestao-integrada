@@ -1,10 +1,10 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Shield, ShieldCheck, UserX, UserCheck } from 'lucide-react';
+import { ArrowLeft, Users, Shield, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminUsers } from '@/hooks/useAdminUsers';
-import { UserRole } from '@/hooks/useUserRoles';
+import { LoadingPage } from '@/components/ui/loading';
 import UserManagement from '@/components/admin/UserManagement';
 import AdminLogs from '@/components/admin/AdminLogs';
 
@@ -18,15 +18,19 @@ const UsersPage = () => {
     fetchAdminLogs();
   }, [fetchUsers, fetchAdminLogs]);
 
+  if (loading) {
+    return <LoadingPage message="Carregando dados de administração..." />;
+  }
+
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button 
           variant="outline" 
           size="sm" 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 transition-all duration-200 hover:scale-105"
         >
           <ArrowLeft className="h-4 w-4" />
           Voltar
@@ -48,10 +52,10 @@ const UsersPage = () => {
       <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
             activeTab === 'users'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-gray-900 shadow-sm scale-105'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           <Users className="h-4 w-4" />
@@ -59,10 +63,10 @@ const UsersPage = () => {
         </button>
         <button
           onClick={() => setActiveTab('logs')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
             activeTab === 'logs'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-gray-900 shadow-sm scale-105'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           <ShieldCheck className="h-4 w-4" />
@@ -71,17 +75,19 @@ const UsersPage = () => {
       </div>
 
       {/* Content */}
-      {activeTab === 'users' ? (
-        <UserManagement
-          users={users}
-          loading={loading}
-          onToggleStatus={toggleUserStatus}
-          onChangeRole={changeUserRole}
-          onRefresh={fetchUsers}
-        />
-      ) : (
-        <AdminLogs logs={logs} onRefresh={fetchAdminLogs} />
-      )}
+      <div className="animate-fade-in">
+        {activeTab === 'users' ? (
+          <UserManagement
+            users={users}
+            loading={loading}
+            onToggleStatus={toggleUserStatus}
+            onChangeRole={changeUserRole}
+            onRefresh={fetchUsers}
+          />
+        ) : (
+          <AdminLogs logs={logs} onRefresh={fetchAdminLogs} />
+        )}
+      </div>
     </div>
   );
 };

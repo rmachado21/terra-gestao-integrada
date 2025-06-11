@@ -8,6 +8,7 @@ import { usePasswordReset } from '@/hooks/usePasswordReset';
 import { emailSchema } from '@/lib/security';
 import { z } from 'zod';
 import { ArrowLeft, Mail } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading';
 
 interface PasswordResetRequestProps {
   onBack: () => void;
@@ -46,7 +47,7 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md animate-scale-in">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <img 
@@ -75,16 +76,24 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
+              className="transition-all duration-200 focus:scale-105"
             />
-            {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+            {emailError && <p className="text-sm text-red-600 animate-fade-in">{emailError}</p>}
           </div>
           
           <Button 
             type="submit" 
-            className="w-full bg-green-600 hover:bg-green-700" 
+            className="w-full bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105" 
             disabled={loading}
           >
-            {loading ? 'Enviando...' : 'Enviar Código de Recuperação'}
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <LoadingSpinner size="sm" />
+                Enviando...
+              </div>
+            ) : (
+              'Enviar Código de Recuperação'
+            )}
           </Button>
         </form>
         
@@ -92,7 +101,7 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
           <button
             type="button"
             onClick={onBack}
-            className="text-green-600 hover:text-green-700 text-sm underline flex items-center gap-1 mx-auto"
+            className="text-green-600 hover:text-green-700 text-sm underline flex items-center gap-1 mx-auto transition-all duration-200 hover:scale-105"
             disabled={loading}
           >
             <ArrowLeft className="h-4 w-4" />
