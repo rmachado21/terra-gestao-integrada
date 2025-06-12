@@ -10,7 +10,17 @@ import AdminLogs from '@/components/admin/AdminLogs';
 
 const UsersPage = () => {
   const navigate = useNavigate();
-  const { users, logs, loading, fetchUsers, toggleUserStatus, changeUserRole, fetchAdminLogs } = useAdminUsers();
+  const { 
+    users, 
+    logs, 
+    loading, 
+    fetchUsers, 
+    toggleUserStatus, 
+    changeUserRole, 
+    updateUserPlan,
+    fetchAdminLogs,
+    calculateRemainingDays
+  } = useAdminUsers();
   const [activeTab, setActiveTab] = useState<'users' | 'logs'>('users');
 
   useEffect(() => {
@@ -42,7 +52,7 @@ const UsersPage = () => {
               Administração de Usuários
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Gerencie usuários e permissões do sistema
+              Gerencie usuários, permissões e planos do sistema
             </p>
           </div>
         </div>
@@ -82,7 +92,9 @@ const UsersPage = () => {
             loading={loading}
             onToggleStatus={toggleUserStatus}
             onChangeRole={changeUserRole}
+            onUpdatePlan={updateUserPlan}
             onRefresh={fetchUsers}
+            calculateRemainingDays={calculateRemainingDays}
           />
         ) : (
           <AdminLogs logs={logs} onRefresh={fetchAdminLogs} />

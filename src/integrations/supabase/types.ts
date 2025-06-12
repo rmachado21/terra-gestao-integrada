@@ -612,6 +612,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_plans: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          data_fim: string
+          data_inicio: string
+          id: string
+          tipo_plano: Database["public"]["Enums"]["tipo_plano"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          data_fim: string
+          data_inicio?: string
+          id?: string
+          tipo_plano?: Database["public"]["Enums"]["tipo_plano"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          tipo_plano?: Database["public"]["Enums"]["tipo_plano"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -641,6 +674,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calcular_data_fim_plano: {
+        Args: {
+          data_inicio: string
+          tipo: Database["public"]["Enums"]["tipo_plano"]
+        }
+        Returns: string
+      }
       cleanup_expired_password_reset_tokens: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -672,6 +712,7 @@ export type Database = {
         | "pronto_colheita"
         | "colhido"
       tipo_movimentacao: "receita" | "despesa"
+      tipo_plano: "mensal" | "anual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -798,6 +839,7 @@ export const Constants = {
         "colhido",
       ],
       tipo_movimentacao: ["receita", "despesa"],
+      tipo_plano: ["mensal", "anual"],
     },
   },
 } as const

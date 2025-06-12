@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
     console.log('Super admin verified:', user.email)
 
-    const { action, targetUserId, newRole, active } = await req.json()
+    const { action, targetUserId, newRole, active, planData } = await req.json()
 
     let result
     const logDetails: any = {}
@@ -76,12 +76,29 @@ Deno.serve(async (req) => {
 
         console.log('Roles fetched:', allRoles?.length || 0)
 
+        // Buscar todos os planos ativos dos usuários
+        const { data: allPlans, error: plansError } = await supabase
+          .from('user_plans')
+          .select('user_id, tipo_plano, data_inicio, data_fim, ativo')
+          .eq('ativo', true)
+
+        if (plansError) {
+          console.error('Error fetching plans:', plansError)
+          throw plansError
+        }
+
+        console.log('Plans fetched:', allPlans?.length || 0)
+
         // Combinar os dados
         const transformedUsers = profiles.map(profile => {
           const userRoles = allRoles?.filter(role => role.user_id === profile.id) || []
+          const userPlan = allPlans?.find(plan => plan.user_id === profile.id)
+          const isSuperAdmin = userRoles.some(role => role.role === 'super_admin')
+          
           return {
             ...profile,
-            user_roles: userRoles.length > 0 ? userRoles.map(r => ({ role: r.role })) : [{ role: 'user' }]
+            user_roles: userRoles.length > 0 ? userRoles.map(r => ({ role: r.role })) : [{ role: 'user' }],
+            user_plan: !isSuperAdmin ? userPlan : null
           }
         })
 
@@ -134,6 +151,39 @@ Deno.serve(async (req) => {
           target_user_id: targetUserId,
           action: 'role_changed',
           details: { new_role: newRole }
+        })
+
+        result = { success: true }
+        break
+
+      case 'update_user_plan':
+        console.log(`Updating user ${targetUserId} plan to ${planData.tipo_plano}`)
+        
+        // Desativar plano atual
+        await supabase
+          .from('user_plans')
+          .update({ ativo: false })
+          .eq('user_id', targetUserId)
+          .eq('ativo', true)
+
+        // Criar novo plano
+        const { error: planUpdateError } = await supabase
+          .from('user_plans')
+          .insert({
+            user_id: targetUserId,
+            tipo_plano: planData.tipo_plano,
+            data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
+            ativo: true
+          })
+
+        if (planUpdateError) throw planUpdateError
+
+        // Log da ação
+        await supabase.from('admin_logs').insert({
+          admin_user_id: user.id,
+          target_user_id: targetUserId,
+          action: 'plan_updated',
+          details: { new_plan: planData.tipo_plano, data_inicio: planData.data_inicio }
         })
 
         result = { success: true }

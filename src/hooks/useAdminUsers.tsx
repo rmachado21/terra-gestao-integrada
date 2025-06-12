@@ -4,6 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from './useUserRoles';
 
+export type TipoPlano = 'mensal' | 'anual';
+
+interface UserPlan {
+  tipo_plano: TipoPlano;
+  data_inicio: string;
+  data_fim: string;
+  ativo: boolean;
+}
+
 interface AdminUser {
   id: string;
   nome: string;
@@ -11,6 +20,7 @@ interface AdminUser {
   ativo: boolean;
   created_at: string;
   user_roles: { role: UserRole }[];
+  user_plan?: UserPlan | null;
 }
 
 interface AdminLog {
@@ -127,6 +137,39 @@ export const useAdminUsers = () => {
     }
   }, [toast]);
 
+  const updateUserPlan = useCallback(async (userId: string, planData: { tipo_plano: TipoPlano; data_inicio?: string }) => {
+    try {
+      console.log(`Updating user ${userId} plan to ${planData.tipo_plano}`);
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: { 
+          action: 'update_user_plan',
+          targetUserId: userId,
+          planData
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Plano do usuário atualizado com sucesso",
+      });
+
+      // Recarregar dados para ter informações atualizadas
+      await fetchUsers();
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar plano do usuário",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, [toast, fetchUsers]);
+
   const fetchAdminLogs = useCallback(async () => {
     try {
       console.log('Fetching admin logs...');
@@ -147,6 +190,14 @@ export const useAdminUsers = () => {
     }
   }, [toast]);
 
+  const calculateRemainingDays = useCallback((dataFim: string) => {
+    const today = new Date();
+    const endDate = new Date(dataFim);
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  }, []);
+
   return {
     users,
     logs,
@@ -154,6 +205,8 @@ export const useAdminUsers = () => {
     fetchUsers,
     toggleUserStatus,
     changeUserRole,
+    updateUserPlan,
     fetchAdminLogs,
+    calculateRemainingDays,
   };
 };
