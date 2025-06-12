@@ -50,31 +50,42 @@ Deno.serve(async (req) => {
     switch (action) {
       case 'list_users':
         console.log('Fetching all users...')
-        // Buscar todos os profiles com suas roles (se existirem)
-        const { data: users, error: listError } = await supabase
+        
+        // Buscar todos os profiles primeiro
+        const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select(`
-            id,
-            nome,
-            email,
-            ativo,
-            created_at,
-            user_roles(role)
-          `)
+          .select('id, nome, email, ativo, created_at')
           .order('created_at', { ascending: false })
 
-        if (listError) {
-          console.error('Error fetching users:', listError)
-          throw listError
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError)
+          throw profilesError
         }
 
-        // Transformar os dados para garantir que sempre temos uma array de roles
-        const transformedUsers = users.map(user => ({
-          ...user,
-          user_roles: user.user_roles.length > 0 ? user.user_roles : [{ role: 'user' }]
-        }))
+        console.log('Profiles fetched:', profiles?.length || 0)
 
-        console.log('Users fetched successfully:', transformedUsers.length)
+        // Buscar todas as roles dos usuários
+        const { data: allRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+
+        if (rolesError) {
+          console.error('Error fetching roles:', rolesError)
+          throw rolesError
+        }
+
+        console.log('Roles fetched:', allRoles?.length || 0)
+
+        // Combinar os dados
+        const transformedUsers = profiles.map(profile => {
+          const userRoles = allRoles?.filter(role => role.user_id === profile.id) || []
+          return {
+            ...profile,
+            user_roles: userRoles.length > 0 ? userRoles.map(r => ({ role: r.role })) : [{ role: 'user' }]
+          }
+        })
+
+        console.log('Users transformed successfully:', transformedUsers.length)
         result = transformedUsers
         break
 
@@ -130,18 +141,36 @@ Deno.serve(async (req) => {
 
       case 'get_admin_logs':
         console.log('Fetching admin logs...')
+        
+        // Buscar logs primeiro
         const { data: logs, error: logsError } = await supabase
           .from('admin_logs')
-          .select(`
-            *,
-            admin_profile:profiles!admin_user_id(nome),
-            target_profile:profiles!target_user_id(nome)
-          `)
+          .select('*')
           .order('created_at', { ascending: false })
           .limit(100)
 
         if (logsError) throw logsError
-        result = logs
+
+        // Buscar profiles para os logs
+        const adminIds = [...new Set(logs.map(log => log.admin_user_id).filter(Boolean))]
+        const targetIds = [...new Set(logs.map(log => log.target_user_id).filter(Boolean))]
+        const allIds = [...new Set([...adminIds, ...targetIds])]
+
+        const { data: logProfiles, error: logProfilesError } = await supabase
+          .from('profiles')
+          .select('id, nome')
+          .in('id', allIds)
+
+        if (logProfilesError) throw logProfilesError
+
+        // Combinar dados dos logs com profiles
+        const enrichedLogs = logs.map(log => ({
+          ...log,
+          admin_profile: logProfiles.find(p => p.id === log.admin_user_id) ? { nome: logProfiles.find(p => p.id === log.admin_user_id)?.nome } : null,
+          target_profile: logProfiles.find(p => p.id === log.target_user_id) ? { nome: logProfiles.find(p => p.id === log.target_user_id)?.nome } : null
+        }))
+
+        result = enrichedLogs
         break
 
       default:
