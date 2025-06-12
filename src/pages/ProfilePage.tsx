@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react';
 import ProfileForm from '@/components/ProfileForm';
+import PlanInfo from '@/components/PlanInfo';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -28,6 +29,9 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Plan Information */}
+      <PlanInfo />
 
       {/* Profile Form */}
       <ProfileForm />
