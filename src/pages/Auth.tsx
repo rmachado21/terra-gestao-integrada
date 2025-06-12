@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -196,7 +195,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src="/lovable-uploads/3a6201d1-e46d-452f-bb15-83e1e6fe48a6.png" alt="Gestor Raiz Logo" className="h-12 w-auto object-contain" />
+            <img src="/lovable-uploads/2f18bf3d-c0fa-4004-bc9f-2bd5e0785b49.png" alt="Gestor Raiz Logo" className="h-12 w-auto object-contain" />
           </div>
           
           <CardDescription>
