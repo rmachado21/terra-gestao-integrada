@@ -6,7 +6,7 @@ export const getCpfCnpjMask = (value: string) => {
   
   // Se tem 11 dígitos ou menos, usa máscara de CPF
   // Se tem 12 dígitos ou mais, usa máscara de CNPJ
-  if (cleanValue.length <= 11) {
+  if (cleanValue.length <= 14) {
     return '999.999.999-99'; // CPF
   } else {
     return '99.999.999/9999-99'; // CNPJ
@@ -18,7 +18,7 @@ export const getTelefoneMask = (value: string) => {
   const cleanValue = value.replace(/\D/g, '');
   // Se tem 10 dígitos ou menos, usa telefone fixo
   // Se tem 11 dígitos ou mais, usa celular
-  if (cleanValue.length <= 10) {
+  if (cleanValue.length <= 11) {
     return '(99) 9999-9999'; // Telefone fixo
   } else {
     return '(99) 99999-9999'; // Celular
