@@ -50,7 +50,7 @@ const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasi
         <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
         <MaskedInput
           id="cpf_cnpj"
-          mask={cpfCnpjMask}
+          mask={getCpfCnpjMask()}
           value={formData.cpf_cnpj}
           onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
           placeholder="000.000.000-00 ou 00.000.000/0000-00"
