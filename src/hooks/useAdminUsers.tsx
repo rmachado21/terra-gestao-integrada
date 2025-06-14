@@ -1,10 +1,9 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from './useUserRoles';
 
-export type TipoPlano = 'mensal' | 'anual';
+export type TipoPlano = 'mensal' | 'anual' | 'teste';
 
 interface UserPlan {
   tipo_plano: TipoPlano;

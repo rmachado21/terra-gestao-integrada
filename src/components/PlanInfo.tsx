@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -45,29 +44,48 @@ const PlanInfo = () => {
     );
   }
 
-  // Mostrar apenas planos anuais
-  if (plan.tipo_plano !== 'anual') {
-    return null;
-  }
-
   const daysRemaining = calculateDaysRemaining(plan.data_fim);
   const isExpiring = daysRemaining <= 30 && daysRemaining > 0;
   const isExpired = daysRemaining <= 0;
+
+  const getPlanTitle = () => {
+    switch (plan.tipo_plano) {
+      case 'teste':
+        return 'Plano Teste';
+      case 'mensal':
+        return 'Plano Mensal';
+      case 'anual':
+        return 'Plano Anual';
+      default:
+        return 'Plano Atual';
+    }
+  };
+
+  const getPlanBadge = () => {
+    switch (plan.tipo_plano) {
+      case 'teste':
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Teste (7 dias)</Badge>;
+      case 'mensal':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800">Mensal</Badge>;
+      case 'anual':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Anual</Badge>;
+      default:
+        return <Badge variant="secondary">{plan.tipo_plano}</Badge>;
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center space-x-3">
           <CreditCard className="h-6 w-6 text-green-600" />
-          <CardTitle>Plano Anual</CardTitle>
+          <CardTitle>{getPlanTitle()}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-600">Tipo do Plano:</span>
-          <Badge variant="default" className="bg-green-100 text-green-800">
-            Anual
-          </Badge>
+          {getPlanBadge()}
         </div>
 
         <div className="flex items-center justify-between">
@@ -91,7 +109,9 @@ const PlanInfo = () => {
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Renovação:</span>
+          <span className="text-sm font-medium text-gray-600">
+            {plan.tipo_plano === 'teste' ? 'Expira em:' : 'Renovação:'}
+          </span>
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-gray-400" />
             <span className="text-sm">
@@ -119,7 +139,15 @@ const PlanInfo = () => {
           </div>
         </div>
 
-        {isExpiring && !isExpired && (
+        {plan.tipo_plano === 'teste' && !isExpired && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              🎯 Você está no período de teste gratuito de 7 dias. Entre em contato para adquirir um plano completo.
+            </p>
+          </div>
+        )}
+
+        {isExpiring && !isExpired && plan.tipo_plano !== 'teste' && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
               ⚠️ Seu plano expira em breve. Entre em contato para renovar.
@@ -130,7 +158,10 @@ const PlanInfo = () => {
         {isExpired && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-800">
-              ❌ Seu plano expirou. Entre em contato para renovar o acesso.
+              {plan.tipo_plano === 'teste' 
+                ? '⏰ Seu período de teste expirou. Entre em contato para adquirir um plano.' 
+                : '❌ Seu plano expirou. Entre em contato para renovar o acesso.'
+              }
             </p>
           </div>
         )}

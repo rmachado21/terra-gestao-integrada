@@ -18,7 +18,7 @@ interface PlanEditDialogProps {
 
 const PlanEditDialog = ({ userId, currentPlan, onUpdatePlan }: PlanEditDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [tipoPlan, setTipoPlan] = useState<TipoPlano>(currentPlan?.tipo_plano || 'mensal');
+  const [tipoPlan, setTipoPlan] = useState<TipoPlano>(currentPlan?.tipo_plano || 'teste');
   const [dataInicio, setDataInicio] = useState(currentPlan?.data_inicio || new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
@@ -62,6 +62,7 @@ const PlanEditDialog = ({ userId, currentPlan, onUpdatePlan }: PlanEditDialogPro
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="teste">Teste (7 dias)</SelectItem>
                 <SelectItem value="mensal">Mensal</SelectItem>
                 <SelectItem value="anual">Anual</SelectItem>
               </SelectContent>

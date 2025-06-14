@@ -85,7 +85,27 @@ const UserManagement = ({
   };
 
   const getPlanBadgeVariant = (tipoPlan: TipoPlano) => {
-    return tipoPlan === 'anual' ? 'default' : 'secondary';
+    switch (tipoPlan) {
+      case 'anual':
+        return 'default';
+      case 'teste':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getPlanLabel = (tipoPlan: TipoPlano) => {
+    switch (tipoPlan) {
+      case 'teste':
+        return 'Teste (7 dias)';
+      case 'mensal':
+        return 'Mensal';
+      case 'anual':
+        return 'Anual';
+      default:
+        return tipoPlan;
+    }
   };
 
   const isSuperAdmin = (userRoles: { role: UserRole }[]) => {
@@ -185,7 +205,7 @@ const UserManagement = ({
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <Badge variant={getPlanBadgeVariant(user.user_plan.tipo_plano)}>
-                                  {user.user_plan.tipo_plano}
+                                  {getPlanLabel(user.user_plan.tipo_plano)}
                                 </Badge>
                                 <span className="text-xs text-gray-500 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
