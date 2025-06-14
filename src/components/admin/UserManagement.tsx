@@ -193,7 +193,7 @@ const UserManagement = ({
                       </div>
 
                       {/* Plan Information */}
-                      {!isUserSuperAdmin && <div className="space-y-2">
+                      {!isUserSuperAdmin && <div className="space-y-2 bg-zinc-100 ">
                           <label className="text-sm font-medium">Plano</label>
                           {user.user_plan ? <div className="space-y-1">
                               <div className="flex items-center gap-2">
