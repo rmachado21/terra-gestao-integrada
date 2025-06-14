@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -51,7 +52,7 @@ const PlanInfo = () => {
   const getPlanTitle = () => {
     switch (plan.tipo_plano) {
       case 'teste':
-        return 'Plano Teste';
+        return 'Plano Free';
       case 'mensal':
         return 'Plano Mensal';
       case 'anual':
@@ -64,7 +65,7 @@ const PlanInfo = () => {
   const getPlanBadge = () => {
     switch (plan.tipo_plano) {
       case 'teste':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Teste (7 dias)</Badge>;
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Free (7 dias)</Badge>;
       case 'mensal':
         return <Badge variant="outline" className="bg-gray-100 text-gray-800">Mensal</Badge>;
       case 'anual':
@@ -142,7 +143,7 @@ const PlanInfo = () => {
         {plan.tipo_plano === 'teste' && !isExpired && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
             <p className="text-sm text-blue-800">
-              🎯 Você está no período de teste gratuito de 7 dias. Entre em contato para adquirir um plano completo.
+              🎯 Você está no período free gratuito de 7 dias. Entre em contato para adquirir um plano completo.
             </p>
           </div>
         )}
@@ -159,7 +160,7 @@ const PlanInfo = () => {
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-800">
               {plan.tipo_plano === 'teste' 
-                ? '⏰ Seu período de teste expirou. Entre em contato para adquirir um plano.' 
+                ? '⏰ Seu período free expirou. Entre em contato para adquirir um plano.' 
                 : '❌ Seu plano expirou. Entre em contato para renovar o acesso.'
               }
             </p>

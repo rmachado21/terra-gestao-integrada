@@ -62,7 +62,7 @@ const PlanEditDialog = ({ userId, currentPlan, onUpdatePlan }: PlanEditDialogPro
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="teste">Teste (7 dias)</SelectItem>
+                <SelectItem value="teste">Free (7 dias)</SelectItem>
                 <SelectItem value="mensal">Mensal</SelectItem>
                 <SelectItem value="anual">Anual</SelectItem>
               </SelectContent>

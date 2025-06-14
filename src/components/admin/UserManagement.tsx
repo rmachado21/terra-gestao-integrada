@@ -98,7 +98,7 @@ const UserManagement = ({
   const getPlanLabel = (tipoPlan: TipoPlano) => {
     switch (tipoPlan) {
       case 'teste':
-        return 'Teste (7 dias)';
+        return 'Free (7 dias)';
       case 'mensal':
         return 'Mensal';
       case 'anual':
