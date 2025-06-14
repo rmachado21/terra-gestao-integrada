@@ -2,10 +2,10 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface LoadingContextType {
-  isNavigating: boolean;
-  setIsNavigating: (loading: boolean) => void;
-  startNavigation: () => void;
-  finishNavigation: () => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  startLoading: () => void;
+  finishLoading: () => void;
 }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
@@ -23,26 +23,23 @@ interface LoadingProviderProps {
 }
 
 export const LoadingProvider = ({ children }: LoadingProviderProps) => {
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const startNavigation = () => {
-    setIsNavigating(true);
+  const startLoading = () => {
+    setIsLoading(true);
   };
 
-  const finishNavigation = () => {
-    // Add small delay to ensure smooth transition
-    setTimeout(() => {
-      setIsNavigating(false);
-    }, 100);
+  const finishLoading = () => {
+    setIsLoading(false);
   };
 
   return (
     <LoadingContext.Provider
       value={{
-        isNavigating,
-        setIsNavigating,
-        startNavigation,
-        finishNavigation,
+        isLoading,
+        setIsLoading,
+        startLoading,
+        finishLoading,
       }}
     >
       {children}

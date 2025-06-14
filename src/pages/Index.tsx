@@ -7,18 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import DashboardStats from "@/components/DashboardStats";
 import RecentActivities from "@/components/RecentActivities";
 import AlertsPanel from "@/components/AlertsPanel";
-import { useLoading } from "@/contexts/LoadingContext";
 import { Sprout, Package, TrendingUp, Users, DollarSign, BarChart3, ShoppingCart } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { startNavigation } = useLoading();
 
   const handleNavigation = (route: string) => {
-    startNavigation();
-    setTimeout(() => {
-      navigate(route);
-    }, 100);
+    navigate(route);
   };
 
   const modules = [{

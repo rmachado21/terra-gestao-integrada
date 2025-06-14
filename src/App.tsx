@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SecurityProvider } from "@/components/SecurityProvider";
 import { LoadingProvider } from "@/contexts/LoadingContext";
-import { useNavigationLoading } from "@/hooks/useNavigationLoading";
 import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -35,11 +34,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const NavigationHandler = () => {
-  useNavigationLoading();
-  return null;
-};
-
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-gray-50">
     <Header />
@@ -63,7 +57,6 @@ const App = () => (
         <LoadingProvider>
           <AuthProvider>
             <SecurityProvider>
-              <NavigationHandler />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/" element={
