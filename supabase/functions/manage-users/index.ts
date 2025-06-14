@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -64,9 +63,175 @@ serve(async (req) => {
       throw new Error('Insufficient permissions')
     }
 
-    const { action, userData, userId, planData } = await req.json()
+    const { action, userData, userId, planData, targetUserId, active, newRole } = await req.json()
 
     switch (action) {
+      case 'list_users': {
+        console.log('Listing users...')
+        
+        // Get all users with their profiles, roles, and plans
+        const { data: profiles, error: profilesError } = await supabaseClient
+          .from('profiles')
+          .select(`
+            id,
+            nome,
+            email,
+            ativo,
+            created_at,
+            user_roles (role),
+            user_plans!inner (
+              tipo_plano,
+              data_inicio,
+              data_fim,
+              ativo
+            )
+          `)
+          .eq('user_plans.ativo', true)
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError)
+          throw profilesError
+        }
+
+        console.log('Users fetched successfully:', profiles?.length)
+        return new Response(
+          JSON.stringify(profiles || []),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'toggle_user_status': {
+        console.log(`Toggling user ${targetUserId} status to ${active}`)
+        
+        const { error: updateError } = await supabaseClient
+          .from('profiles')
+          .update({ ativo: active })
+          .eq('id', targetUserId)
+
+        if (updateError) {
+          throw updateError
+        }
+
+        // Log admin action
+        await supabaseClient
+          .from('admin_logs')
+          .insert({
+            admin_user_id: user.id,
+            action: 'toggle_user_status',
+            target_user_id: targetUserId,
+            details: { ativo: active }
+          })
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'change_user_role': {
+        console.log(`Changing user ${targetUserId} role to ${newRole}`)
+        
+        // First, delete existing role
+        await supabaseClient
+          .from('user_roles')
+          .delete()
+          .eq('user_id', targetUserId)
+
+        // Then insert new role
+        const { error: roleError } = await supabaseClient
+          .from('user_roles')
+          .insert({
+            user_id: targetUserId,
+            role: newRole,
+            created_by: user.id
+          })
+
+        if (roleError) {
+          throw roleError
+        }
+
+        // Log admin action
+        await supabaseClient
+          .from('admin_logs')
+          .insert({
+            admin_user_id: user.id,
+            action: 'change_user_role',
+            target_user_id: targetUserId,
+            details: { role: newRole }
+          })
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'update_user_plan': {
+        console.log('Updating user plan:', { targetUserId, planData })
+        
+        // First, deactivate existing plans
+        await supabaseClient
+          .from('user_plans')
+          .update({ ativo: false })
+          .eq('user_id', targetUserId)
+
+        // Create new plan
+        const { error: planError } = await supabaseClient
+          .from('user_plans')
+          .insert({
+            user_id: targetUserId,
+            tipo_plano: planData.tipo_plano,
+            data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
+            ativo: true
+          })
+
+        if (planError) {
+          console.error('Error updating user plan:', planError)
+          throw planError
+        }
+
+        // Log admin action
+        await supabaseClient
+          .from('admin_logs')
+          .insert({
+            admin_user_id: user.id,
+            action: 'update_user_plan',
+            target_user_id: targetUserId,
+            details: { tipo_plano: planData.tipo_plano, data_inicio: planData.data_inicio }
+          })
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'get_admin_logs': {
+        console.log('Fetching admin logs...')
+        
+        const { data: logs, error: logsError } = await supabaseClient
+          .from('admin_logs')
+          .select(`
+            id,
+            action,
+            details,
+            created_at,
+            admin_profile:profiles!admin_user_id (nome),
+            target_profile:profiles!target_user_id (nome)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(100)
+
+        if (logsError) {
+          throw logsError
+        }
+
+        return new Response(
+          JSON.stringify(logs || []),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       case 'create_user': {
         console.log('Creating user with data:', userData)
         
