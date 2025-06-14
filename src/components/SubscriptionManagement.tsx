@@ -103,7 +103,7 @@ const SubscriptionManagement = () => {
               <div className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold">Plano Mensal</h4>
-                  <Badge variant="outline">R$ 7,99/mês</Badge>
+                  <Badge variant="outline">R$ 19,90/mês</Badge>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
                   Perfeito para começar. Pagamento mensal.
@@ -126,13 +126,13 @@ const SubscriptionManagement = () => {
                       2 meses grátis
                     </Badge>
                     <div className="text-sm">
-                      <span className="line-through text-gray-500">R$ 95,88</span>
-                      <span className="font-semibold text-green-600 ml-2">R$ 79,90/ano</span>
+                      <span className="line-through text-gray-500">R$ 238,80</span>
+                      <span className="font-semibold text-green-600 ml-2">R$ 199,90/ano</span>
                     </div>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Melhor valor! Economize R$ 15,98 por ano.
+                  Melhor valor! Desconto equibvale a 2 meses.
                 </p>
                 <Button 
                   onClick={() => createCheckout('anual')}
