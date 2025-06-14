@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SecurityProvider } from "@/components/SecurityProvider";
+import { LoadingProvider } from "@/contexts/LoadingContext";
+import { useNavigationLoading } from "@/hooks/useNavigationLoading";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -32,150 +35,112 @@ const queryClient = new QueryClient({
   },
 });
 
+const NavigationHandler = () => {
+  useNavigationLoading();
+  return null;
+};
+
+const AppLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-screen bg-gray-50">
+    <Header />
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
+        <PageTransition>
+          {children}
+        </PageTransition>
+      </main>
+    </div>
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <SecurityProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <Index />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <ProfilePage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/areas" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <AreasPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/plantios" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <PlantiosPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/colheitas" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <ColheitasPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/processamento" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <ProcessamentoPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/estoque" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <EstoquePage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/vendas" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <VendasPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/financeiro" element={
-                <ProtectedRoute>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <FinanceiroPage />
-                      </main>
-                    </div>
-                  </div>
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/users" element={
-                <AdminRoute requireSuperAdmin={true}>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <div className="flex">
-                      <Sidebar />
-                      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
-                        <UsersPage />
-                      </main>
-                    </div>
-                  </div>
-                </AdminRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SecurityProvider>
-        </AuthProvider>
+        <LoadingProvider>
+          <AuthProvider>
+            <SecurityProvider>
+              <NavigationHandler />
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Index />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ProfilePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/areas" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <AreasPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/plantios" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <PlantiosPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/colheitas" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ColheitasPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/processamento" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <ProcessamentoPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/estoque" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <EstoquePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/vendas" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <VendasPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/financeiro" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <FinanceiroPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/users" element={
+                  <AdminRoute requireSuperAdmin={true}>
+                    <AppLayout>
+                      <UsersPage />
+                    </AppLayout>
+                  </AdminRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SecurityProvider>
+          </AuthProvider>
+        </LoadingProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

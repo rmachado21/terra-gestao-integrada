@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRoles } from '@/hooks/useUserRoles';
+import { LoadingSpinner } from '@/components/ui/loading';
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -25,10 +26,10 @@ const AdminRoute = ({ children, requireSuperAdmin = false }: AdminRouteProps) =>
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center animate-fade-in">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Verificando permissões...</p>
+          <LoadingSpinner size="lg" className="mx-auto mb-4 text-green-600" />
+          <p className="text-gray-600 mt-2">Verificando permissões...</p>
         </div>
       </div>
     );
