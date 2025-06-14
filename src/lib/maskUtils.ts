@@ -6,10 +6,11 @@ export const getCpfCnpjMask = (value: string) => {
   
   // Se tem 11 dígitos ou menos, usa máscara de CPF
   // Se tem 12 dígitos ou mais, usa máscara de CNPJ
-  if (cleanValue.length <= 14) {
-    return '999.999.999-99'; // CPF
-  } else {
-    return '99.999.999/9999-99'; // CNPJ
+  if (cleanValue.length > 11) {
+    return '99.999.999/9999-99'; // Máscara de CNPJ
+  }
+  
+  return '999.999.999-99'; // Máscara de CPF
   }
 };
 
