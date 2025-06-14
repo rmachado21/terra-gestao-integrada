@@ -13,7 +13,6 @@ export const getCpfCnpjMask = (value: string) => {
   }
 };
 
-
 // Máscara única para telefone fixo e celular
 export const getTelefoneMask = () => {  
     return '(99) 99999-9999'; // Celular

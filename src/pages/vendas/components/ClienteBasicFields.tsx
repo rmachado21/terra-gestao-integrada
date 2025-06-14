@@ -39,7 +39,7 @@ const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasi
         <Label htmlFor="telefone">Telefone</Label>
         <MaskedInput
           id="telefone"
-          mask={getTelefoneMask(formData.telefone)}
+          mask={getTelefoneMask()}
           value={formData.telefone}
           onChange={(e) => handleChange('telefone', e.target.value)}
           placeholder="(11) 99999-9999"
