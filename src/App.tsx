@@ -19,6 +19,7 @@ import ProcessamentoPage from "./pages/processamento/ProcessamentoPage";
 import EstoquePage from "./pages/estoque/EstoquePage";
 import VendasPage from "./pages/vendas/VendasPage";
 import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -70,6 +71,13 @@ const App = () => (
                   <ProtectedRoute>
                     <AppLayout>
                       <ProfilePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/subscription" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <SubscriptionPage />
                     </AppLayout>
                   </ProtectedRoute>
                 } />

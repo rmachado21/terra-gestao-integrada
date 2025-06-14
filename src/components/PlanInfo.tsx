@@ -1,15 +1,18 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useUserRoles } from '@/hooks/useUserRoles';
-import { Calendar, Clock, CreditCard } from 'lucide-react';
+import { useStripeSubscription } from '@/hooks/useStripeSubscription';
+import { Calendar, Clock, CreditCard, ExternalLink, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const PlanInfo = () => {
   const { plan, loading, calculateDaysRemaining } = useUserPlan();
   const { isSuperAdmin } = useUserRoles();
+  const { subscriptionData, createCheckout, openCustomerPortal } = useStripeSubscription();
 
   // Não mostrar para Super Admins
   if (isSuperAdmin) {
@@ -140,30 +143,117 @@ const PlanInfo = () => {
           </div>
         </div>
 
+        {/* Stripe subscription info if available */}
+        {subscriptionData?.subscribed && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-green-800">
+                ✅ Assinatura Stripe ativa: {subscriptionData.subscription_tier}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={openCustomerPortal}
+                className="text-xs"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Gerenciar
+              </Button>
+            </div>
+          </div>
+        )}
+
         {plan.tipo_plano === 'teste' && !isExpired && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              🎯 Você está no período free gratuito de 7 dias. Entre em contato para adquirir um plano completo.
+            <p className="text-sm text-blue-800 mb-3">
+              🎯 Você está no período free gratuito de 7 dias. Faça upgrade para um plano completo.
             </p>
+            <div className="flex space-x-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => createCheckout('mensal')}
+                className="flex-1"
+              >
+                <Zap className="h-3 w-3 mr-1" />
+                Mensal R$ 7,99
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => createCheckout('anual')}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <CreditCard className="h-3 w-3 mr-1" />
+                Anual R$ 79,90
+              </Button>
+            </div>
           </div>
         )}
 
         {isExpiring && !isExpired && plan.tipo_plano !== 'teste' && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              ⚠️ Seu plano expira em breve. Entre em contato para renovar.
+            <p className="text-sm text-yellow-800 mb-3">
+              ⚠️ Seu plano expira em breve. Renove para continuar usando o sistema.
             </p>
+            {subscriptionData?.subscribed ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={openCustomerPortal}
+                className="w-full"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Gerenciar no Stripe
+              </Button>
+            ) : (
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => createCheckout('mensal')}
+                  className="flex-1"
+                >
+                  Renovar Mensal
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => createCheckout('anual')}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  Renovar Anual
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
         {isExpired && (
           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-800">
+            <p className="text-sm text-red-800 mb-3">
               {plan.tipo_plano === 'teste' 
-                ? '⏰ Seu período free expirou. Entre em contato para adquirir um plano.' 
-                : '❌ Seu plano expirou. Entre em contato para renovar o acesso.'
+                ? '⏰ Seu período free expirou. Faça upgrade para continuar usando o sistema.' 
+                : '❌ Seu plano expirou. Renove para continuar o acesso.'
               }
             </p>
+            <div className="flex space-x-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => createCheckout('mensal')}
+                className="flex-1"
+              >
+                <Zap className="h-3 w-3 mr-1" />
+                Plano Mensal
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => createCheckout('anual')}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <CreditCard className="h-3 w-3 mr-1" />
+                Plano Anual (Melhor valor)
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

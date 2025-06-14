@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, nome: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  checkSubscription: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +43,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const checkSubscription = async () => {
+    if (!session) return;
+    
+    try {
+      await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+    } catch (error) {
+      secureLogger.error('Error checking subscription:', error);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -81,6 +96,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                   await supabase.auth.signOut();
                   return;
                 }
+
+                // Check subscription after successful login
+                await supabase.functions.invoke('check-subscription', {
+                  headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                });
               } catch (error) {
                 secureLogger.error('Error checking user status:', error);
               }
@@ -123,6 +145,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 await supabase.auth.signOut();
                 setSession(null);
                 setUser(null);
+              } else {
+                // Check subscription on session restore
+                await supabase.functions.invoke('check-subscription', {
+                  headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                });
               }
             } catch (error) {
               secureLogger.error('Error checking user status:', error);
@@ -269,6 +298,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signIn,
       signUp,
       signOut,
+      checkSubscription,
     }}>
       {children}
     </AuthContext.Provider>
