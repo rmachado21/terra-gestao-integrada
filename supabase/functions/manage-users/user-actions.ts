@@ -1,41 +1,74 @@
-
 import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { UserData, PlanData } from './types.ts';
 
 export const listUsers = async (supabaseClient: SupabaseClient) => {
   console.log('Listing users...');
   
-  // Get all users with their profiles and roles (LEFT JOIN to include users without plans)
-  const { data: profiles, error: profilesError } = await supabaseClient
-    .from('profiles')
-    .select(`
-      id,
-      nome,
-      email,
-      ativo,
-      created_at,
-      user_roles (role),
-      user_plans (
-        tipo_plano,
-        data_inicio,
-        data_fim,
-        ativo
-      )
-    `);
+  try {
+    // Get all profiles first
+    const { data: profiles, error: profilesError } = await supabaseClient
+      .from('profiles')
+      .select('*');
 
-  if (profilesError) {
-    console.error('Error fetching profiles:', profilesError);
-    throw profilesError;
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      throw profilesError;
+    }
+
+    if (!profiles || profiles.length === 0) {
+      console.log('No profiles found');
+      return [];
+    }
+
+    console.log('Found profiles:', profiles.length);
+
+    // Get user roles for all users
+    const { data: userRoles, error: rolesError } = await supabaseClient
+      .from('user_roles')
+      .select('user_id, role');
+
+    if (rolesError) {
+      console.error('Error fetching user roles:', rolesError);
+      throw rolesError;
+    }
+
+    console.log('Found user roles:', userRoles?.length || 0);
+
+    // Get user plans for all users
+    const { data: userPlans, error: plansError } = await supabaseClient
+      .from('user_plans')
+      .select('user_id, tipo_plano, data_inicio, data_fim, ativo')
+      .eq('ativo', true);
+
+    if (plansError) {
+      console.error('Error fetching user plans:', plansError);
+      throw plansError;
+    }
+
+    console.log('Found active user plans:', userPlans?.length || 0);
+
+    // Combine the data manually
+    const processedUsers = profiles.map(profile => {
+      // Find roles for this user
+      const roles = userRoles?.filter(role => role.user_id === profile.id) || [];
+      
+      // Find active plan for this user
+      const activePlan = userPlans?.find(plan => plan.user_id === profile.id) || null;
+
+      return {
+        ...profile,
+        user_roles: roles.map(role => ({ role: role.role })),
+        user_plan: activePlan
+      };
+    });
+
+    console.log('Users processed successfully:', processedUsers.length);
+    return processedUsers;
+
+  } catch (error) {
+    console.error('Error in listUsers:', error);
+    throw error;
   }
-
-  // Filter to only show active plans for each user (if they have any)
-  const processedUsers = profiles?.map(profile => ({
-    ...profile,
-    user_plan: profile.user_plans?.find(plan => plan.ativo) || null
-  })) || [];
-
-  console.log('Users fetched successfully:', processedUsers?.length);
-  return processedUsers;
 };
 
 export const toggleUserStatus = async (
@@ -235,24 +268,58 @@ export const createUser = async (
 export const getAdminLogs = async (supabaseClient: SupabaseClient) => {
   console.log('Fetching admin logs...');
   
-  const { data: logs, error: logsError } = await supabaseClient
-    .from('admin_logs')
-    .select(`
-      id,
-      action,
-      details,
-      created_at,
-      admin_profile:profiles!admin_user_id (nome),
-      target_profile:profiles!target_user_id (nome)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(100);
+  try {
+    // Get admin logs first
+    const { data: logs, error: logsError } = await supabaseClient
+      .from('admin_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
 
-  if (logsError) {
-    throw logsError;
+    if (logsError) {
+      console.error('Error fetching admin logs:', logsError);
+      throw logsError;
+    }
+
+    if (!logs || logs.length === 0) {
+      console.log('No admin logs found');
+      return [];
+    }
+
+    // Get profile names for admin users and target users
+    const adminUserIds = [...new Set(logs.map(log => log.admin_user_id))];
+    const targetUserIds = [...new Set(logs.map(log => log.target_user_id).filter(Boolean))];
+    const allUserIds = [...new Set([...adminUserIds, ...targetUserIds])];
+
+    const { data: profiles, error: profilesError } = await supabaseClient
+      .from('profiles')
+      .select('id, nome')
+      .in('id', allUserIds);
+
+    if (profilesError) {
+      console.error('Error fetching profiles for logs:', profilesError);
+      // Continue without profile names rather than failing
+    }
+
+    // Map logs with profile names
+    const logsWithProfiles = logs.map(log => {
+      const adminProfile = profiles?.find(p => p.id === log.admin_user_id);
+      const targetProfile = profiles?.find(p => p.id === log.target_user_id);
+
+      return {
+        ...log,
+        admin_profile: adminProfile ? { nome: adminProfile.nome } : { nome: 'Unknown' },
+        target_profile: targetProfile ? { nome: targetProfile.nome } : null
+      };
+    });
+
+    console.log('Admin logs fetched successfully:', logsWithProfiles.length);
+    return logsWithProfiles;
+
+  } catch (error) {
+    console.error('Error in getAdminLogs:', error);
+    throw error;
   }
-
-  return logs || [];
 };
 
 export const updateUserStatus = async (
