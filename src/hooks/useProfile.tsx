@@ -13,6 +13,9 @@ interface Profile {
   cargo?: string;
   avatar_url?: string;
   bio?: string;
+  empresa_nome?: string;
+  cnpj?: string;
+  logo_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -23,6 +26,7 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const fetchProfile = async () => {
     if (!user) {
@@ -101,6 +105,55 @@ export const useProfile = () => {
     }
   };
 
+  const uploadLogo = async (file: File) => {
+    if (!user) return null;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/logo.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('company-logos')
+        .upload(fileName, file, {
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('company-logos')
+        .getPublicUrl(fileName);
+
+      const logoUrl = data.publicUrl;
+
+      // Update profile with new logo URL
+      const success = await updateProfile({ logo_url: logoUrl });
+      
+      if (success) {
+        toast({
+          title: "Sucesso",
+          description: "Logo da empresa enviado com sucesso",
+        });
+        return logoUrl;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer upload da logo",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
   }, [user]);
@@ -109,7 +162,9 @@ export const useProfile = () => {
     profile,
     loading,
     updating,
+    uploading,
     updateProfile,
+    uploadLogo,
     refetchProfile: fetchProfile,
   };
 };

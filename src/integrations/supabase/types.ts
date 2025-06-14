@@ -591,9 +591,12 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           cargo: string | null
+          cnpj: string | null
           created_at: string
           email: string
+          empresa_nome: string | null
           id: string
+          logo_url: string | null
           nome: string
           telefone: string | null
           updated_at: string
@@ -603,9 +606,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cargo?: string | null
+          cnpj?: string | null
           created_at?: string
           email: string
+          empresa_nome?: string | null
           id: string
+          logo_url?: string | null
           nome: string
           telefone?: string | null
           updated_at?: string
@@ -615,9 +621,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           cargo?: string | null
+          cnpj?: string | null
           created_at?: string
           email?: string
+          empresa_nome?: string | null
           id?: string
+          logo_url?: string | null
           nome?: string
           telefone?: string | null
           updated_at?: string
