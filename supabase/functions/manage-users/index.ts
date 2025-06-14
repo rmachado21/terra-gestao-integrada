@@ -1,20 +1,23 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { authenticateAndAuthorize } from './auth.ts'
+import { RequestBody } from './types.ts'
+import {
+  listUsers,
+  toggleUserStatus,
+  changeUserRole,
+  updateUserPlan,
+  createUser,
+  getAdminLogs,
+  updateUserStatus,
+  updateUserRole,
+  updateUserPlanById
+} from './user-actions.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-interface UserData {
-  nome: string;
-  email: string;
-  ativo?: boolean;
-}
-
-interface PlanData {
-  tipo_plano: 'mensal' | 'anual' | 'teste';
-  data_inicio?: string;
 }
 
 serve(async (req) => {
@@ -36,396 +39,91 @@ serve(async (req) => {
     )
 
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      console.error('No authorization header provided')
-      throw new Error('No authorization header')
-    }
+    const user = await authenticateAndAuthorize(supabaseClient, authHeader)
 
-    // Verify the user has admin role
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-    
-    if (authError || !user) {
-      console.error('Authentication failed:', authError)
-      throw new Error('Invalid token')
-    }
-
-    console.log('User authenticated:', user.id)
-
-    // Check if user has admin or super_admin role
-    const { data: userRoles, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-    
-    if (roleError) {
-      console.error('Error checking user roles:', roleError)
-      throw new Error('Error checking user roles')
-    }
-
-    console.log('User roles:', userRoles)
-
-    const hasAdminRole = userRoles?.some(r => r.role === 'admin' || r.role === 'super_admin')
-    if (!hasAdminRole) {
-      console.error('User does not have admin role. User roles:', userRoles)
-      throw new Error('Insufficient permissions')
-    }
-
-    const { action, userData, userId, planData, targetUserId, active, newRole } = await req.json()
+    const { action, userData, userId, planData, targetUserId, active, newRole }: RequestBody = await req.json()
 
     console.log('Processing action:', action)
 
     switch (action) {
       case 'list_users': {
-        console.log('Listing users...')
-        
-        // Get all users with their profiles and roles (LEFT JOIN to include users without plans)
-        const { data: profiles, error: profilesError } = await supabaseClient
-          .from('profiles')
-          .select(`
-            id,
-            nome,
-            email,
-            ativo,
-            created_at,
-            user_roles (role),
-            user_plans (
-              tipo_plano,
-              data_inicio,
-              data_fim,
-              ativo
-            )
-          `)
-
-        if (profilesError) {
-          console.error('Error fetching profiles:', profilesError)
-          throw profilesError
-        }
-
-        // Filter to only show active plans for each user (if they have any)
-        const processedUsers = profiles?.map(profile => ({
-          ...profile,
-          user_plan: profile.user_plans?.find(plan => plan.ativo) || null
-        })) || []
-
-        console.log('Users fetched successfully:', processedUsers?.length)
+        const users = await listUsers(supabaseClient)
         return new Response(
-          JSON.stringify(processedUsers),
+          JSON.stringify(users),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'toggle_user_status': {
-        console.log(`Toggling user ${targetUserId} status to ${active}`)
-        
-        const { error: updateError } = await supabaseClient
-          .from('profiles')
-          .update({ ativo: active })
-          .eq('id', targetUserId)
-
-        if (updateError) {
-          throw updateError
+        if (!targetUserId || active === undefined) {
+          throw new Error('Missing required parameters')
         }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'toggle_user_status',
-            target_user_id: targetUserId,
-            details: { ativo: active }
-          })
-
+        const result = await toggleUserStatus(supabaseClient, targetUserId, active, user.id)
         return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'change_user_role': {
-        console.log(`Changing user ${targetUserId} role to ${newRole}`)
-        
-        // First, delete existing role
-        await supabaseClient
-          .from('user_roles')
-          .delete()
-          .eq('user_id', targetUserId)
-
-        // Then insert new role
-        const { error: roleError } = await supabaseClient
-          .from('user_roles')
-          .insert({
-            user_id: targetUserId,
-            role: newRole,
-            created_by: user.id
-          })
-
-        if (roleError) {
-          throw roleError
+        if (!targetUserId || !newRole) {
+          throw new Error('Missing required parameters')
         }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'change_user_role',
-            target_user_id: targetUserId,
-            details: { role: newRole }
-          })
-
+        const result = await changeUserRole(supabaseClient, targetUserId, newRole, user.id)
         return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'update_user_plan': {
-        console.log('Updating user plan:', { targetUserId, planData })
-        
-        // First, deactivate existing plans
-        await supabaseClient
-          .from('user_plans')
-          .update({ ativo: false })
-          .eq('user_id', targetUserId)
-
-        // Create new plan
-        const { error: planError } = await supabaseClient
-          .from('user_plans')
-          .insert({
-            user_id: targetUserId,
-            tipo_plano: planData.tipo_plano,
-            data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
-            ativo: true
-          })
-
-        if (planError) {
-          console.error('Error updating user plan:', planError)
-          throw planError
+        if (!targetUserId || !planData) {
+          throw new Error('Missing required parameters')
         }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'update_user_plan',
-            target_user_id: targetUserId,
-            details: { tipo_plano: planData.tipo_plano, data_inicio: planData.data_inicio }
-          })
-
+        const result = await updateUserPlan(supabaseClient, targetUserId, planData, user.id)
         return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'get_admin_logs': {
-        console.log('Fetching admin logs...')
-        
-        const { data: logs, error: logsError } = await supabaseClient
-          .from('admin_logs')
-          .select(`
-            id,
-            action,
-            details,
-            created_at,
-            admin_profile:profiles!admin_user_id (nome),
-            target_profile:profiles!target_user_id (nome)
-          `)
-          .order('created_at', { ascending: false })
-          .limit(100)
-
-        if (logsError) {
-          throw logsError
-        }
-
+        const logs = await getAdminLogs(supabaseClient)
         return new Response(
-          JSON.stringify(logs || []),
+          JSON.stringify(logs),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'create_user': {
-        console.log('Creating user with data:', userData)
-        
-        // Create user in auth
-        const { data: authData, error: createError } = await supabaseClient.auth.admin.createUser({
-          email: userData.email,
-          password: 'temp123456',
-          email_confirm: true,
-          user_metadata: {
-            nome: userData.nome
-          }
-        })
-
-        if (createError) {
-          console.error('Error creating user:', createError)
-          throw createError
+        if (!userData) {
+          throw new Error('Missing user data')
         }
-
-        if (!authData.user) {
-          throw new Error('User creation failed')
-        }
-
-        console.log('Auth user created:', authData.user.id)
-
-        // Create profile
-        const { error: profileError } = await supabaseClient
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            nome: userData.nome,
-            email: userData.email,
-            ativo: userData.ativo ?? true
-          })
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError)
-          throw profileError
-        }
-
-        // Create initial user role
-        const { error: roleError2 } = await supabaseClient
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'user',
-            created_by: user.id
-          })
-
-        if (roleError2) {
-          console.error('Error creating user role:', roleError2)
-        }
-
-        // Create teste plan for new users (default 7 days)
-        const { error: planError } = await supabaseClient
-          .from('user_plans')
-          .insert({
-            user_id: authData.user.id,
-            tipo_plano: 'teste',
-            data_inicio: new Date().toISOString().split('T')[0]
-          })
-
-        if (planError) {
-          console.error('Error creating user plan:', planError)
-        }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'create_user',
-            target_user_id: authData.user.id,
-            details: { email: userData.email, nome: userData.nome }
-          })
-
+        const result = await createUser(supabaseClient, userData, user.id)
         return new Response(
-          JSON.stringify({ success: true, user: authData.user }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'update_user_status': {
-        const { error: updateError } = await supabaseClient
-          .from('profiles')
-          .update({ ativo: userData.ativo })
-          .eq('id', userId)
-
-        if (updateError) {
-          throw updateError
+        if (!userId || !userData) {
+          throw new Error('Missing required parameters')
         }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'update_user_status',
-            target_user_id: userId,
-            details: { ativo: userData.ativo }
-          })
-
+        const result = await updateUserStatus(supabaseClient, userId, userData, user.id)
         return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'update_user_role': {
-        // First, delete existing role
-        await supabaseClient
-          .from('user_roles')
-          .delete()
-          .eq('user_id', userId)
-
-        // Then insert new role
-        const { error: roleError3 } = await supabaseClient
-          .from('user_roles')
-          .insert({
-            user_id: userId,
-            role: userData.role,
-            created_by: user.id
-          })
-
-        if (roleError3) {
-          throw roleError3
+        if (!userId || !userData) {
+          throw new Error('Missing required parameters')
         }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'update_user_role',
-            target_user_id: userId,
-            details: { role: userData.role }
-          })
-
+        const result = await updateUserRole(supabaseClient, userId, userData as any, user.id)
         return new Response(
-          JSON.stringify({ success: true }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      case 'update_user_plan': {
-        console.log('Updating user plan:', { userId, planData })
-        
-        // First, deactivate existing plans
-        await supabaseClient
-          .from('user_plans')
-          .update({ ativo: false })
-          .eq('user_id', userId)
-
-        // Create new plan
-        const { error: planError2 } = await supabaseClient
-          .from('user_plans')
-          .insert({
-            user_id: userId,
-            tipo_plano: planData.tipo_plano,
-            data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
-            ativo: true
-          })
-
-        if (planError2) {
-          console.error('Error updating user plan:', planError2)
-          throw planError2
-        }
-
-        // Log admin action
-        await supabaseClient
-          .from('admin_logs')
-          .insert({
-            admin_user_id: user.id,
-            action: 'update_user_plan',
-            target_user_id: userId,
-            details: { tipo_plano: planData.tipo_plano, data_inicio: planData.data_inicio }
-          })
-
-        return new Response(
-          JSON.stringify({ success: true }),
+          JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
