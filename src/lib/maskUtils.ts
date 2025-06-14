@@ -13,16 +13,10 @@ export const getCpfCnpjMask = (value: string) => {
   }
 };
 
-// Função para determinar a máscara do telefone dinamicamente
-export const getTelefoneMask = (value: string) => {
-  const cleanValue = value.replace(/\D/g, '');
-  // Se tem 10 dígitos ou menos, usa telefone fixo
-  // Se tem 11 dígitos ou mais, usa celular
-  if (cleanValue.length <= 11) {
-    return '(99) 9999-9999'; // Telefone fixo
-  } else {
+
+// Máscara única para telefone fixo e celular
+export const getTelefoneMask = () => {  
     return '(99) 99999-9999'; // Celular
-  }
 };
 
 // Função para máscara de CEP
