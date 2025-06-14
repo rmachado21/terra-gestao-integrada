@@ -112,13 +112,15 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     if (field.includes('.')) {
       // Handle nested fields like 'endereco.cep'
       const [parent, child] = field.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof ClienteFormData],
-          [child]: value
-        }
-      }));
+      if (parent === 'endereco') {
+        setFormData(prev => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            [child]: value
+          }
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
