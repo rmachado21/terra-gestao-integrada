@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +35,60 @@ const cleanupAuthState = () => {
     }
   } catch (error) {
     secureLogger.error('Erro ao limpar estado de autenticação:', error);
+  }
+};
+
+// Helper function to check if user should be redirected to subscription
+const checkUserPlanStatus = async (userId: string) => {
+  try {
+    // Check if user has super admin role
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'super_admin')
+      .single();
+    
+    if (roleData) {
+      return { shouldRedirect: false, isBlocked: false };
+    }
+
+    // Get user profile status
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('ativo')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      return { shouldRedirect: false, isBlocked: true, reason: 'Erro ao verificar dados do usuário' };
+    }
+
+    // Get user plan status
+    const { data: planData } = await supabase
+      .from('user_plans')
+      .select('tipo_plano, data_fim, ativo')
+      .eq('user_id', userId)
+      .eq('ativo', true)
+      .single();
+
+    const hasActivePlan = planData && new Date(planData.data_fim) > new Date();
+
+    // If user is inactive in profile
+    if (!profileData?.ativo) {
+      // If user has no active plan or expired plan, redirect to subscription
+      if (!hasActivePlan) {
+        return { shouldRedirect: true, isBlocked: false };
+      }
+      // If user has active plan but is inactive, they are admin-disabled
+      return { shouldRedirect: false, isBlocked: true, reason: 'Seu acesso está inativo. Entre em contato com o suporte.' };
+    }
+
+    // User is active in profile
+    return { shouldRedirect: false, isBlocked: false };
+  } catch (error) {
+    secureLogger.error('Error checking user plan status:', error);
+    return { shouldRedirect: false, isBlocked: true, reason: 'Erro ao verificar status do usuário' };
   }
 };
 
@@ -81,19 +134,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: session?.user?.email 
           });
           
-          // Verificar se o usuário está ativo
+          // Verificar status do usuário e plano
           if (session?.user) {
             setTimeout(async () => {
               try {
-                const { data: profileData, error } = await supabase
-                  .from('profiles')
-                  .select('ativo')
-                  .eq('id', session.user.id)
-                  .single();
+                const planStatus = await checkUserPlanStatus(session.user.id);
                 
-                if (error || !profileData?.ativo) {
-                  secureLogger.security('inactive_user_blocked', { userId: session.user.id });
+                if (planStatus.isBlocked) {
+                  secureLogger.security('user_blocked', { userId: session.user.id, reason: planStatus.reason });
                   await supabase.auth.signOut();
+                  return;
+                }
+
+                if (planStatus.shouldRedirect) {
+                  secureLogger.security('user_redirected_to_subscription', { userId: session.user.id });
+                  setTimeout(() => {
+                    window.location.href = '/subscription';
+                  }, 100);
                   return;
                 }
 
@@ -132,19 +189,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (session) {
             secureLogger.security('session_restored', { userId: session.user.id });
             
-            // Verificar se o usuário está ativo
+            // Verificar status do usuário e plano
             try {
-              const { data: profileData, error } = await supabase
-                .from('profiles')
-                .select('ativo')
-                .eq('id', session.user.id)
-                .single();
+              const planStatus = await checkUserPlanStatus(session.user.id);
               
-              if (error || !profileData?.ativo) {
-                secureLogger.security('inactive_user_blocked', { userId: session.user.id });
+              if (planStatus.isBlocked) {
+                secureLogger.security('user_blocked_on_restore', { userId: session.user.id });
                 await supabase.auth.signOut();
                 setSession(null);
                 setUser(null);
+              } else if (planStatus.shouldRedirect) {
+                secureLogger.security('user_redirected_to_subscription_on_restore', { userId: session.user.id });
+                setTimeout(() => {
+                  window.location.href = '/subscription';
+                }, 100);
               } else {
                 // Check subscription on session restore
                 await supabase.functions.invoke('check-subscription', {
@@ -201,28 +259,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      // Verificar se o usuário está ativo ANTES de completar o login
+      // Verificar status do usuário e plano ANTES de completar o login
       if (data.user) {
         try {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('ativo')
-            .eq('id', data.user.id)
-            .single();
+          const planStatus = await checkUserPlanStatus(data.user.id);
           
-          if (profileError) {
-            secureLogger.error('Error checking user profile:', profileError);
+          if (planStatus.isBlocked) {
+            secureLogger.security('user_blocked_on_signin', { userId: data.user.id });
             await supabase.auth.signOut();
-            return { error: { message: 'Erro ao verificar dados do usuário' } };
+            return { error: { message: planStatus.reason || 'Acesso negado', code: 'USER_BLOCKED' } };
           }
           
-          if (!profileData?.ativo) {
-            secureLogger.security('inactive_user_login_blocked', { userId: data.user.id });
-            await supabase.auth.signOut();
-            return { error: { message: 'INACTIVE_USER', code: 'INACTIVE_USER' } };
+          if (planStatus.shouldRedirect) {
+            secureLogger.security('user_should_redirect_on_signin', { userId: data.user.id });
+            setTimeout(() => {
+              window.location.href = '/subscription';
+            }, 100);
+            return { error: null };
           }
         } catch (error) {
-          secureLogger.error('Error checking user status:', error);
+          secureLogger.error('Error checking user status on signin:', error);
           await supabase.auth.signOut();
           return { error: { message: 'Erro ao verificar status do usuário' } };
         }
