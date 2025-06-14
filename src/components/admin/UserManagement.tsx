@@ -173,7 +173,7 @@ const UserManagement = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Role Management */}
-                      <div className="space-y-2 bg-zinc-100 ">
+                      <div className="space-y-2">
                         <label className="text-sm font-medium">Role</label>
                         <div className="flex items-center gap-2">
                           <Badge variant={getRoleBadgeVariant(user.user_roles[0]?.role || 'user')}>
