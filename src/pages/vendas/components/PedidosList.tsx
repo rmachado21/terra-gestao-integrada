@@ -263,7 +263,7 @@ const PedidosList = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="font-semibold">Pedido #{pedido.id.slice(-8)}</h3>
+                        <h3 className="font-semibold text-lg">Pedido #{pedido.id.slice(-8)}</h3>
                         <Badge className={getStatusColor(pedido.status)}>
                           {getStatusLabel(pedido.status)}
                         </Badge>
