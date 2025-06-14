@@ -12,7 +12,6 @@ interface Profile {
   telefone?: string;
   cargo?: string;
   avatar_url?: string;
-  bio?: string;
   empresa_nome?: string;
   cnpj?: string;
   logo_url?: string;

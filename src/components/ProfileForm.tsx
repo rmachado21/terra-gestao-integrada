@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useProfile } from '@/hooks/useProfile';
@@ -24,7 +23,6 @@ const profileSchema = z.object({
   nome: nameSchema,
   telefone: phoneSchema,
   cargo: z.string().max(100, 'Cargo muito longo').optional(),
-  bio: z.string().max(500, 'Bio deve ter no máximo 500 caracteres').optional(),
   empresa_nome: z.string().max(200, 'Nome da empresa muito longo').optional(),
   cnpj: cnpjSchema,
 });
@@ -40,7 +38,6 @@ const ProfileForm = () => {
       nome: '',
       telefone: '',
       cargo: '',
-      bio: '',
       empresa_nome: '',
       cnpj: '',
     },
@@ -53,7 +50,6 @@ const ProfileForm = () => {
         nome: profile.nome || '',
         telefone: profile.telefone || '',
         cargo: profile.cargo || '',
-        bio: profile.bio || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
       });
@@ -73,7 +69,6 @@ const ProfileForm = () => {
         nome: profile.nome || '',
         telefone: profile.telefone || '',
         cargo: profile.cargo || '',
-        bio: profile.bio || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
       });
@@ -162,24 +157,6 @@ const ProfileForm = () => {
                     <FormLabel>Cargo/Função</FormLabel>
                     <FormControl>
                       <Input placeholder="Seu cargo ou função" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Conte um pouco sobre você..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
