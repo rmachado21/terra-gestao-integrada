@@ -20,40 +20,48 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
   });
 
   return (
-    <Card className="fixed inset-0 z-50 bg-white shadow-lg">
-      <CardHeader className="border-b">
-        <div className="flex items-center justify-between">
-          <CardTitle>
-            {cliente ? 'Editar Cliente' : 'Novo Cliente'}
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-2xl bg-white shadow-lg flex flex-col max-h-[90vh]">
+        <CardHeader className="border-b flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              {cliente ? 'Editar Cliente' : 'Novo Cliente'}
+            </CardTitle>
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
 
-      <CardContent className="p-6 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <ClienteBasicFields 
-            formData={formData} 
-            handleChange={handleChange}
-            cpfCnpjMask={cpfCnpjMask}
-          />
-          <ClienteAddressFields formData={formData} handleChange={handleChange} />
-          <ClienteAdditionalFields formData={formData} handleChange={handleChange} />
+        <CardContent className="flex-1 overflow-y-auto p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <ClienteBasicFields 
+              formData={formData} 
+              handleChange={handleChange}
+              cpfCnpjMask={cpfCnpjMask}
+            />
+            <ClienteAddressFields formData={formData} handleChange={handleChange} />
+            <ClienteAdditionalFields formData={formData} handleChange={handleChange} />
+          </form>
+        </CardContent>
 
-          <div className="flex justify-end space-x-3 pt-6 border-t">
+        <div className="border-t p-6 flex-shrink-0">
+          <div className="flex justify-end space-x-3">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button 
+              type="button" 
+              onClick={handleSubmit} 
+              disabled={mutation.isPending}
+            >
               <Save className="h-4 w-4 mr-2" />
               {mutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </Card>
+    </div>
   );
 };
 
