@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -100,13 +101,18 @@ const Auth = () => {
         recordLoginAttempt(email, !error);
         if (error) {
           let errorMessage = "Erro no login";
-          if (error.message?.includes('Invalid login credentials')) {
+          
+          // Verificar se é erro de usuário inativo
+          if (error.code === 'INACTIVE_USER' || error.message === 'INACTIVE_USER') {
+            errorMessage = "Seu acesso está inativo. Entre em contato com o suporte.";
+          } else if (error.message?.includes('Invalid login credentials')) {
             errorMessage = "Email ou senha incorretos";
           } else if (error.message?.includes('Email not confirmed')) {
             errorMessage = "Verifique seu email para confirmar a conta";
           } else if (error.message?.includes('Too many requests')) {
             errorMessage = "Muitas tentativas. Tente novamente mais tarde.";
           }
+          
           toast({
             title: "Erro no login",
             description: errorMessage,

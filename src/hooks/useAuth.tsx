@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -171,8 +172,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error };
       }
 
-      // Forçar atualização da página para garantir estado limpo
+      // Verificar se o usuário está ativo ANTES de completar o login
       if (data.user) {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('ativo')
+            .eq('id', data.user.id)
+            .single();
+          
+          if (profileError) {
+            secureLogger.error('Error checking user profile:', profileError);
+            await supabase.auth.signOut();
+            return { error: { message: 'Erro ao verificar dados do usuário' } };
+          }
+          
+          if (!profileData?.ativo) {
+            secureLogger.security('inactive_user_login_blocked', { userId: data.user.id });
+            await supabase.auth.signOut();
+            return { error: { message: 'INACTIVE_USER', code: 'INACTIVE_USER' } };
+          }
+        } catch (error) {
+          secureLogger.error('Error checking user status:', error);
+          await supabase.auth.signOut();
+          return { error: { message: 'Erro ao verificar status do usuário' } };
+        }
+
         secureLogger.security('signin_success', { userId: data.user.id, email });
         setTimeout(() => {
           window.location.href = '/';
