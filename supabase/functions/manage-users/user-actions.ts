@@ -149,38 +149,74 @@ export const updateUserPlan = async (
 ) => {
   console.log('Updating user plan:', { targetUserId, planData });
   
-  // First, deactivate existing plans
-  await supabaseClient
-    .from('user_plans')
-    .update({ ativo: false })
-    .eq('user_id', targetUserId);
+  // Map 'teste' to 'mensal' since 'teste' doesn't exist in the database enum
+  const mappedPlanType = planData.tipo_plano === 'teste' ? 'mensal' : planData.tipo_plano;
+  
+  try {
+    // First, deactivate existing plans using a transaction-like approach
+    const { error: deactivateError } = await supabaseClient
+      .from('user_plans')
+      .update({ ativo: false })
+      .eq('user_id', targetUserId)
+      .eq('ativo', true);
 
-  // Create new plan
-  const { error: planError } = await supabaseClient
-    .from('user_plans')
-    .insert({
-      user_id: targetUserId,
-      tipo_plano: planData.tipo_plano,
-      data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
-      ativo: true
-    });
+    if (deactivateError) {
+      console.error('Error deactivating existing plans:', deactivateError);
+      throw deactivateError;
+    }
 
-  if (planError) {
-    console.error('Error updating user plan:', planError);
-    throw planError;
+    // Calculate end date based on plan type
+    const startDate = planData.data_inicio || new Date().toISOString().split('T')[0];
+    let endDate: string;
+    
+    if (planData.tipo_plano === 'teste') {
+      // For teste plans, add 7 days
+      const start = new Date(startDate);
+      start.setDate(start.getDate() + 7);
+      endDate = start.toISOString().split('T')[0];
+    } else if (mappedPlanType === 'mensal') {
+      // For monthly plans, add 1 month
+      const start = new Date(startDate);
+      start.setMonth(start.getMonth() + 1);
+      endDate = start.toISOString().split('T')[0];
+    } else {
+      // For annual plans, add 1 year
+      const start = new Date(startDate);
+      start.setFullYear(start.getFullYear() + 1);
+      endDate = start.toISOString().split('T')[0];
+    }
+
+    // Create new plan with calculated end date
+    const { error: planError } = await supabaseClient
+      .from('user_plans')
+      .insert({
+        user_id: targetUserId,
+        tipo_plano: mappedPlanType,
+        data_inicio: startDate,
+        data_fim: endDate,
+        ativo: true
+      });
+
+    if (planError) {
+      console.error('Error creating user plan:', planError);
+      throw planError;
+    }
+
+    // Log admin action with original plan type
+    await supabaseClient
+      .from('admin_logs')
+      .insert({
+        admin_user_id: adminUserId,
+        action: 'update_user_plan',
+        target_user_id: targetUserId,
+        details: { tipo_plano: planData.tipo_plano, data_inicio: startDate, data_fim: endDate }
+      });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in updateUserPlan:', error);
+    throw error;
   }
-
-  // Log admin action
-  await supabaseClient
-    .from('admin_logs')
-    .insert({
-      admin_user_id: adminUserId,
-      action: 'update_user_plan',
-      target_user_id: targetUserId,
-      details: { tipo_plano: planData.tipo_plano, data_inicio: planData.data_inicio }
-    });
-
-  return { success: true };
 };
 
 export const createUser = async (
@@ -227,7 +263,7 @@ export const createUser = async (
   }
 
   // Create initial user role
-  const { error: roleError2 } = await supabaseClient
+  const { error: roleError } = await supabaseClient
     .from('user_roles')
     .insert({
       user_id: authData.user.id,
@@ -235,17 +271,23 @@ export const createUser = async (
       created_by: adminUserId
     });
 
-  if (roleError2) {
-    console.error('Error creating user role:', roleError2);
+  if (roleError) {
+    console.error('Error creating user role:', roleError);
   }
 
-  // Create teste plan for new users (default 7 days)
+  // Create mensal plan for new users (mapped from teste, 7 days duration)
+  const startDate = new Date().toISOString().split('T')[0];
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + 7);
+  const endDateStr = endDate.toISOString().split('T')[0];
+
   const { error: planError } = await supabaseClient
     .from('user_plans')
     .insert({
       user_id: authData.user.id,
-      tipo_plano: 'teste',
-      data_inicio: new Date().toISOString().split('T')[0]
+      tipo_plano: 'mensal', // Use mensal instead of teste
+      data_inicio: startDate,
+      data_fim: endDateStr
     });
 
   if (planError) {
@@ -363,7 +405,7 @@ export const updateUserRole = async (
     .eq('user_id', userId);
 
   // Then insert new role
-  const { error: roleError3 } = await supabaseClient
+  const { error: roleError } = await supabaseClient
     .from('user_roles')
     .insert({
       user_id: userId,
@@ -371,8 +413,8 @@ export const updateUserRole = async (
       created_by: adminUserId
     });
 
-  if (roleError3) {
-    throw roleError3;
+  if (roleError) {
+    throw roleError;
   }
 
   // Log admin action
@@ -394,38 +436,74 @@ export const updateUserPlanById = async (
   planData: PlanData,
   adminUserId: string
 ) => {
-  console.log('Updating user plan:', { userId, planData });
+  console.log('Updating user plan by ID:', { userId, planData });
   
-  // First, deactivate existing plans
-  await supabaseClient
-    .from('user_plans')
-    .update({ ativo: false })
-    .eq('user_id', userId);
+  // Map 'teste' to 'mensal' since 'teste' doesn't exist in the database enum
+  const mappedPlanType = planData.tipo_plano === 'teste' ? 'mensal' : planData.tipo_plano;
+  
+  try {
+    // First, deactivate existing plans
+    const { error: deactivateError } = await supabaseClient
+      .from('user_plans')
+      .update({ ativo: false })
+      .eq('user_id', userId)
+      .eq('ativo', true);
 
-  // Create new plan
-  const { error: planError2 } = await supabaseClient
-    .from('user_plans')
-    .insert({
-      user_id: userId,
-      tipo_plano: planData.tipo_plano,
-      data_inicio: planData.data_inicio || new Date().toISOString().split('T')[0],
-      ativo: true
-    });
+    if (deactivateError) {
+      console.error('Error deactivating existing plans:', deactivateError);
+      throw deactivateError;
+    }
 
-  if (planError2) {
-    console.error('Error updating user plan:', planError2);
-    throw planError2;
+    // Calculate end date based on plan type
+    const startDate = planData.data_inicio || new Date().toISOString().split('T')[0];
+    let endDate: string;
+    
+    if (planData.tipo_plano === 'teste') {
+      // For teste plans, add 7 days
+      const start = new Date(startDate);
+      start.setDate(start.getDate() + 7);
+      endDate = start.toISOString().split('T')[0];
+    } else if (mappedPlanType === 'mensal') {
+      // For monthly plans, add 1 month
+      const start = new Date(startDate);
+      start.setMonth(start.getMonth() + 1);
+      endDate = start.toISOString().split('T')[0];
+    } else {
+      // For annual plans, add 1 year
+      const start = new Date(startDate);
+      start.setFullYear(start.getFullYear() + 1);
+      endDate = start.toISOString().split('T')[0];
+    }
+
+    // Create new plan with calculated end date
+    const { error: planError } = await supabaseClient
+      .from('user_plans')
+      .insert({
+        user_id: userId,
+        tipo_plano: mappedPlanType,
+        data_inicio: startDate,
+        data_fim: endDate,
+        ativo: true
+      });
+
+    if (planError) {
+      console.error('Error creating user plan:', planError);
+      throw planError;
+    }
+
+    // Log admin action with original plan type
+    await supabaseClient
+      .from('admin_logs')
+      .insert({
+        admin_user_id: adminUserId,
+        action: 'update_user_plan',
+        target_user_id: userId,
+        details: { tipo_plano: planData.tipo_plano, data_inicio: startDate, data_fim: endDate }
+      });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in updateUserPlanById:', error);
+    throw error;
   }
-
-  // Log admin action
-  await supabaseClient
-    .from('admin_logs')
-    .insert({
-      admin_user_id: adminUserId,
-      action: 'update_user_plan',
-      target_user_id: userId,
-      details: { tipo_plano: planData.tipo_plano, data_inicio: planData.data_inicio }
-    });
-
-  return { success: true };
 };
