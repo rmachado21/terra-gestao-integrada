@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -59,7 +58,7 @@ const PersonalInfoCard = ({ form, email, updating, onSubmit, onCancel }: Persona
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
                     <MaskedInput
-                      mask={getTelefoneMask(field.value || '')}
+                      mask={getTelefoneMask()}
                       value={field.value || ''}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
