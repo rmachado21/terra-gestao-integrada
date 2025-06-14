@@ -23,7 +23,7 @@ const PedidoImpressaoButton = ({
   const { data, isLoading } = usePedidoImpressao(pedidoId);
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
     documentTitle: `Pedido-${pedidoId.slice(-8)}`,
   });
 

@@ -53,7 +53,7 @@ const PedidoPDF = React.forwardRef<HTMLDivElement, PedidoPDFProps>(
 
     return (
       <div ref={ref} className="p-8 bg-white text-black print-document">
-        <style jsx>{`
+        <style>{`
           @media print {
             .print-document {
               width: 100%;
