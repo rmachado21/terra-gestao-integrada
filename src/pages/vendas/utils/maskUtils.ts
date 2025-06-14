@@ -1,7 +1,10 @@
 
 // Função para determinar a máscara do CPF/CNPJ dinamicamente
 export const getCpfCnpjMask = (value: string) => {
+  // Remove todos os caracteres não numéricos para contar apenas dígitos
   const cleanValue = value.replace(/\D/g, '');
+  
+  // Se tem 11 dígitos ou menos, usa máscara de CPF
   if (cleanValue.length <= 11) {
     return '999.999.999-99'; // CPF
   } else {

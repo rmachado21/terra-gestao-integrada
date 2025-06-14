@@ -14,7 +14,7 @@ interface ClienteFormProps {
 }
 
 const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
-  const { formData, mutation, handleSubmit, handleChange } = useClienteForm({
+  const { formData, mutation, handleSubmit, handleChange, cpfCnpjMask } = useClienteForm({
     cliente,
     onClose
   });
@@ -34,7 +34,11 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
 
       <CardContent className="p-6 overflow-y-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <ClienteBasicFields formData={formData} handleChange={handleChange} />
+          <ClienteBasicFields 
+            formData={formData} 
+            handleChange={handleChange}
+            cpfCnpjMask={cpfCnpjMask}
+          />
           <ClienteAddressFields formData={formData} handleChange={handleChange} />
           <ClienteAdditionalFields formData={formData} handleChange={handleChange} />
 

@@ -3,14 +3,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputMask from 'react-input-mask';
 import { ClienteFormData } from '../types/cliente';
-import { getCpfCnpjMask, getTelefoneMask } from '../utils/maskUtils';
+import { getTelefoneMask } from '../utils/maskUtils';
 
 interface ClienteBasicFieldsProps {
   formData: ClienteFormData;
   handleChange: (field: keyof ClienteFormData, value: string | boolean) => void;
+  cpfCnpjMask: string;
 }
 
-const ClienteBasicFields = ({ formData, handleChange }: ClienteBasicFieldsProps) => {
+const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasicFieldsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-2">
@@ -55,7 +56,7 @@ const ClienteBasicFields = ({ formData, handleChange }: ClienteBasicFieldsProps)
       <div className="space-y-2">
         <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
         <InputMask
-          mask={getCpfCnpjMask(formData.cpf_cnpj)}
+          mask={cpfCnpjMask}
           value={formData.cpf_cnpj}
           onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
         >

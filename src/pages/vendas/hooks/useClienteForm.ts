@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Cliente, ClienteFormData } from '../types/cliente';
+import { getCpfCnpjMask } from '../utils/maskUtils';
 
 interface UseClienteFormProps {
   cliente?: Cliente | null;
@@ -29,6 +30,11 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     observacoes: cliente?.observacoes || '',
     ativo: cliente?.ativo ?? true
   });
+
+  // Estado para controlar a máscara dinâmica do CPF/CNPJ
+  const [cpfCnpjMask, setCpfCnpjMask] = useState(() => 
+    getCpfCnpjMask(cliente?.cpf_cnpj || '')
+  );
 
   const mutation = useMutation({
     mutationFn: async (data: ClienteFormData) => {
@@ -102,12 +108,19 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
       ...prev,
       [field]: value
     }));
+
+    // Atualizar máscara dinamicamente quando o campo CPF/CNPJ for alterado
+    if (field === 'cpf_cnpj' && typeof value === 'string') {
+      const newMask = getCpfCnpjMask(value);
+      setCpfCnpjMask(newMask);
+    }
   };
 
   return {
     formData,
     mutation,
     handleSubmit,
-    handleChange
+    handleChange,
+    cpfCnpjMask
   };
 };
