@@ -6,7 +6,7 @@ import { useUserRoles } from './useUserRoles';
 
 interface UserPlan {
   id: string;
-  tipo_plano: 'mensal' | 'anual';
+  tipo_plano: 'mensal' | 'anual' | 'teste';
   data_inicio: string;
   data_fim: string;
   ativo: boolean;
