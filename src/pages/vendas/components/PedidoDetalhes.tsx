@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Calendar, DollarSign, User, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import PedidoImpressaoButton from './PedidoImpressaoButton';
 
 interface Pedido {
   id: string;
@@ -72,9 +73,12 @@ const PedidoDetalhes = ({ pedido, onClose }: PedidoDetalhesProps) => {
           <CardTitle>
             Detalhes do Pedido #{pedido.id.slice(-8)}
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <PedidoImpressaoButton pedidoId={pedido.id} />
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
 

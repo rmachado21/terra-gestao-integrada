@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import PedidoForm from './PedidoForm';
 import PedidoDetalhes from './PedidoDetalhes';
+import PedidoImpressaoButton from './PedidoImpressaoButton';
 
 interface Pedido {
   id: string;
@@ -336,6 +337,11 @@ const PedidosList = () => {
                     </div>
                     
                     <div className="flex space-x-2">
+                      <PedidoImpressaoButton 
+                        pedidoId={pedido.id} 
+                        showText={false}
+                        size="sm"
+                      />
                       <Button variant="outline" size="sm" onClick={() => handleDetalhes(pedido)}>
                         <Eye className="h-4 w-4" />
                       </Button>
