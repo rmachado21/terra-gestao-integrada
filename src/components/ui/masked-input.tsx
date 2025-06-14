@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Input } from "./input";
 import { cn } from "@/lib/utils";
@@ -21,6 +20,7 @@ const MaskedInput = React.forwardRef<HTMLInputElement, MaskedInputProps>(
       let valueIndex = 0;
       
       for (let i = 0; i < maskPattern.length && valueIndex < cleanValue.length; i++) {
+	if (maskPattern[i] === '11') {
         if (maskPattern[i] === '9') {
           maskedValue += cleanValue[valueIndex];
           valueIndex++;
