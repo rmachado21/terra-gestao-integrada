@@ -17,8 +17,12 @@ interface Cliente {
   nome: string;
   email: string | null;
   telefone: string | null;
+  cpf_cnpj: string | null;
+  cep: string | null;
   endereco: string | null;
+  bairro: string | null;
   cidade: string | null;
+  estado: string | null;
   ativo: boolean;
   observacoes: string | null;
 }
@@ -37,8 +41,12 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
     nome: cliente?.nome || '',
     email: cliente?.email || '',
     telefone: cliente?.telefone || '',
+    cpf_cnpj: cliente?.cpf_cnpj || '',
+    cep: cliente?.cep || '',
     endereco: cliente?.endereco || '',
+    bairro: cliente?.bairro || '',
     cidade: cliente?.cidade || '',
+    estado: cliente?.estado || '',
     observacoes: cliente?.observacoes || '',
     ativo: cliente?.ativo ?? true
   });
@@ -52,8 +60,12 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
         user_id: user.id,
         email: data.email || null,
         telefone: data.telefone || null,
+        cpf_cnpj: data.cpf_cnpj || null,
+        cep: data.cep || null,
         endereco: data.endereco || null,
+        bairro: data.bairro || null,
         cidade: data.cidade || null,
+        estado: data.estado || null,
         observacoes: data.observacoes || null
       };
 
@@ -162,12 +174,52 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+              <Input
+                id="cpf_cnpj"
+                value={formData.cpf_cnpj}
+                onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="cep">CEP</Label>
+              <Input
+                id="cep"
+                value={formData.cep}
+                onChange={(e) => handleChange('cep', e.target.value)}
+                placeholder="00000-000"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bairro">Bairro</Label>
+              <Input
+                id="bairro"
+                value={formData.bairro}
+                onChange={(e) => handleChange('bairro', e.target.value)}
+                placeholder="Bairro"
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="cidade">Cidade</Label>
               <Input
                 id="cidade"
                 value={formData.cidade}
                 onChange={(e) => handleChange('cidade', e.target.value)}
                 placeholder="Cidade"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estado">Estado</Label>
+              <Input
+                id="estado"
+                value={formData.estado}
+                onChange={(e) => handleChange('estado', e.target.value)}
+                placeholder="Estado"
               />
             </div>
           </div>

@@ -117,10 +117,14 @@ export type Database = {
       clientes: {
         Row: {
           ativo: boolean | null
+          bairro: string | null
+          cep: string | null
           cidade: string | null
+          cpf_cnpj: string | null
           created_at: string | null
           email: string | null
           endereco: string | null
+          estado: string | null
           id: string
           nome: string
           observacoes: string | null
@@ -130,10 +134,14 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          bairro?: string | null
+          cep?: string | null
           cidade?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           endereco?: string | null
+          estado?: string | null
           id?: string
           nome: string
           observacoes?: string | null
@@ -143,10 +151,14 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          bairro?: string | null
+          cep?: string | null
           cidade?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           endereco?: string | null
+          estado?: string | null
           id?: string
           nome?: string
           observacoes?: string | null
