@@ -57,13 +57,13 @@ serve(async (req) => {
 
     // Define prices based on plan type
     const priceConfig = planType === 'anual' ? {
-      unit_amount: 7990, // R$ 79.90 annually
+      unit_amount: 19990, // R$ 199.90 annually
       recurring: { interval: 'year' as const },
-      product_name: 'Plano Anual - Sistema Agrícola'
+      product_name: 'Plano Anual - Gestor Raiz'
     } : {
-      unit_amount: 799, // R$ 7.99 monthly
+      unit_amount: 1990, // R$ 19.90 monthly
       recurring: { interval: 'month' as const },
-      product_name: 'Plano Mensal - Sistema Agrícola'
+      product_name: 'Plano Mensal - Gestor Raiz'
     };
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
