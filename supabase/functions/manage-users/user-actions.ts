@@ -5,10 +5,10 @@ export const listUsers = async (supabaseClient: SupabaseClient) => {
   console.log('Listing users...');
   
   try {
-    // Get all profiles first
+    // Get all profiles first with telefone and cargo fields
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
-      .select('*');
+      .select('id, nome, email, ativo, created_at, telefone, cargo');
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError);

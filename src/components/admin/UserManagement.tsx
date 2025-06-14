@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +14,8 @@ interface AdminUser {
   id: string;
   nome: string;
   email: string;
+  telefone?: string;
+  cargo?: string;
   ativo: boolean;
   created_at: string;
   user_roles: { role: UserRole }[];
@@ -156,7 +157,27 @@ const UserManagement = ({
                             <Crown className="h-4 w-4 text-yellow-500" />
                           )}
                         </div>
-                        <p className="text-gray-600 mb-2">{user.email}</p>
+                        
+                        {/* Cargo */}
+                        {user.cargo && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              {user.cargo}
+                            </Badge>
+                          </div>
+                        )}
+                        
+                        <p className="text-gray-600 mb-1">{user.email}</p>
+                        
+                        {/* Telefone */}
+                        {user.telefone && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm text-gray-500 flex items-center gap-1">
+                              📞 {user.telefone}
+                            </span>
+                          </div>
+                        )}
+                        
                         <p className="text-sm text-gray-500">
                           Criado em: {format(new Date(user.created_at), 'dd/MM/yyyy')}
                         </p>

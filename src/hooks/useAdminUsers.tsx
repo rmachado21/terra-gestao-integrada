@@ -16,6 +16,8 @@ interface AdminUser {
   id: string;
   nome: string;
   email: string;
+  telefone?: string;
+  cargo?: string;
   ativo: boolean;
   created_at: string;
   user_roles: { role: UserRole }[];
