@@ -37,6 +37,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      console.error('No authorization header provided')
       throw new Error('No authorization header')
     }
 
@@ -45,8 +46,11 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
     
     if (authError || !user) {
+      console.error('Authentication failed:', authError)
       throw new Error('Invalid token')
     }
+
+    console.log('User authenticated:', user.id)
 
     // Check if user has admin or super_admin role
     const { data: userRoles, error: roleError } = await supabaseClient
@@ -55,21 +59,27 @@ serve(async (req) => {
       .eq('user_id', user.id)
     
     if (roleError) {
+      console.error('Error checking user roles:', roleError)
       throw new Error('Error checking user roles')
     }
 
+    console.log('User roles:', userRoles)
+
     const hasAdminRole = userRoles?.some(r => r.role === 'admin' || r.role === 'super_admin')
     if (!hasAdminRole) {
+      console.error('User does not have admin role. User roles:', userRoles)
       throw new Error('Insufficient permissions')
     }
 
     const { action, userData, userId, planData, targetUserId, active, newRole } = await req.json()
 
+    console.log('Processing action:', action)
+
     switch (action) {
       case 'list_users': {
         console.log('Listing users...')
         
-        // Get all users with their profiles, roles, and plans
+        // Get all users with their profiles and roles (LEFT JOIN to include users without plans)
         const { data: profiles, error: profilesError } = await supabaseClient
           .from('profiles')
           .select(`
@@ -79,23 +89,28 @@ serve(async (req) => {
             ativo,
             created_at,
             user_roles (role),
-            user_plans!inner (
+            user_plans (
               tipo_plano,
               data_inicio,
               data_fim,
               ativo
             )
           `)
-          .eq('user_plans.ativo', true)
 
         if (profilesError) {
           console.error('Error fetching profiles:', profilesError)
           throw profilesError
         }
 
-        console.log('Users fetched successfully:', profiles?.length)
+        // Filter to only show active plans for each user (if they have any)
+        const processedUsers = profiles?.map(profile => ({
+          ...profile,
+          user_plan: profile.user_plans?.find(plan => plan.ativo) || null
+        })) || []
+
+        console.log('Users fetched successfully:', processedUsers?.length)
         return new Response(
-          JSON.stringify(profiles || []),
+          JSON.stringify(processedUsers),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
