@@ -10,7 +10,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useEffect } from 'react';
 import { Loader2, User, Building } from 'lucide-react';
 import { nameSchema, phoneSchema } from '@/lib/security';
-import InputMask from 'react-input-mask';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { getTelefoneMask } from '@/lib/maskUtils';
 import LogoUpload from './LogoUpload';
 
@@ -130,19 +130,13 @@ const ProfileForm = () => {
                   <FormItem>
                     <FormLabel>Telefone</FormLabel>
                     <FormControl>
-                      <InputMask
+                      <MaskedInput
                         mask={getTelefoneMask(field.value || '')}
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                      >
-                        {(inputProps: any) => (
-                          <Input 
-                            {...inputProps}
-                            placeholder="(11) 99999-9999" 
-                          />
-                        )}
-                      </InputMask>
+                        placeholder="(11) 99999-9999"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,19 +212,13 @@ const ProfileForm = () => {
                   <FormItem>
                     <FormLabel>CNPJ</FormLabel>
                     <FormControl>
-                      <InputMask
+                      <MaskedInput
                         mask="99.999.999/9999-99"
                         value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                      >
-                        {(inputProps: any) => (
-                          <Input 
-                            {...inputProps}
-                            placeholder="XX.XXX.XXX/XXXX-XX" 
-                          />
-                        )}
-                      </InputMask>
+                        placeholder="XX.XXX.XXX/XXXX-XX"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
