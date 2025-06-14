@@ -9,17 +9,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import ClienteForm from './ClienteForm';
+
 interface Cliente {
   id: string;
   nome: string;
   email: string | null;
   telefone: string | null;
+  cpf_cnpj: string | null;
+  cep: string | null;
   endereco: string | null;
+  bairro: string | null;
   cidade: string | null;
+  estado: string | null;
   ativo: boolean;
   observacoes: string | null;
   created_at: string;
 }
+
 const ClientesList = () => {
   const {
     user
