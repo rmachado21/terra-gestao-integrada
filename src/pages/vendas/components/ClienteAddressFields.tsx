@@ -1,6 +1,7 @@
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InputMask from 'react-input-mask';
 import { ClienteFormData } from '../types/cliente';
 
@@ -8,6 +9,14 @@ interface ClienteAddressFieldsProps {
   formData: ClienteFormData;
   handleChange: (field: keyof ClienteFormData, value: string | boolean) => void;
 }
+
+// Lista de siglas dos estados brasileiros
+const ESTADOS_BRASIL = [
+  'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 
+  'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 
+  'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 
+  'SE', 'TO'
+];
 
 const ClienteAddressFields = ({ formData, handleChange }: ClienteAddressFieldsProps) => {
   return (
@@ -51,11 +60,30 @@ const ClienteAddressFields = ({ formData, handleChange }: ClienteAddressFieldsPr
 
       <div className="space-y-2">
         <Label htmlFor="estado">Estado</Label>
-        <Input
-          id="estado"
+        <Select
           value={formData.estado}
-          onChange={(e) => handleChange('estado', e.target.value)}
-          placeholder="Estado"
+          onValueChange={(value) => handleChange('estado', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o estado" />
+          </SelectTrigger>
+          <SelectContent>
+            {ESTADOS_BRASIL.map((estado) => (
+              <SelectItem key={estado} value={estado}>
+                {estado}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="endereco">Endereço</Label>
+        <Input
+          id="endereco"
+          value={formData.endereco}
+          onChange={(e) => handleChange('endereco', e.target.value)}
+          placeholder="Rua, número, complemento"
         />
       </div>
     </div>
