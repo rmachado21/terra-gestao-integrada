@@ -153,17 +153,18 @@ export const updateUserPlan = async (
   const mappedPlanType = planData.tipo_plano === 'teste' ? 'mensal' : planData.tipo_plano;
   
   try {
-    // First, deactivate existing plans using a transaction-like approach
-    const { error: deactivateError } = await supabaseClient
+    // First, delete all existing plans for this user to avoid unique constraint issues
+    const { error: deleteError } = await supabaseClient
       .from('user_plans')
-      .update({ ativo: false })
-      .eq('user_id', targetUserId)
-      .eq('ativo', true);
+      .delete()
+      .eq('user_id', targetUserId);
 
-    if (deactivateError) {
-      console.error('Error deactivating existing plans:', deactivateError);
-      throw deactivateError;
+    if (deleteError) {
+      console.error('Error deleting existing plans:', deleteError);
+      throw deleteError;
     }
+
+    console.log('Successfully deleted existing plans for user:', targetUserId);
 
     // Calculate end date based on plan type
     const startDate = planData.data_inicio || new Date().toISOString().split('T')[0];
@@ -201,6 +202,8 @@ export const updateUserPlan = async (
       console.error('Error creating user plan:', planError);
       throw planError;
     }
+
+    console.log('Successfully created new plan for user:', targetUserId);
 
     // Log admin action with original plan type
     await supabaseClient
@@ -442,17 +445,18 @@ export const updateUserPlanById = async (
   const mappedPlanType = planData.tipo_plano === 'teste' ? 'mensal' : planData.tipo_plano;
   
   try {
-    // First, deactivate existing plans
-    const { error: deactivateError } = await supabaseClient
+    // First, delete all existing plans for this user to avoid unique constraint issues
+    const { error: deleteError } = await supabaseClient
       .from('user_plans')
-      .update({ ativo: false })
-      .eq('user_id', userId)
-      .eq('ativo', true);
+      .delete()
+      .eq('user_id', userId);
 
-    if (deactivateError) {
-      console.error('Error deactivating existing plans:', deactivateError);
-      throw deactivateError;
+    if (deleteError) {
+      console.error('Error deleting existing plans:', deleteError);
+      throw deleteError;
     }
+
+    console.log('Successfully deleted existing plans for user:', userId);
 
     // Calculate end date based on plan type
     const startDate = planData.data_inicio || new Date().toISOString().split('T')[0];
@@ -490,6 +494,8 @@ export const updateUserPlanById = async (
       console.error('Error creating user plan:', planError);
       throw planError;
     }
+
+    console.log('Successfully created new plan for user:', userId);
 
     // Log admin action with original plan type
     await supabaseClient
