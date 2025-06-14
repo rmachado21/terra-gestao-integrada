@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Cliente, ClienteFormData } from '../types/cliente';
-import { getCpfCnpjMask } from '../utils/maskUtils';
+import { getCpfCnpjMask } from '@/lib/maskUtils';
 
 interface UseClienteFormProps {
   cliente?: Cliente | null;

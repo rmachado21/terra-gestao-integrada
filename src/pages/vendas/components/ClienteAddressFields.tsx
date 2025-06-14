@@ -1,132 +1,72 @@
 
-import InputMask from 'react-input-mask';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UseFormReturn } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { ClienteFormData } from '../types/cliente';
 import { getCepMask } from '@/lib/maskUtils';
 
 interface ClienteAddressFieldsProps {
-  form: UseFormReturn<ClienteFormData>;
+  formData: ClienteFormData;
+  handleChange: (field: keyof ClienteFormData, value: string | boolean) => void;
 }
 
-const ClienteAddressFields = ({ form }: ClienteAddressFieldsProps) => {
+const ClienteAddressFields = ({ formData, handleChange }: ClienteAddressFieldsProps) => {
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="endereco.cep"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>CEP</FormLabel>
-            <FormControl>
-              <InputMask
-                mask={getCepMask()}
-                value={field.value || ''}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              >
-                {(inputProps: any) => (
-                  <Input 
-                    {...inputProps}
-                    placeholder="00000-000" 
-                  />
-                )}
-              </InputMask>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="endereco.logradouro"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Logradouro</FormLabel>
-            <FormControl>
-              <Input placeholder="Rua, Avenida, etc." {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="endereco.numero"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número</FormLabel>
-              <FormControl>
-                <Input placeholder="123" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="endereco.complemento"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Complemento</FormLabel>
-              <FormControl>
-                <Input placeholder="Apt, Sala, etc." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="cep">CEP</Label>
+        <MaskedInput
+          id="cep"
+          mask={getCepMask()}
+          value={formData.cep}
+          onChange={(e) => handleChange('cep', e.target.value)}
+          placeholder="00000-000"
         />
       </div>
 
-      <FormField
-        control={form.control}
-        name="endereco.bairro"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Bairro</FormLabel>
-            <FormControl>
-              <Input placeholder="Nome do bairro" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="endereco.cidade"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cidade</FormLabel>
-              <FormControl>
-                <Input placeholder="Nome da cidade" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="endereco.estado"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estado</FormLabel>
-              <FormControl>
-                <Input placeholder="SP" maxLength={2} {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="space-y-2">
+        <Label htmlFor="endereco">Endereço</Label>
+        <Input
+          id="endereco"
+          value={formData.endereco}
+          onChange={(e) => handleChange('endereco', e.target.value)}
+          placeholder="Rua, Avenida, etc."
         />
       </div>
-    </>
+
+      <div className="space-y-2">
+        <Label htmlFor="bairro">Bairro</Label>
+        <Input
+          id="bairro"
+          value={formData.bairro}
+          onChange={(e) => handleChange('bairro', e.target.value)}
+          placeholder="Nome do bairro"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="cidade">Cidade</Label>
+          <Input
+            id="cidade"
+            value={formData.cidade}
+            onChange={(e) => handleChange('cidade', e.target.value)}
+            placeholder="Nome da cidade"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="estado">Estado</Label>
+          <Input
+            id="estado"
+            value={formData.estado}
+            onChange={(e) => handleChange('estado', e.target.value)}
+            placeholder="SP"
+            maxLength={2}
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

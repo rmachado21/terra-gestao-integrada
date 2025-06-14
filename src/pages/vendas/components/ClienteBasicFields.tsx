@@ -1,102 +1,62 @@
 
-import InputMask from 'react-input-mask';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UseFormReturn } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
+import { MaskedInput } from '@/components/ui/masked-input';
 import { ClienteFormData } from '../types/cliente';
-import { getCpfCnpjMask, getTelefoneMask } from '@/lib/maskUtils';
+import { getTelefoneMask } from '@/lib/maskUtils';
 
 interface ClienteBasicFieldsProps {
-  form: UseFormReturn<ClienteFormData>;
+  formData: ClienteFormData;
+  handleChange: (field: keyof ClienteFormData, value: string | boolean) => void;
+  cpfCnpjMask: string;
 }
 
-const ClienteBasicFields = ({ form }: ClienteBasicFieldsProps) => {
+const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasicFieldsProps) => {
   return (
-    <>
-      <FormField
-        control={form.control}
-        name="nome"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Nome *</FormLabel>
-            <FormControl>
-              <Input placeholder="Nome do cliente" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="nome">Nome *</Label>
+        <Input
+          id="nome"
+          value={formData.nome}
+          onChange={(e) => handleChange('nome', e.target.value)}
+          placeholder="Nome do cliente"
+        />
+      </div>
 
-      <FormField
-        control={form.control}
-        name="email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email *</FormLabel>
-            <FormControl>
-              <Input 
-                type="email" 
-                placeholder="email@exemplo.com" 
-                {...field} 
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+          placeholder="email@exemplo.com"
+        />
+      </div>
 
-      <FormField
-        control={form.control}
-        name="telefone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Telefone *</FormLabel>
-            <FormControl>
-              <InputMask
-                mask={getTelefoneMask(field.value || '')}
-                value={field.value || ''}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              >
-                {(inputProps: any) => (
-                  <Input 
-                    {...inputProps}
-                    placeholder="(11) 99999-9999" 
-                  />
-                )}
-              </InputMask>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="telefone">Telefone</Label>
+        <MaskedInput
+          id="telefone"
+          mask={getTelefoneMask(formData.telefone)}
+          value={formData.telefone}
+          onChange={(e) => handleChange('telefone', e.target.value)}
+          placeholder="(11) 99999-9999"
+        />
+      </div>
 
-      <FormField
-        control={form.control}
-        name="cpf_cnpj"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>CPF/CNPJ *</FormLabel>
-            <FormControl>
-              <InputMask
-                mask={getCpfCnpjMask(field.value || '')}
-                value={field.value || ''}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-              >
-                {(inputProps: any) => (
-                  <Input 
-                    {...inputProps}
-                    placeholder="000.000.000-00 ou 00.000.000/0000-00" 
-                  />
-                )}
-              </InputMask>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </>
+      <div className="space-y-2">
+        <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+        <MaskedInput
+          id="cpf_cnpj"
+          mask={cpfCnpjMask}
+          value={formData.cpf_cnpj}
+          onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
+          placeholder="000.000.000-00 ou 00.000.000/0000-00"
+        />
+      </div>
+    </div>
   );
 };
 
