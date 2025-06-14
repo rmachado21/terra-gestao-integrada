@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Cliente, ClienteFormData } from '../types/cliente';
-import { getCpfCnpjMask } from '@/lib/maskUtils';
+import { getCpfCnpjMask } from '../utils/maskUtils';
 
 interface UseClienteFormProps {
   cliente?: Cliente | null;
@@ -22,15 +22,11 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     email: cliente?.email || '',
     telefone: cliente?.telefone || '',
     cpf_cnpj: cliente?.cpf_cnpj || '',
-    endereco: {
-      cep: cliente?.cep || '',
-      logradouro: cliente?.endereco || '',
-      numero: '',
-      complemento: '',
-      bairro: cliente?.bairro || '',
-      cidade: cliente?.cidade || '',
-      estado: cliente?.estado || '',
-    },
+    cep: cliente?.cep || '',
+    endereco: cliente?.endereco || '',
+    bairro: cliente?.bairro || '',
+    cidade: cliente?.cidade || '',
+    estado: cliente?.estado || '',
     observacoes: cliente?.observacoes || '',
     ativo: cliente?.ativo ?? true
   });
@@ -45,18 +41,17 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
       if (!user?.id) throw new Error('Usuário não autenticado');
 
       const clienteData = {
-        nome: data.nome,
+        ...data,
+        user_id: user.id,
         email: data.email || null,
         telefone: data.telefone || null,
         cpf_cnpj: data.cpf_cnpj || null,
-        cep: data.endereco.cep || null,
-        endereco: data.endereco.logradouro || null,
-        bairro: data.endereco.bairro || null,
-        cidade: data.endereco.cidade || null,
-        estado: data.endereco.estado || null,
-        observacoes: data.observacoes || null,
-        ativo: data.ativo,
-        user_id: user.id
+        cep: data.cep || null,
+        endereco: data.endereco || null,
+        bairro: data.bairro || null,
+        cidade: data.cidade || null,
+        estado: data.estado || null,
+        observacoes: data.observacoes || null
       };
 
       if (cliente) {
@@ -108,25 +103,11 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     mutation.mutate(formData);
   };
 
-  const handleChange = (field: keyof ClienteFormData | string, value: string | boolean) => {
-    if (field.includes('.')) {
-      // Handle nested fields like 'endereco.cep'
-      const [parent, child] = field.split('.');
-      if (parent === 'endereco') {
-        setFormData(prev => ({
-          ...prev,
-          endereco: {
-            ...prev.endereco,
-            [child]: value
-          }
-        }));
-      }
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value
-      }));
-    }
+  const handleChange = (field: keyof ClienteFormData, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
 
     // Atualizar máscara dinamicamente quando o campo CPF/CNPJ for alterado
     if (field === 'cpf_cnpj' && typeof value === 'string') {

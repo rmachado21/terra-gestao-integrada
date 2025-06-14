@@ -19,15 +19,11 @@ export interface ClienteFormData {
   email: string;
   telefone: string;
   cpf_cnpj: string;
-  endereco: {
-    cep: string;
-    logradouro: string;
-    numero: string;
-    complemento: string;
-    bairro: string;
-    cidade: string;
-    estado: string;
-  };
+  cep: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
   observacoes: string;
   ativo: boolean;
 }
