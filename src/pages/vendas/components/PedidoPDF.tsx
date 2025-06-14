@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { formatDocument, getDocumentLabel } from '../utils/documentFormatter';
 
 interface PedidoPDFProps {
   pedido: {
@@ -18,6 +19,7 @@ interface PedidoPDFProps {
       cidade?: string;
       estado?: string;
       cep?: string;
+      cpf_cnpj?: string;
     } | null;
   };
   itens: Array<{
@@ -111,6 +113,11 @@ const PedidoPDF = React.forwardRef<HTMLDivElement, PedidoPDFProps>(
             <CardContent>
               <div className="space-y-1">
                 <p><strong>Nome:</strong> {pedido.cliente?.nome || 'Cliente não informado'}</p>
+                {pedido.cliente?.cpf_cnpj && (
+                  <p>
+                    <strong>{getDocumentLabel(pedido.cliente.cpf_cnpj)}:</strong> {formatDocument(pedido.cliente.cpf_cnpj)}
+                  </p>
+                )}
                 {pedido.cliente?.telefone && (
                   <p><strong>Telefone:</strong> {pedido.cliente.telefone}</p>
                 )}

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Calendar, DollarSign, User, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PedidoImpressaoButton from './PedidoImpressaoButton';
+import { formatDocument, getDocumentLabel } from '../utils/documentFormatter';
 
 interface Pedido {
   id: string;
@@ -17,6 +18,7 @@ interface Pedido {
   cliente: {
     id: string;
     nome: string;
+    cpf_cnpj?: string | null;
   } | null;
 }
 
@@ -95,6 +97,11 @@ const PedidoDetalhes = ({ pedido, onClose }: PedidoDetalhesProps) => {
             <CardContent>
               <div className="space-y-2">
                 <p><strong>Nome:</strong> {pedido.cliente?.nome || 'Cliente não informado'}</p>
+                {pedido.cliente?.cpf_cnpj && (
+                  <p>
+                    <strong>{getDocumentLabel(pedido.cliente.cpf_cnpj)}:</strong> {formatDocument(pedido.cliente.cpf_cnpj)}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

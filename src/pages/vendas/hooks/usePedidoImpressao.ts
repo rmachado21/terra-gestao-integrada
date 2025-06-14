@@ -21,7 +21,8 @@ export const usePedidoImpressao = (pedidoId: string) => {
             endereco,
             cidade,
             estado,
-            cep
+            cep,
+            cpf_cnpj
           )
         `)
         .eq('id', pedidoId)
