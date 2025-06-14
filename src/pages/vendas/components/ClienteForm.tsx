@@ -11,6 +11,7 @@ import { X, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import InputMask from 'react-input-mask';
 
 interface Cliente {
   id: string;
@@ -50,6 +51,26 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
     observacoes: cliente?.observacoes || '',
     ativo: cliente?.ativo ?? true
   });
+
+  // Função para determinar a máscara do CPF/CNPJ dinamicamente
+  const getCpfCnpjMask = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '');
+    if (cleanValue.length <= 11) {
+      return '999.999.999-99'; // CPF
+    } else {
+      return '99.999.999/9999-99'; // CNPJ
+    }
+  };
+
+  // Função para determinar a máscara do telefone dinamicamente
+  const getTelefoneMask = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '');
+    if (cleanValue.length <= 10) {
+      return '(99) 9999-9999'; // Telefone fixo
+    } else {
+      return '(99) 99999-9999'; // Celular
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -165,32 +186,53 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="telefone">Telefone</Label>
-              <Input
-                id="telefone"
+              <InputMask
+                mask={getTelefoneMask(formData.telefone)}
                 value={formData.telefone}
                 onChange={(e) => handleChange('telefone', e.target.value)}
-                placeholder="(11) 99999-9999"
-              />
+              >
+                {(inputProps: any) => (
+                  <Input
+                    {...inputProps}
+                    id="telefone"
+                    placeholder="(11) 99999-9999"
+                  />
+                )}
+              </InputMask>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
-              <Input
-                id="cpf_cnpj"
+              <InputMask
+                mask={getCpfCnpjMask(formData.cpf_cnpj)}
                 value={formData.cpf_cnpj}
                 onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
-                placeholder="000.000.000-00 ou 00.000.000/0000-00"
-              />
+              >
+                {(inputProps: any) => (
+                  <Input
+                    {...inputProps}
+                    id="cpf_cnpj"
+                    placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  />
+                )}
+              </InputMask>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cep">CEP</Label>
-              <Input
-                id="cep"
+              <InputMask
+                mask="99999-999"
                 value={formData.cep}
                 onChange={(e) => handleChange('cep', e.target.value)}
-                placeholder="00000-000"
-              />
+              >
+                {(inputProps: any) => (
+                  <Input
+                    {...inputProps}
+                    id="cep"
+                    placeholder="00000-000"
+                  />
+                )}
+              </InputMask>
             </div>
 
             <div className="space-y-2">
