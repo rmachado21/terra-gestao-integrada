@@ -132,7 +132,7 @@ const SubscriptionManagement = () => {
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Melhor valor! Desconto equibvale a 2 meses.
+                  Economize 2 meses de assinatura.
                 </p>
                 <Button 
                   onClick={() => createCheckout('anual')}
