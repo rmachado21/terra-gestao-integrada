@@ -1,6 +1,6 @@
 
 // Função para determinar a máscara do CPF/CNPJ dinamicamente
-export const CpfCnpjMask = (value: string) => {
+export const getCpfCnpjMask = (value: string) => {
   // Remove todos os caracteres não numéricos para contar apenas dígitos
   const cleanValue = value.replace(/\D/g, '');
   
