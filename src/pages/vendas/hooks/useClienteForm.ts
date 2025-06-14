@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Cliente, ClienteFormData } from '../types/cliente';
-import { getCpfCnpjMask } from '@/lib/maskUtils';
 
 interface UseClienteFormProps {
   cliente?: Cliente | null;
@@ -16,6 +15,13 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Determinar tipo inicial baseado no valor existente do CPF/CNPJ
+  const getInitialDocumentType = (cpfCnpj: string | null) => {
+    if (!cpfCnpj) return 'cpf';
+    const cleanValue = cpfCnpj.replace(/\D/g, '');
+    return cleanValue.length > 11 ? 'cnpj' : 'cpf';
+  };
   
   const [formData, setFormData] = useState<ClienteFormData>({
     nome: cliente?.nome || '',
@@ -28,21 +34,21 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     cidade: cliente?.cidade || '',
     estado: cliente?.estado || '',
     observacoes: cliente?.observacoes || '',
-    ativo: cliente?.ativo ?? true
+    ativo: cliente?.ativo ?? true,
+    documentType: getInitialDocumentType(cliente?.cpf_cnpj || null)
   });
 
-  // Estado para controlar a máscara dinâmica do CPF/CNPJ
-  const [cpfCnpjMask, setCpfCnpjMask] = useState(() => 
-    getCpfCnpjMask(cliente?.cpf_cnpj || '')
-  );
+  // Função para obter a máscara baseada no tipo selecionado
+  const getDocumentMask = (documentType: 'cpf' | 'cnpj') => {
+    return documentType === 'cpf' ? '999.999.999-99' : '99.999.999/9999-99';
+  };
 
   const mutation = useMutation({
     mutationFn: async (data: ClienteFormData) => {
       if (!user?.id) throw new Error('Usuário não autenticado');
 
       const clienteData = {
-        ...data,
-        user_id: user.id,
+        nome: data.nome,
         email: data.email || null,
         telefone: data.telefone || null,
         cpf_cnpj: data.cpf_cnpj || null,
@@ -51,7 +57,9 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
         bairro: data.bairro || null,
         cidade: data.cidade || null,
         estado: data.estado || null,
-        observacoes: data.observacoes || null
+        observacoes: data.observacoes || null,
+        ativo: data.ativo,
+        user_id: user.id
       };
 
       if (cliente) {
@@ -109,10 +117,13 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
       [field]: value
     }));
 
-    // Atualizar máscara dinamicamente quando o campo CPF/CNPJ for alterado
-    if (field === 'cpf_cnpj' && typeof value === 'string') {
-      const newMask = getCpfCnpjMask(value);
-      setCpfCnpjMask(newMask);
+    // Limpar o campo CPF/CNPJ quando trocar o tipo de documento
+    if (field === 'documentType') {
+      setFormData(prev => ({
+        ...prev,
+        documentType: value as 'cpf' | 'cnpj',
+        cpf_cnpj: ''
+      }));
     }
   };
 
@@ -121,6 +132,6 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
     mutation,
     handleSubmit,
     handleChange,
-    cpfCnpjMask
+    getDocumentMask
   };
 };

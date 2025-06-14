@@ -2,16 +2,20 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MaskedInput } from '@/components/ui/masked-input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ClienteFormData } from '../types/cliente';
 import { getTelefoneMask } from '@/lib/maskUtils';
 
 interface ClienteBasicFieldsProps {
   formData: ClienteFormData;
   handleChange: (field: keyof ClienteFormData, value: string | boolean) => void;
-  cpfCnpjMask: string;
+  getDocumentMask: (documentType: 'cpf' | 'cnpj') => string;
 }
 
-const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasicFieldsProps) => {
+const ClienteBasicFields = ({ formData, handleChange, getDocumentMask }: ClienteBasicFieldsProps) => {
+  const documentMask = getDocumentMask(formData.documentType);
+  const documentPlaceholder = formData.documentType === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00';
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -47,13 +51,33 @@ const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasi
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+        <Label>Tipo de Documento</Label>
+        <RadioGroup
+          value={formData.documentType}
+          onValueChange={(value) => handleChange('documentType', value)}
+          className="flex gap-6"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="cpf" id="cpf" />
+            <Label htmlFor="cpf">CPF</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="cnpj" id="cnpj" />
+            <Label htmlFor="cnpj">CNPJ</Label>
+          </div>
+        </RadioGroup>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="cpf_cnpj">
+          {formData.documentType === 'cpf' ? 'CPF' : 'CNPJ'}
+        </Label>
         <MaskedInput
           id="cpf_cnpj"
-          mask={cpfCnpjMask}
+          mask={documentMask}
           value={formData.cpf_cnpj}
           onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
-          placeholder="000.000.000-00 ou 00.000.000/0000-00"
+          placeholder={documentPlaceholder}
         />
       </div>
     </div>

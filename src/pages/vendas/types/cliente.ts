@@ -26,4 +26,5 @@ export interface ClienteFormData {
   estado: string;
   observacoes: string;
   ativo: boolean;
+  documentType: 'cpf' | 'cnpj';
 }

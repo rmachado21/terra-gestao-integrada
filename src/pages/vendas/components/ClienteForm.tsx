@@ -14,7 +14,7 @@ interface ClienteFormProps {
 }
 
 const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
-  const { formData, mutation, handleSubmit, handleChange, cpfCnpjMask } = useClienteForm({
+  const { formData, mutation, handleSubmit, handleChange, getDocumentMask } = useClienteForm({
     cliente,
     onClose
   });
@@ -38,7 +38,7 @@ const ClienteForm = ({ cliente, onClose }: ClienteFormProps) => {
             <ClienteBasicFields 
               formData={formData} 
               handleChange={handleChange}
-              cpfCnpjMask={cpfCnpjMask}
+              getDocumentMask={getDocumentMask}
             />
             <ClienteAddressFields formData={formData} handleChange={handleChange} />
             <ClienteAdditionalFields formData={formData} handleChange={handleChange} />
