@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MaskedInput } from '@/components/ui/masked-input';
 import { ClienteFormData } from '../types/cliente';
-import { getTelefoneMask, getCpfCnpjMask } from '@/lib/maskUtils';
+import { getTelefoneMask } from '@/lib/maskUtils';
 
 interface ClienteBasicFieldsProps {
   formData: ClienteFormData;
@@ -50,7 +50,7 @@ const ClienteBasicFields = ({ formData, handleChange, cpfCnpjMask }: ClienteBasi
         <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
         <MaskedInput
           id="cpf_cnpj"
-          mask={getCpfCnpjMask(formData.cpf_cnpj)}
+          mask={cpfCnpjMask}
           value={formData.cpf_cnpj}
           onChange={(e) => handleChange('cpf_cnpj', e.target.value)}
           placeholder="000.000.000-00 ou 00.000.000/0000-00"
