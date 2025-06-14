@@ -9,22 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import ClienteForm from './ClienteForm';
-
-interface Cliente {
-  id: string;
-  nome: string;
-  email: string | null;
-  telefone: string | null;
-  cpf_cnpj: string | null;
-  cep: string | null;
-  endereco: string | null;
-  bairro: string | null;
-  cidade: string | null;
-  estado: string | null;
-  ativo: boolean;
-  observacoes: string | null;
-  created_at: string;
-}
+import { Cliente } from '../types/cliente';
 
 const ClientesList = () => {
   const {
@@ -87,19 +72,23 @@ const ClientesList = () => {
       });
     }
   });
+
   const handleEdit = (cliente: Cliente) => {
     setEditingCliente(cliente);
     setShowForm(true);
   };
+
   const handleDelete = (clienteId: string) => {
     if (confirm('Tem certeza que deseja excluir este cliente?')) {
       deleteClienteMutation.mutate(clienteId);
     }
   };
+
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingCliente(null);
   };
+
   if (isLoading) {
     return <Card>
         <CardContent className="p-6">
@@ -109,6 +98,7 @@ const ClientesList = () => {
         </CardContent>
       </Card>;
   }
+
   return <div className="space-y-6">
       <Card>
         <CardHeader>
@@ -182,4 +172,5 @@ const ClientesList = () => {
       {showForm && <ClienteForm cliente={editingCliente} onClose={handleCloseForm} />}
     </div>;
 };
+
 export default ClientesList;
