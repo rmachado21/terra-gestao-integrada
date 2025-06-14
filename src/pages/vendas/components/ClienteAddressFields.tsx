@@ -20,71 +20,77 @@ const ESTADOS_BRASIL = [
 
 const ClienteAddressFields = ({ formData, handleChange }: ClienteAddressFieldsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-2">
-        <Label htmlFor="cep">CEP</Label>
-        <InputMask
-          mask="99999-999"
-          value={formData.cep}
-          onChange={(e) => handleChange('cep', e.target.value)}
-        >
-          {(inputProps: any) => (
-            <Input
-              {...inputProps}
-              id="cep"
-              placeholder="00000-000"
-            />
-          )}
-        </InputMask>
+    <div className="space-y-4">
+      {/* Primeira linha: CEP (1/3) + Endereço (2/3) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="cep">CEP</Label>
+          <InputMask
+            mask="99999-999"
+            value={formData.cep}
+            onChange={(e) => handleChange('cep', e.target.value)}
+          >
+            {(inputProps: any) => (
+              <Input
+                {...inputProps}
+                id="cep"
+                placeholder="00000-000"
+              />
+            )}
+          </InputMask>
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="endereco">Endereço</Label>
+          <Input
+            id="endereco"
+            value={formData.endereco}
+            onChange={(e) => handleChange('endereco', e.target.value)}
+            placeholder="Rua, número, complemento"
+          />
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bairro">Bairro</Label>
-        <Input
-          id="bairro"
-          value={formData.bairro}
-          onChange={(e) => handleChange('bairro', e.target.value)}
-          placeholder="Bairro"
-        />
-      </div>
+      {/* Segunda linha: Bairro + Cidade + Estado */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="bairro">Bairro</Label>
+          <Input
+            id="bairro"
+            value={formData.bairro}
+            onChange={(e) => handleChange('bairro', e.target.value)}
+            placeholder="Bairro"
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="cidade">Cidade</Label>
-        <Input
-          id="cidade"
-          value={formData.cidade}
-          onChange={(e) => handleChange('cidade', e.target.value)}
-          placeholder="Cidade"
-        />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="cidade">Cidade</Label>
+          <Input
+            id="cidade"
+            value={formData.cidade}
+            onChange={(e) => handleChange('cidade', e.target.value)}
+            placeholder="Cidade"
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="estado">Estado</Label>
-        <Select
-          value={formData.estado}
-          onValueChange={(value) => handleChange('estado', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o estado" />
-          </SelectTrigger>
-          <SelectContent>
-            {ESTADOS_BRASIL.map((estado) => (
-              <SelectItem key={estado} value={estado}>
-                {estado}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="endereco">Endereço</Label>
-        <Input
-          id="endereco"
-          value={formData.endereco}
-          onChange={(e) => handleChange('endereco', e.target.value)}
-          placeholder="Rua, número, complemento"
-        />
+        <div className="space-y-2">
+          <Label htmlFor="estado">Estado</Label>
+          <Select
+            value={formData.estado}
+            onValueChange={(value) => handleChange('estado', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o estado" />
+            </SelectTrigger>
+            <SelectContent>
+              {ESTADOS_BRASIL.map((estado) => (
+                <SelectItem key={estado} value={estado}>
+                  {estado}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
