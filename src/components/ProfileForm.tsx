@@ -11,6 +11,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { useEffect } from 'react';
 import { Loader2, User } from 'lucide-react';
 import { nameSchema, phoneSchema } from '@/lib/security';
+import InputMask from 'react-input-mask';
+import { getTelefoneMask } from '@/lib/maskUtils';
 
 const profileSchema = z.object({
   nome: nameSchema,
@@ -117,7 +119,19 @@ const ProfileForm = () => {
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <Input placeholder="(11) 99999-9999" {...field} />
+                    <InputMask
+                      mask={getTelefoneMask(field.value || '')}
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    >
+                      {(inputProps: any) => (
+                        <Input 
+                          {...inputProps}
+                          placeholder="(11) 99999-9999" 
+                        />
+                      )}
+                    </InputMask>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
