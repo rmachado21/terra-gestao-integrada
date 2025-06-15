@@ -1,15 +1,17 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail, Users } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, MapPin, Phone, Mail, Users, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import ClienteForm from './ClienteForm';
 import { Cliente } from '../types/cliente';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const ClientesList = () => {
   const {
@@ -72,6 +74,14 @@ const ClientesList = () => {
       });
     }
   });
+
+  const handleWhatsAppClick = (nome: string, telefone: string) => {
+    const cleanTelefone = telefone.replace(/\D/g, '');
+    const message = encodeURIComponent(`Olá ${nome}, tudo bem?`);
+    // Adicionando o código do país (55 para o Brasil)
+    const whatsappUrl = `https://wa.me/55${cleanTelefone}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   const handleEdit = (cliente: Cliente) => {
     setEditingCliente(cliente);
@@ -156,12 +166,44 @@ const ClientesList = () => {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(cliente)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(cliente.id)} className="text-red-600 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                       {cliente.telefone && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => handleWhatsAppClick(cliente.nome, cliente.telefone!)} className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                                <MessageCircle className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Conversar no WhatsApp</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                      <TooltipProvider>
+                        <Tooltip>
+                           <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => handleEdit(cliente)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                              <p>Editar Cliente</p>
+                           </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleDelete(cliente.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Excluir Cliente</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </div>)}
