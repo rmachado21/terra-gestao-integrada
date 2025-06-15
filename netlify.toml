@@ -3,7 +3,6 @@
 [build]
   command = "npm run build"
   publish = "dist"
-  functions = "supabase/functions"
 
 # Redirecionamento para Single Page Application (SPA)
 [[redirects]]
