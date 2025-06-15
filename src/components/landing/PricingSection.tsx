@@ -46,7 +46,7 @@ const PricingSection = () => {
           {plans.map((plan, index) => <Card key={index} className={`relative ${plan.highlighted ? 'border-green-500 border-2 shadow-lg scale-105' : 'border-gray-200'}`}>
               {plan.highlighted && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-500 text-white">
                   <Star className="w-3 h-3 mr-1" />
-                  Mais Popular
+                  Melhor Opção
                 </Badge>}
               
               <CardHeader className="text-center pb-4">
