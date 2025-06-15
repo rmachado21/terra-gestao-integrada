@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,16 +9,6 @@ import RelatoriosVendas from './components/RelatoriosVendas';
 import { ShoppingCart } from 'lucide-react';
 
 const VendasPage = () => {
-  // Mock data para as estatísticas - pode ser substituído por dados reais do backend
-  const statsData = {
-    totalClientes: 45,
-    totalPedidos: 128,
-    pedidosPendentes: 12,
-    entregasRealizadas: 98,
-    faturamentoTotal: 185000,
-    faturamentoMes: 25000
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -30,7 +19,7 @@ const VendasPage = () => {
         </div>
       </div>
 
-      <VendasStats data={statsData} />
+      <VendasStats data={null} />
 
       <Tabs defaultValue="pedidos" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
