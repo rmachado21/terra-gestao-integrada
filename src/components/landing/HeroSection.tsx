@@ -1,12 +1,9 @@
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Play, Sprout } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const HeroSection = () => {
-  return (
-    <section className="relative bg-gradient-to-br from-green-50 to-blue-50 py-20 overflow-hidden">
+  return <section className="relative bg-gradient-to-br from-green-50 to-blue-50 py-20 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
@@ -34,10 +31,7 @@ const HeroSection = () => {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                <Play className="mr-2 h-5 w-5" />
-                Ver Demonstração
-              </Button>
+              
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-gray-500">
@@ -90,8 +84,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
