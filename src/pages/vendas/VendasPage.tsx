@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +20,7 @@ const VendasPage = () => {
         </div>
       </div>
 
-      <VendasStats data={null} />
+      <VendasStats />
 
       <Tabs defaultValue="pedidos" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
