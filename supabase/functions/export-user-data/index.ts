@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import * as XLSX from 'npm:xlsx@0.18.5'
@@ -12,7 +11,7 @@ const corsHeaders = {
 const tablesToExport = [
   'profiles', 'alertas', 'areas', 'clientes', 'colheitas', 'estoque',
   'itens_pedido', 'movimentacoes_financeiras', 'pedidos', 'plantios',
-  'processamentos', 'produtos', 'user_plans', 'user_roles'
+  'processamentos', 'produtos'
 ];
 
 async function fetchAllData(supabaseClient: SupabaseClient, userId: string) {
