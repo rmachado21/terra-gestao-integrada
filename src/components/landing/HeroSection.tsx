@@ -27,7 +27,7 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/auth">
                 <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-6">
-                  Começar Grátis por 30 Dias
+                  Começar Grátis por 7 Dias
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
