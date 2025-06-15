@@ -42,9 +42,7 @@ const SolutionSection = () => {
               <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-semibold text-gray-900">Plantio de Milho - Área 3</h4>
-                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm">
-                    Em Crescimento
-                  </span>
+                  <span className="bg-green-100 text-green-800 py-1 rounded-full px-[9px] text-left mx-0 text-xs font-normal">Crescendo</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
