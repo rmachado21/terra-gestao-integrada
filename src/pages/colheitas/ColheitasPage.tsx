@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 interface Colheita {
   id: string;
   plantio_id: string;
@@ -115,14 +114,21 @@ const ColheitasPage = () => {
   });
   const createColheitaMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('colheitas')
-        .insert([{ ...data, user_id: user?.id }]);
+      const {
+        error
+      } = await supabase.from('colheitas').insert([{
+        ...data,
+        user_id: user?.id
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['colheitas'] });
-      queryClient.invalidateQueries({ queryKey: ['plantios-disponiveis'] });
+      queryClient.invalidateQueries({
+        queryKey: ['colheitas']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['plantios-disponiveis']
+      });
       toast({
         title: 'Colheita registrada com sucesso!'
       });
@@ -303,7 +309,7 @@ const ColheitasPage = () => {
       </div>
 
       <Tabs defaultValue="colheitas" className="space-y-4">
-        <TabsList className="bg-stone-200">
+        <TabsList className=" bg-gray-300">
           <TabsTrigger value="colheitas">Colheitas</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
         </TabsList>
