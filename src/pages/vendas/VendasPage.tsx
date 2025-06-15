@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +8,12 @@ import EntregasList from './components/EntregasList';
 import RelatoriosVendas from './components/RelatoriosVendas';
 import { ShoppingCart } from 'lucide-react';
 import { useVendasStats } from './hooks/useVendasStats';
-
 const VendasPage = () => {
-  const { data: vendasStatsData, isLoading: isLoadingStats } = useVendasStats();
-
-  return (
-    <div className="space-y-6">
+  const {
+    data: vendasStatsData,
+    isLoading: isLoadingStats
+  } = useVendasStats();
+  return <div className="space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
@@ -26,7 +25,7 @@ const VendasPage = () => {
       <VendasStats data={isLoadingStats ? null : vendasStatsData} />
 
       <Tabs defaultValue="pedidos" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4  bg-gray-300">
           <TabsTrigger value="pedidos">
             Pedidos
           </TabsTrigger>
@@ -97,8 +96,6 @@ const VendasPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default VendasPage;
