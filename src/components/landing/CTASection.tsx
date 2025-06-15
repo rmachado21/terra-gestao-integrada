@@ -19,7 +19,7 @@ const CTASection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link to="/auth">
               <Button size="lg" variant="secondary" className="bg-white text-green-600 hover:bg-gray-50 text-lg px-8 py-6">
-                Começar Grátis por 30 Dias
+                Começar Grátis por 7 Dias
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -31,7 +31,7 @@ const CTASection = () => {
           <div className="grid md:grid-cols-3 gap-6 text-sm">
             <div className="flex items-center justify-center space-x-2">
               <CheckCircle className="h-5 w-5" />
-              <span>30 dias grátis</span>
+              <span>7 dias grátis</span>
             </div>
             <div className="flex items-center justify-center space-x-2">
               <CheckCircle className="h-5 w-5" />
