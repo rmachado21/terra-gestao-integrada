@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { z } from 'zod';
 import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { Sprout } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
 
@@ -205,63 +205,78 @@ const Auth = () => {
             <Sprout className="h-8 w-8 text-green-600" />
             <span className="text-2xl font-bold text-gray-900">Gestor Raiz</span>
           </div>
-          
-          <CardDescription>
-            {mode === 'login' ? 'Faça login em sua conta' : 'Crie sua conta de administrador'}
-          </CardDescription>
           {isBlocked && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-2">
               Acesso temporariamente bloqueado por segurança
             </div>}
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'register' && <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input id="nome" type="text" placeholder="Digite seu nome" value={nome} onChange={e => setNome(e.target.value)} required disabled={loading || isBlocked} />
-                {errors.nome && <p className="text-sm text-red-600">{errors.nome}</p>}
-              </div>}
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="Digite seu email" value={email} onChange={e => setEmail(e.target.value)} required disabled={loading || isBlocked} />
-              {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading || isBlocked} />
-              {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
-              {mode === 'register' && <p className="text-xs text-gray-600 mt-1">
-                  Senha deve conter: 8+ caracteres, maiúscula, minúscula, número e símbolo
-                </p>}
-            </div>
-            
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
-              {loading ? 'Carregando...' : mode === 'login' ? 'Entrar' : 'Cadastrar'}
-            </Button>
-          </form>
-          
-          <div className="mt-4 text-center space-y-2">
-            {mode === 'login' && (
-              <button
-                type="button"
-                onClick={() => setMode('reset-request')}
-                className="text-green-600 hover:text-green-700 text-sm underline block mx-auto"
-                disabled={loading || isBlocked}
-              >
-                Esqueci minha senha
-              </button>
-            )}
-            
-            <button 
-              type="button" 
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')} 
-              className="text-green-600 hover:text-green-700 text-sm underline" 
-              disabled={loading || isBlocked}
-            >
-              {mode === 'login' ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
-            </button>
-          </div>
+          <Tabs defaultValue="login" className="w-full" onValueChange={(value) => {
+            setMode(value as AuthMode);
+            setErrors({});
+          }}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Registro</TabsTrigger>
+            </TabsList>
+            <TabsContent value="login" className="pt-4">
+              <CardDescription className="text-center pb-4">
+                Faça login em sua conta
+              </CardDescription>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-login">Email</Label>
+                  <Input id="email-login" type="email" placeholder="Digite seu email" value={email} onChange={e => setEmail(e.target.value)} required disabled={loading || isBlocked} />
+                  {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-login">Senha</Label>
+                  <Input id="password-login" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading || isBlocked} />
+                  {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
+                  {loading ? 'Carregando...' : 'Entrar'}
+                </Button>
+              </form>
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setMode('reset-request')}
+                  className="text-green-600 hover:text-green-700 text-sm underline"
+                  disabled={loading || isBlocked}
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
+            </TabsContent>
+            <TabsContent value="register" className="pt-4">
+              <CardDescription className="text-center pb-4">
+                Crie sua conta de administrador
+              </CardDescription>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="nome-register">Nome</Label>
+                  <Input id="nome-register" type="text" placeholder="Digite seu nome" value={nome} onChange={e => setNome(e.target.value)} required disabled={loading || isBlocked} />
+                  {errors.nome && <p className="text-sm text-red-600">{errors.nome}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email-register">Email</Label>
+                  <Input id="email-register" type="email" placeholder="Digite seu email" value={email} onChange={e => setEmail(e.target.value)} required disabled={loading || isBlocked} />
+                  {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-register">Senha</Label>
+                  <Input id="password-register" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading || isBlocked} />
+                  {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+                   <p className="text-xs text-gray-600 mt-1">
+                      Senha deve conter: 8+ caracteres, maiúscula, minúscula, número e símbolo
+                    </p>
+                </div>
+                <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
+                  {loading ? 'Carregando...' : 'Cadastrar'}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
