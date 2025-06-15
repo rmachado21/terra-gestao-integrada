@@ -9,15 +9,13 @@ export const useDataExport = () => {
 
   const exportData = async () => {
     setLoading(true);
-    const { id } = toast({
+    const { id, update } = toast({
       title: "Iniciando Backup",
       description: "Seu backup está sendo preparado. O download começará em breve...",
     });
 
     try {
-      const { data, error } = await supabase.functions.invoke('export-user-data', {
-        responseType: 'blob',
-      });
+      const { data, error } = await supabase.functions.invoke('export-user-data');
 
       if (error) throw error;
       
@@ -31,7 +29,7 @@ export const useDataExport = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
 
-      toast({
+      update({
         id,
         title: "Backup Concluído",
         description: "Seu arquivo de backup foi baixado com sucesso.",
@@ -40,7 +38,7 @@ export const useDataExport = () => {
 
     } catch (error: any) {
       console.error('Error exporting data:', error);
-      toast({
+      update({
         id,
         title: "Erro no Backup",
         description: error.message || "Não foi possível gerar o backup. Tente novamente.",
