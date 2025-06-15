@@ -53,7 +53,7 @@ const RecentActivities = () => {
   if (activities.length === 0) {
     return <Card>
         <CardHeader>
-          <CardTitle>Atividades Recentes</CardTitle>
+          <CardTitle className="text-lg">Atividades Recentes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-gray-500">
