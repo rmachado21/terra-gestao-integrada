@@ -185,6 +185,7 @@ const UserManagement = ({
                               {isUserSuperAdmin && <Crown className="h-4 w-4 text-yellow-500" />}
                             </div>
                             {user.empresa_nome && <div className="text-sm text-muted-foreground">{user.empresa_nome}</div>}
+                            {user.telefone && <div className="text-sm text-muted-foreground">{user.telefone}</div>}
                             <div className="text-sm text-muted-foreground">{user.email}</div>
                           </TableCell>
                           <TableCell>
