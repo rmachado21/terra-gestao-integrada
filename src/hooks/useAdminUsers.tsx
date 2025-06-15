@@ -18,6 +18,7 @@ interface AdminUser {
   email: string;
   telefone?: string;
   cargo?: string;
+  empresa_nome?: string;
   ativo: boolean;
   created_at: string;
   user_roles: { role: UserRole }[];
