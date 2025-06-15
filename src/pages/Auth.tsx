@@ -13,9 +13,7 @@ import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { Sprout } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
-
 const Auth = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -37,7 +35,6 @@ const Auth = () => {
     isBlocked
   } = useSafeSecurity();
   const navigate = useNavigate();
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     try {
@@ -66,7 +63,6 @@ const Auth = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isBlocked) {
@@ -102,7 +98,7 @@ const Auth = () => {
         recordLoginAttempt(email, !error);
         if (error) {
           let errorMessage = "Erro no login";
-          
+
           // Verificar se é erro de usuário inativo
           if (error.code === 'INACTIVE_USER' || error.message === 'INACTIVE_USER') {
             errorMessage = "Seu acesso está inativo. Entre em contato com o suporte.";
@@ -113,7 +109,6 @@ const Auth = () => {
           } else if (error.message?.includes('Too many requests')) {
             errorMessage = "Muitas tentativas. Tente novamente mais tarde.";
           }
-          
           toast({
             title: "Erro no login",
             description: errorMessage,
@@ -160,45 +155,29 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
   const handleResetSuccess = () => {
     toast({
       title: "Senha Alterada",
-      description: "Sua senha foi alterada com sucesso. Faça login com a nova senha.",
+      description: "Sua senha foi alterada com sucesso. Faça login com a nova senha."
     });
     setMode('login');
     setEmail('');
     setPassword('');
   };
-
   if (mode === 'reset-request') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
-        <PasswordResetRequest
-          onBack={() => setMode('login')}
-          onEmailSent={(email) => {
-            setResetEmail(email);
-            setMode('reset-form');
-          }}
-        />
-      </div>
-    );
+    return <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+        <PasswordResetRequest onBack={() => setMode('login')} onEmailSent={email => {
+        setResetEmail(email);
+        setMode('reset-form');
+      }} />
+      </div>;
   }
-
   if (mode === 'reset-form') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
-        <PasswordResetForm
-          email={resetEmail}
-          onBack={() => setMode('reset-request')}
-          onSuccess={handleResetSuccess}
-        />
-      </div>
-    );
+    return <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+        <PasswordResetForm email={resetEmail} onBack={() => setMode('reset-request')} onSuccess={handleResetSuccess} />
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center items-center space-x-2 mb-4">
@@ -210,10 +189,10 @@ const Auth = () => {
             </div>}
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full" onValueChange={(value) => {
-            setMode(value as AuthMode);
-            setErrors({});
-          }}>
+          <Tabs defaultValue="login" className="w-full" onValueChange={value => {
+          setMode(value as AuthMode);
+          setErrors({});
+        }}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Registro</TabsTrigger>
@@ -238,20 +217,13 @@ const Auth = () => {
                 </Button>
               </form>
               <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => setMode('reset-request')}
-                  className="text-green-600 hover:text-green-700 text-sm underline"
-                  disabled={loading || isBlocked}
-                >
+                <button type="button" onClick={() => setMode('reset-request')} className="text-green-600 hover:text-green-700 text-sm underline" disabled={loading || isBlocked}>
                   Esqueci minha senha
                 </button>
               </div>
             </TabsContent>
             <TabsContent value="register" className="pt-4">
-              <CardDescription className="text-center pb-4">
-                Crie sua conta de administrador
-              </CardDescription>
+              <CardDescription className="text-center pb-4">Crie sua conta. Grátis por 7 dias!</CardDescription>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="nome-register">Nome</Label>
@@ -279,8 +251,6 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default Auth;
