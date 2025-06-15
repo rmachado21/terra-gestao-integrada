@@ -41,7 +41,7 @@ const HeroSection = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Suporte em português</span>
+                <span>Suporte especializado</span>
               </div>
             </div>
           </div>
