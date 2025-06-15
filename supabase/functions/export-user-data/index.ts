@@ -2,6 +2,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import * as XLSX from 'npm:xlsx@0.18.5'
+import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,14 +75,14 @@ serve(async (req) => {
     const workbook = await fetchAllData(supabaseClient, user.id);
     
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([new Uint8Array(excelBuffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const excelBase64 = encode(new Uint8Array(excelBuffer));
 
-    return new Response(blob, {
+    return new Response(JSON.stringify({ data: excelBase64 }), {
       headers: {
         ...corsHeaders,
-        'Content-Disposition': `attachment; filename="backup_dados_${new Date().toISOString()}.xlsx"`,
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Type': 'application/json',
       },
+      status: 200,
     });
 
   } catch (error) {

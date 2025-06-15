@@ -3,6 +3,16 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+function base64ToArrayBuffer(base64: string) {
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
 export const useDataExport = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -15,11 +25,18 @@ export const useDataExport = () => {
     });
 
     try {
-      const { data, error } = await supabase.functions.invoke('export-user-data');
+      const { data: responseData, error } = await supabase.functions.invoke('export-user-data');
 
       if (error) throw error;
+      if (!responseData || !responseData.data) {
+        throw new Error("A resposta da função de backup está incompleta.");
+      }
       
-      const blob = data;
+      const arrayBuffer = base64ToArrayBuffer(responseData.data);
+      const blob = new Blob([arrayBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
