@@ -13,9 +13,7 @@ import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { Sprout, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
-
 const Auth = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -166,7 +164,6 @@ const Auth = () => {
     setEmail('');
     setPassword('');
   };
-
   const renderContent = () => {
     switch (mode) {
       case 'reset-request':
@@ -179,8 +176,7 @@ const Auth = () => {
       case 'login':
       case 'register':
       default:
-        return (
-          <Card className="w-full max-w-md">
+        return <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="flex justify-center items-center space-x-2 mb-4">
                 <Sprout className="h-8 w-8 text-green-600" />
@@ -192,12 +188,12 @@ const Auth = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue={mode} className="w-full" onValueChange={value => {
-                setMode(value as AuthMode);
-                setErrors({});
-                setEmail('');
-                setPassword('');
-                setNome('');
-              }}>
+              setMode(value as AuthMode);
+              setErrors({});
+              setEmail('');
+              setPassword('');
+              setNome('');
+            }}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="login">Login</TabsTrigger>
                   <TabsTrigger value="register">Registro</TabsTrigger>
@@ -255,14 +251,12 @@ const Auth = () => {
                 </TabsContent>
               </Tabs>
             </CardContent>
-          </Card>
-        );
+          </Card>;
     }
   };
-
   return <div className="relative min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 z-10" aria-label="Voltar para a página inicial">
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="bg-green-700 hover:bg-green-600">
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </Button>
       </Link>
