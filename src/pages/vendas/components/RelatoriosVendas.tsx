@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,12 +9,16 @@ import { BarChart3, TrendingUp, Download, Calendar, DollarSign, Package, Users }
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/ui/loading";
 
 const RelatoriosVendas = () => {
   const { user } = useAuth();
   const [periodo, setPeriodo] = useState('mes');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
 
   // Calcular período automaticamente
   const calcularPeriodo = () => {
@@ -157,6 +160,66 @@ const RelatoriosVendas = () => {
     );
   }
 
+  const handleExportPDF = async () => {
+    if (!dadosVendas) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Selecione um período com dados de vendas para gerar o relatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const periodoOptions: { [key: string]: string } = {
+        'semana': 'Última semana',
+        'mes': 'Este mês',
+        'trimestre': 'Este trimestre',
+        'ano': 'Este ano',
+        'personalizado': `Personalizado: ${dataInicio} a ${dataFim}`,
+      };
+      const periodoLabel = periodoOptions[periodo] || 'Período não definido';
+
+      const { data, error: invokeError } = await supabase.functions.invoke('export-sales-report', {
+        body: { dadosVendas, periodoLabel },
+      });
+
+      if (invokeError) {
+        throw invokeError;
+      }
+      
+      const responseData = data;
+      if (responseData.error) {
+         throw new Error(responseData.error);
+      }
+      
+      const link = document.createElement('a');
+      link.href = responseData.pdf;
+      const dataString = new Date().toISOString().slice(0,10);
+      link.download = `relatorio-vendas-${periodo.replace(' ', '-')}-${dataString}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Relatório gerado com sucesso!",
+        description: "O download do seu relatório em PDF foi iniciado.",
+      });
+
+    } catch (error: any) {
+      console.error("Erro ao exportar PDF:", error);
+      toast({
+        title: "Erro ao exportar",
+        description: error.message || "Não foi possível gerar o relatório em PDF. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Filtros */}
@@ -207,9 +270,22 @@ const RelatoriosVendas = () => {
             )}
             
             <div className="flex items-end">
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+              <Button 
+                variant="outline"
+                onClick={handleExportPDF}
+                disabled={isExporting || isLoading || !dadosVendas}
+              >
+                {isExporting ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Exportando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Exportar PDF
+                  </>
+                )}
               </Button>
             </div>
           </div>
