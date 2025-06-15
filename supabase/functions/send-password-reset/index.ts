@@ -107,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Enviar email com token
     const emailResponse = await resend.emails.send({
-      from: "Gestor Raiz <noreply@gestorraiz.com>",
+      from: "Gestor Raiz <noreply@gestorraiz.com.br>",
       to: [email],
       subject: "Recuperação de Senha - Gestor Raiz",
       html: `
