@@ -1,11 +1,8 @@
-
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const CTASection = () => {
-  return (
-    <section className="py-20 bg-gradient-to-br from-green-600 to-green-700">
+  return <section className="py-20 bg-gradient-to-br from-green-600 to-green-700">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
@@ -23,9 +20,7 @@ const CTASection = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 text-lg px-8 py-6">
-              Agendar Demonstração
-            </Button>
+            
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 text-sm">
@@ -44,8 +39,6 @@ const CTASection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default CTASection;
