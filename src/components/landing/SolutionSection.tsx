@@ -1,20 +1,9 @@
-
 import { Button } from '@/components/ui/button';
 import { Check, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const SolutionSection = () => {
-  const benefits = [
-    "Controle total da sua produção em tempo real",
-    "Relatórios automáticos e análises detalhadas", 
-    "Gestão integrada de estoque e vendas",
-    "Controle financeiro completo",
-    "Acesso de qualquer lugar pelo celular",
-    "Suporte especializado em agricultura"
-  ];
-
-  return (
-    <section id="solucao" className="py-20 bg-white">
+  const benefits = ["Controle total da sua produção em tempo real", "Relatórios automáticos e análises detalhadas", "Gestão integrada de estoque e vendas", "Controle financeiro completo", "Acesso de qualquer lugar pelo celular", "Suporte especializado em agricultura"];
+  return <section id="solucao" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
@@ -29,14 +18,12 @@ const SolutionSection = () => {
             </div>
 
             <div className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start space-x-3">
+              {benefits.map((benefit, index) => <div key={index} className="flex items-start space-x-3">
                   <div className="bg-green-100 rounded-full p-1 mt-1">
                     <Check className="h-4 w-4 text-green-600" />
                   </div>
                   <span className="text-gray-700">{benefit}</span>
-                </div>
-              ))}
+                </div>)}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -46,9 +33,7 @@ const SolutionSection = () => {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg">
-                Ver Demonstração
-              </Button>
+              
             </div>
           </div>
 
@@ -95,8 +80,6 @@ const SolutionSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default SolutionSection;
