@@ -254,7 +254,7 @@ const Auth = () => {
           </Card>;
     }
   };
-  return <div className="relative min-h-screen bg-gradient-to-br from-green-0 to-green-50 flex items-center justify-center p-4">
+  return <div className="relative min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 z-10" aria-label="Voltar para a página inicial">
         <Button variant="ghost" size="icon" className="bg-green-700 hover:bg-green-600 rounded-full text-white ">
           <ArrowLeft className="h-6 w-6 text-gray-700" />
