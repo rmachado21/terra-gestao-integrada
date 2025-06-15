@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Check, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 const SolutionSection = () => {
-  const benefits = ["Controle total da sua produção em tempo real", "Relatórios automáticos e análises detalhadas", "Gestão integrada de estoque e vendas", "Controle financeiro completo", "Acesso de qualquer lugar pelo celular", "Suporte especializado em agricultura"];
+  const benefits = ["Controle total da sua produção em tempo real", "Relatórios automáticos e análises detalhadas", "Gestão integrada de estoque e vendas", "Controle financeiro completo", "Acesso de qualquer lugar pelo celular"];
   return <section id="solucao" className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
