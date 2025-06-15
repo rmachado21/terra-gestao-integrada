@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,9 +10,11 @@ import EstoqueMovimentacoes from './components/EstoqueMovimentacoes';
 import AlertasEstoque from './components/AlertasEstoque';
 import GestaoValidades from './components/GestaoValidades';
 import EstoqueStats from './components/EstoqueStats';
-
 const EstoquePage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const {
+    user,
+    loading: authLoading
+  } = useAuth();
   const [activeTab, setActiveTab] = useState('estoque');
 
   // Buscar estatísticas gerais do estoque
@@ -24,20 +25,13 @@ const EstoquePage = () => {
     queryKey: ['estoque-stats', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const [produtosRes, estoqueRes] = await Promise.all([
-        supabase.from('produtos').select('id').eq('user_id', user.id).eq('ativo', true),
-        supabase.from('estoque').select('quantidade, quantidade_minima, data_validade').eq('user_id', user.id)
-      ]);
-      
+      const [produtosRes, estoqueRes] = await Promise.all([supabase.from('produtos').select('id').eq('user_id', user.id).eq('ativo', true), supabase.from('estoque').select('quantidade, quantidade_minima, data_validade').eq('user_id', user.id)]);
       const totalProdutos = produtosRes.data?.length || 0;
       const itensEstoque = estoqueRes.data?.length || 0;
       const estoqueTotal = estoqueRes.data?.reduce((sum, item) => sum + item.quantidade, 0) || 0;
 
       // Calcular alertas
-      const estoqueBaixo = estoqueRes.data?.filter(item => 
-        item.quantidade_minima && item.quantidade <= item.quantidade_minima
-      ).length || 0;
-      
+      const estoqueBaixo = estoqueRes.data?.filter(item => item.quantidade_minima && item.quantidade <= item.quantidade_minima).length || 0;
       const produtosVencendo = estoqueRes.data?.filter(item => {
         if (!item.data_validade) return false;
         const hoje = new Date();
@@ -45,7 +39,6 @@ const EstoquePage = () => {
         const diasParaVencer = Math.ceil((vencimento.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
         return diasParaVencer <= 30 && diasParaVencer >= 0;
       }).length || 0;
-      
       return {
         totalProdutos,
         itensEstoque,
@@ -56,13 +49,10 @@ const EstoquePage = () => {
     },
     enabled: !!user?.id
   });
-
   if (authLoading) {
     return <LoadingPage message="Carregando autenticação..." />;
   }
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <Package className="h-8 w-8 text-blue-600" />
         <div>
@@ -73,7 +63,7 @@ const EstoquePage = () => {
 
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-stone-200">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-300">
           <TabsTrigger value="estoque" className="transition-all duration-200">
             <span>Estoque</span>
           </TabsTrigger>
@@ -107,14 +97,8 @@ const EstoquePage = () => {
 
       {/* Estatísticas - com loading state */}
       <div className="animate-fade-in">
-        {statsLoading ? (
-          <LoadingStats count={5} />
-        ) : (
-          <EstoqueStats data={statsData} />
-        )}
+        {statsLoading ? <LoadingStats count={5} /> : <EstoqueStats data={statsData} />}
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default EstoquePage;
