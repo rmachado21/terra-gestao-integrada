@@ -26,7 +26,7 @@ const Header = () => {
             <div className="flex items-center space-x-3">
               {/* Nova Logo */}
               <img 
-                src="/lovable-uploads/2f18bf3d-c0fa-4004-bc9f-2bd5e0785b49.png" 
+                src="/lovable-uploads/ec4dab23-29e6-43a2-93e4-17638d9cf022.png" 
                 alt="Gestor Raiz Logo" 
                 className="h-8 w-auto object-contain" 
               />
