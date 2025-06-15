@@ -9,7 +9,7 @@ const PricingSection = () => {
     price: "R$ 0",
     period: "7 dias",
     description: "Perfeito para testar o sistema",
-    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Começar Grátis",
     highlighted: false
   }, {
@@ -17,7 +17,7 @@ const PricingSection = () => {
     price: "R$ 19,90",
     period: "por mês",
     description: "Ideal para pequenos produtores",
-    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Assinar Mensal",
     highlighted: false
   }, {
@@ -27,7 +27,7 @@ const PricingSection = () => {
     originalPrice: "R$ 238,80",
     savings: "2 meses grátis",
     description: "Melhor custo-benefício",
-    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Assinar Anual",
     highlighted: true
   }];
