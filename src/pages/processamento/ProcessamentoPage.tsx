@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 interface ProcessamentoItem {
   id: string;
   colheita_id: string;
@@ -126,13 +125,18 @@ const ProcessamentoPage = () => {
   });
   const createProcessamentoMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('processamentos')
-        .insert([{ ...data, user_id: user?.id }]);
+      const {
+        error
+      } = await supabase.from('processamentos').insert([{
+        ...data,
+        user_id: user?.id
+      }]);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['processamentos'] });
+      queryClient.invalidateQueries({
+        queryKey: ['processamentos']
+      });
       toast({
         title: 'Processamento registrado com sucesso!'
       });
@@ -312,7 +316,7 @@ const ProcessamentoPage = () => {
       </div>
 
       <Tabs defaultValue="processamentos" className="space-y-4">
-        <TabsList className="bg-stone-200">
+        <TabsList className=" bg-gray-300">
           <TabsTrigger value="processamentos">Processamentos</TabsTrigger>
           <TabsTrigger value="rastreabilidade">Rastreabilidade</TabsTrigger>
           <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
