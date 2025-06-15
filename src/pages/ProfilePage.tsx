@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, User } from 'lucide-react';
 import ProfileForm from '@/components/ProfileForm';
 import PlanInfo from '@/components/PlanInfo';
+import DataBackupCard from '@/components/profile/DataBackupCard';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,9 @@ const ProfilePage = () => {
 
       {/* Plan Information */}
       <PlanInfo />
+
+      {/* Data Backup */}
+      <DataBackupCard />
 
       {/* Profile Form */}
       <ProfileForm />
