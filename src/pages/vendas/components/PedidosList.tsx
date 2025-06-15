@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Eye, Calendar, DollarSign, ShoppingCart } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Calendar, DollarSign, ShoppingCart, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import PedidoForm from './PedidoForm';
 import PedidoDetalhes from './PedidoDetalhes';
 import PedidoImpressaoButton from './PedidoImpressaoButton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface Pedido {
   id: string;
   cliente_id: string | null;
@@ -23,6 +25,7 @@ interface Pedido {
   cliente: {
     id: string;
     nome: string;
+    telefone?: string | null;
   } | null;
 }
 const PedidosList = () => {
@@ -52,7 +55,8 @@ const PedidosList = () => {
           *,
           clientes:cliente_id (
             id,
-            nome
+            nome,
+            telefone
           )
         `).eq('user_id', user.id).order('created_at', {
         ascending: false
@@ -160,6 +164,13 @@ const PedidosList = () => {
       });
     }
   });
+  const handleWhatsAppClick = (nome: string, telefone: string, pedidoId: string) => {
+    const cleanTelefone = telefone.replace(/\D/g, '');
+    const message = encodeURIComponent(`Olá ${nome}, tudo bem? Referente ao seu pedido #${pedidoId.slice(-8)}`);
+    // Adicionando o código do país (55 para o Brasil)
+    const whatsappUrl = `https://wa.me/55${cleanTelefone}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
   const handleStatusChange = (pedidoId: string, newStatus: string) => {
     updateStatusMutation.mutate({
       pedidoId,
@@ -273,6 +284,25 @@ const PedidosList = () => {
                         <div className="flex items-center space-x-1">
                           <span className="font-medium">Cliente:</span>
                           <span className="font-bold">{pedido.cliente?.nome || 'Cliente não informado'}</span>
+                          {pedido.cliente?.telefone && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    onClick={() => handleWhatsAppClick(pedido.cliente!.nome, pedido.cliente!.telefone!, pedido.id)}
+                                  >
+                                    <MessageCircle className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Conversar no WhatsApp</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
