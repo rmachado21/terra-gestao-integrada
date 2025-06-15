@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +5,8 @@ import LancamentosFinanceiros from './components/LancamentosFinanceiros';
 import FluxoCaixa from './components/FluxoCaixa';
 import RelatoriosFinanceiros from './components/RelatoriosFinanceiros';
 import { TrendingUp } from 'lucide-react';
-
 const FinanceiroPage = () => {
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="flex items-center gap-3">
         <TrendingUp className="h-8 w-8 text-green-600" />
         <div>
@@ -19,7 +16,7 @@ const FinanceiroPage = () => {
       </div>
 
       <Tabs defaultValue="lancamentos" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3  bg-gray-300">
           <TabsTrigger value="lancamentos">
             Lançamentos
           </TabsTrigger>
@@ -73,8 +70,6 @@ const FinanceiroPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default FinanceiroPage;
