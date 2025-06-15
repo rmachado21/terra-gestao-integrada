@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AlertasList from './components/AlertasList';
 import ConfiguracaoRegras from './components/ConfiguracaoRegras';
 import GerenciamentoAlertas from './components/GerenciamentoAlertas';
-import { Bell, Settings, Users, BarChart3 } from 'lucide-react';
+import { Bell } from 'lucide-react';
 
 const AlertasPage = () => {
   return (
@@ -20,16 +20,13 @@ const AlertasPage = () => {
 
       <Tabs defaultValue="alertas" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="alertas" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
+          <TabsTrigger value="alertas">
             Alertas Ativos
           </TabsTrigger>
-          <TabsTrigger value="configuracao" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
+          <TabsTrigger value="configuracao">
             Configuração
           </TabsTrigger>
-          <TabsTrigger value="gerenciamento" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+          <TabsTrigger value="gerenciamento">
             Gerenciamento
           </TabsTrigger>
         </TabsList>

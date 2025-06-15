@@ -1,103 +1,99 @@
+
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, ShoppingCart, Truck, BarChart3 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import ClientesList from './components/ClientesList';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import VendasStats from './components/VendasStats';
 import PedidosList from './components/PedidosList';
+import ClientesList from './components/ClientesList';
 import EntregasList from './components/EntregasList';
 import RelatoriosVendas from './components/RelatoriosVendas';
-import VendasStats from './components/VendasStats';
+import { ShoppingCart } from 'lucide-react';
 
 const VendasPage = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('pedidos');
-
-  // Buscar estatísticas gerais de vendas
-  const {
-    data: statsData
-  } = useQuery({
-    queryKey: ['vendas-stats', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const [clientesRes, pedidosRes, entregasRes] = await Promise.all([supabase.from('clientes').select('id').eq('user_id', user.id).eq('ativo', true), supabase.from('pedidos').select('valor_total, status, data_pedido').eq('user_id', user.id), supabase.from('pedidos').select('id').eq('user_id', user.id).eq('status', 'entregue')]);
-      const totalClientes = clientesRes.data?.length || 0;
-      const totalPedidos = pedidosRes.data?.length || 0;
-      const pedidosPendentes = pedidosRes.data?.filter(p => p.status === 'pendente').length || 0;
-      const entregasRealizadas = entregasRes.data?.length || 0;
-      const faturamentoTotal = pedidosRes.data?.reduce((sum, pedido) => {
-        return sum + (pedido.valor_total || 0);
-      }, 0) || 0;
-
-      // Faturamento do mês atual
-      const hoje = new Date();
-      const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-      const faturamentoMes = pedidosRes.data?.filter(pedido => {
-        const dataPedido = new Date(pedido.data_pedido);
-        return dataPedido >= inicioMes;
-      }).reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0) || 0;
-      return {
-        totalClientes,
-        totalPedidos,
-        pedidosPendentes,
-        entregasRealizadas,
-        faturamentoTotal,
-        faturamentoMes
-      };
-    },
-    enabled: !!user?.id
-  });
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <ShoppingCart className="h-8 w-8 text-purple-600" />
         <div>
-          <h1 className="font-bold text-gray-900 text-2xl">Módulo de Vendas</h1>
-          <p className="text-gray-600">Gerencie clientes, pedidos, entregas e relatórios de vendas</p>
+          <h1 className="text-3xl font-bold text-gray-900">Vendas</h1>
+          <p className="text-gray-600">Gestão completa de vendas e relacionamento com clientes</p>
         </div>
       </div>
 
-      {/* Tabs principais */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-stone-200">
-          <TabsTrigger value="pedidos" className="flex items-center space-x-2">
-            <ShoppingCart className="h-4 w-4" />
-            <span>Pedidos</span>
+      <VendasStats />
+
+      <Tabs defaultValue="pedidos" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="pedidos">
+            Pedidos
           </TabsTrigger>
-          <TabsTrigger value="clientes" className="flex items-center space-x-2">
-            <Users className="h-4 w-4" />
-            <span>Clientes</span>
+          <TabsTrigger value="clientes">
+            Clientes
           </TabsTrigger>
-          <TabsTrigger value="entregas" className="flex items-center space-x-2">
-            <Truck className="h-4 w-4" />
-            <span>Entregas</span>
+          <TabsTrigger value="entregas">
+            Entregas
           </TabsTrigger>
-          <TabsTrigger value="relatorios" className="flex items-center space-x-2">
-            <BarChart3 className="h-4 w-4" />
-            <span>Relatórios</span>
+          <TabsTrigger value="relatorios">
+            Relatórios
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="pedidos">
-          <PedidosList />
+        <TabsContent value="pedidos" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestão de Pedidos</CardTitle>
+              <CardDescription>
+                Controle todos os pedidos de vendas da propriedade
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PedidosList />
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="clientes">
-          <ClientesList />
+        <TabsContent value="clientes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestão de Clientes</CardTitle>
+              <CardDescription>
+                Cadastro e acompanhamento de clientes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ClientesList />
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="entregas">
-          <EntregasList />
+        <TabsContent value="entregas" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Controle de Entregas</CardTitle>
+              <CardDescription>
+                Acompanhe o status das entregas e logística
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EntregasList />
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="relatorios">
-          <RelatoriosVendas />
+        <TabsContent value="relatorios" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Relatórios de Vendas</CardTitle>
+              <CardDescription>
+                Análises e insights sobre performance de vendas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RelatoriosVendas />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Estatísticas - movidas para baixo */}
-      <VendasStats data={statsData} />
     </div>
   );
 };
