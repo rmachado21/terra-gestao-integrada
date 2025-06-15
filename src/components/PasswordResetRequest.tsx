@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { usePasswordReset } from '@/hooks/usePasswordReset';
 import { emailSchema } from '@/lib/security';
 import { z } from 'zod';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, Sprout } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading';
 
 interface PasswordResetRequestProps {
@@ -48,12 +48,9 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
   return (
     <Card className="w-full max-w-md animate-scale-in">
       <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <img 
-            src="/lovable-uploads/2f18bf3d-c0fa-4004-bc9f-2bd5e0785b49.png" 
-            alt="Gestor Raiz Logo" 
-            className="h-12 w-auto object-contain" 
-          />
+        <div className="flex justify-center items-center space-x-2 mb-4">
+          <Sprout className="h-8 w-8 text-green-600" />
+          <span className="text-2xl font-bold text-gray-900">Gestor Raiz</span>
         </div>
         <CardTitle className="flex items-center gap-2 justify-center">
           <Mail className="h-5 w-5" />
