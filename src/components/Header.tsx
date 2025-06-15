@@ -13,7 +13,7 @@ const Header = () => {
   const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isDashboard = location.pathname === '/dashboard';
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -21,7 +21,7 @@ const Header = () => {
         {/* Logo alinhado com o sidebar */}
         <div className="w-64 flex items-center">
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate(user ? '/dashboard' : '/')} 
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-lg p-1 -m-1"
           >
             <div className="flex items-center space-x-2">
@@ -33,11 +33,11 @@ const Header = () => {
         
         {user && (
           <div className="flex items-center space-x-2 sm:space-x-3 pr-2 sm:pr-4">
-            {!isHome && (
+            {!isDashboard && (
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => navigate('/')} 
+                onClick={() => navigate('/dashboard')} 
                 className="lg:hidden flex items-center justify-center p-2"
               >
                 <Home className="h-4 w-4" />

@@ -48,7 +48,7 @@ export const signIn = async (email: string, password: string) => {
 
       secureLogger.security('signin_success', { userId: data.user.id, email });
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }, 100);
     }
 
@@ -63,7 +63,7 @@ export const signUp = async (email: string, password: string, nome: string) => {
   try {
     cleanupAuthState();
     
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${window.location.origin}/dashboard`;
     
     const { error } = await supabase.auth.signUp({
       email,
