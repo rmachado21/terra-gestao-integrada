@@ -82,8 +82,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/?checkout=success`,
-      cancel_url: `${origin}/?checkout=cancel`,
+      success_url: `https://gestorraiz.com.br/?checkout=success`,
+      cancel_url: `https://gestorraiz.com.br/?checkout=cancel`,
       metadata: {
         user_id: user.id,
         plan_type: planType
