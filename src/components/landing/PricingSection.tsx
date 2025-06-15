@@ -7,9 +7,9 @@ const PricingSection = () => {
   const plans = [{
     name: "Gratuito",
     price: "R$ 0",
-    period: "30 dias",
+    period: "7 dias",
     description: "Perfeito para testar o sistema",
-    features: ["Até 3 áreas de plantio", "Controle básico de estoque", "Relatórios simples", "Suporte por email"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Começar Grátis",
     highlighted: false
   }, {
@@ -17,7 +17,7 @@ const PricingSection = () => {
     price: "R$ 19,90",
     period: "por mês",
     description: "Ideal para pequenos produtores",
-    features: ["Áreas ilimitadas", "Todos os módulos inclusos", "Relatórios avançados", "Suporte prioritário", "Backup automático", "App mobile"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Assinar Mensal",
     highlighted: false
   }, {
@@ -27,7 +27,7 @@ const PricingSection = () => {
     originalPrice: "R$ 238,80",
     savings: "2 meses grátis",
     description: "Melhor custo-benefício",
-    features: ["Áreas ilimitadas", "Todos os módulos inclusos", "Relatórios avançados", "Suporte prioritário", "Backup automático", "App mobile", "Consultoria mensal", "Integração com contabilidade"],
+    features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas"  "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
     cta: "Assinar Anual",
     highlighted: true
   }];
@@ -98,7 +98,7 @@ const PricingSection = () => {
 
         <div className="text-center mt-12 space-y-4">
           <p className="text-gray-600">
-            Todos os planos incluem 30 dias grátis para testar
+            7 dias grátis para testar
           </p>
           <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
             <span>✓ Sem cartão de crédito</span>
