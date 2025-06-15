@@ -8,8 +8,11 @@ import ClientesList from './components/ClientesList';
 import EntregasList from './components/EntregasList';
 import RelatoriosVendas from './components/RelatoriosVendas';
 import { ShoppingCart } from 'lucide-react';
+import { useVendasStats } from './hooks/useVendasStats';
 
 const VendasPage = () => {
+  const { data: vendasStatsData, isLoading: isLoadingStats } = useVendasStats();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -20,7 +23,7 @@ const VendasPage = () => {
         </div>
       </div>
 
-      <VendasStats />
+      <VendasStats data={isLoadingStats ? null : vendasStatsData} />
 
       <Tabs defaultValue="pedidos" className="w-full">
         <TabsList className="grid w-full grid-cols-4">

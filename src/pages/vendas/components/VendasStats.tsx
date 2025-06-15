@@ -1,16 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, ShoppingCart, Truck, DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { VendasStatsData } from '../hooks/useVendasStats';
 
 interface VendasStatsProps {
-  data: {
-    totalClientes: number;
-    totalPedidos: number;
-    pedidosPendentes: number;
-    entregasRealizadas: number;
-    faturamentoTotal: number;
-    faturamentoMes: number;
-  } | null;
+  data: VendasStatsData | null | undefined;
 }
 
 const VendasStats = ({ data }: VendasStatsProps) => {
