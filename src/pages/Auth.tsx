@@ -1,5 +1,3 @@
-
-```tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,6 +13,7 @@ import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { Sprout, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
 
 const Auth = () => {
@@ -271,4 +270,3 @@ const Auth = () => {
     </div>;
 };
 export default Auth;
-```
