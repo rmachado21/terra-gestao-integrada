@@ -1,18 +1,17 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useUserPlan } from '@/hooks/useUserPlan';
 import { useUserRoles } from '@/hooks/useUserRoles';
 import { useStripeSubscription } from '@/hooks/useStripeSubscription';
-import { Calendar, Clock, CreditCard, ExternalLink, Zap } from 'lucide-react';
+import { Calendar, Clock, CreditCard, ExternalLink, Loader2, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const PlanInfo = () => {
   const { plan, loading, calculateDaysRemaining } = useUserPlan();
   const { isSuperAdmin } = useUserRoles();
-  const { subscriptionData, createCheckout, openCustomerPortal } = useStripeSubscription();
+  const { subscriptionData, loading: stripeLoading, createCheckout, openCustomerPortal } = useStripeSubscription();
 
   // Não mostrar para Super Admins
   if (isSuperAdmin) {
@@ -174,17 +173,25 @@ const PlanInfo = () => {
                 variant="outline"
                 onClick={() => createCheckout('mensal')}
                 className="flex-1"
+                disabled={stripeLoading}
               >
-                <Zap className="h-3 w-3 mr-1" />
-                Mensal R$ 7,99
+                {stripeLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                ) : (
+                  <><Zap className="h-3 w-3 mr-1" /> Mensal R$ 7,99</>
+                )}
               </Button>
               <Button
                 size="sm"
                 onClick={() => createCheckout('anual')}
                 className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={stripeLoading}
               >
-                <CreditCard className="h-3 w-3 mr-1" />
-                Anual R$ 79,90
+                {stripeLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                ) : (
+                  <><CreditCard className="h-3 w-3 mr-1" /> Anual R$ 79,90</>
+                )}
               </Button>
             </div>
           </div>
@@ -212,15 +219,25 @@ const PlanInfo = () => {
                   variant="outline"
                   onClick={() => createCheckout('mensal')}
                   className="flex-1"
+                  disabled={stripeLoading}
                 >
-                  Renovar Mensal
+                  {stripeLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                  ) : (
+                    'Renovar Mensal'
+                  )}
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => createCheckout('anual')}
                   className="flex-1 bg-green-600 hover:bg-green-700"
+                  disabled={stripeLoading}
                 >
-                  Renovar Anual
+                  {stripeLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                  ) : (
+                    'Renovar Anual'
+                  )}
                 </Button>
               </div>
             )}
@@ -241,17 +258,25 @@ const PlanInfo = () => {
                 variant="outline"
                 onClick={() => createCheckout('mensal')}
                 className="flex-1"
+                disabled={stripeLoading}
               >
-                <Zap className="h-3 w-3 mr-1" />
-                Plano Mensal
+                {stripeLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                ) : (
+                  <><Zap className="h-3 w-3 mr-1" /> Plano Mensal</>
+                )}
               </Button>
               <Button
                 size="sm"
                 onClick={() => createCheckout('anual')}
                 className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={stripeLoading}
               >
-                <CreditCard className="h-3 w-3 mr-1" />
-                Plano Anual (Melhor valor)
+                {stripeLoading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
+                ) : (
+                  <><CreditCard className="h-3 w-3 mr-1" /> Plano Anual (Melhor valor)</>
+                )}
               </Button>
             </div>
           </div>
