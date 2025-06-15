@@ -25,7 +25,7 @@ const VendasPage = () => {
       <VendasStats data={isLoadingStats ? null : vendasStatsData} />
 
       <Tabs defaultValue="pedidos" className="w-full">
-        <TabsList className="grid w-full grid-cols-4  bg-gray-300 text-gray-600">
+        <TabsList className="grid w-full grid-cols-4  bg-gray-300 text-gray-900">
           <TabsTrigger value="pedidos">
             Pedidos
           </TabsTrigger>
