@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { LogOut, User, Home, Settings, Shield } from 'lucide-react';
+import { LogOut, User, Home, Settings, Shield, Sprout } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
@@ -23,13 +24,9 @@ const Header = () => {
             onClick={() => navigate('/')} 
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-lg p-1 -m-1"
           >
-            <div className="flex items-center space-x-3">
-              {/* Nova Logo */}
-              <img 
-                src="/lovable-uploads/ec4dab23-29e6-43a2-93e4-17638d9cf022.png" 
-                alt="Gestor Raiz Logo" 
-                className="h-8 w-auto object-contain" 
-              />
+            <div className="flex items-center space-x-2">
+              <Sprout className="h-8 w-8 text-green-600" />
+              <span className="text-2xl font-bold text-gray-900">Gestor Raiz</span>
             </div>
           </button>
         </div>

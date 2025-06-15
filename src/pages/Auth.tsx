@@ -11,6 +11,7 @@ import { emailSchema, passwordSchema, nameSchema, secureLogger } from '@/lib/sec
 import { z } from 'zod';
 import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
+import { Sprout } from 'lucide-react';
 
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
 
@@ -199,8 +200,9 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/lovable-uploads/ec4dab23-29e6-43a2-93e4-17638d9cf022.png" alt="Gestor Raiz Logo" className="h-12 w-auto object-contain" />
+          <div className="flex justify-center items-center space-x-2 mb-4">
+            <Sprout className="h-8 w-8 text-green-600" />
+            <span className="text-2xl font-bold text-gray-900">Gestor Raiz</span>
           </div>
           
           <CardDescription>
