@@ -50,16 +50,16 @@ const FeaturesSection = () => {
       details: ["Fluxo de caixa", "Relatório de lucros", "Análise de custos"]
     },
     {
-      icon: Smartphone,
-      title: "Acesso Mobile",
-      description: "Use em qualquer lugar",
-      details: ["App responsivo", "Atualize de qualquer lugar"]
-    },
-    {
       icon: Calendar,
       title: "Controle de Produção",
       description: "Controle de produção e validade",
       details: ["Cadastro de colheitas e produção", "Controle de lotes e validades", "Alertas de validades"]
+    },
+    {
+      icon: Smartphone,
+      title: "Acesso Mobile",
+      description: "Use em qualquer lugar",
+      details: ["App responsivo", "Atualize de qualquer lugar"]
     }
   ];
 
