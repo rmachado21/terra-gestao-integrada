@@ -63,7 +63,7 @@ const EstoquePage = () => {
 
       {/* Tabs principais */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-300">
+        <TabsList className="grid w-full grid-cols-4 bg-gray-300 text-gray-900">
           <TabsTrigger value="estoque" className="transition-all duration-200">
             <span>Estoque</span>
           </TabsTrigger>
