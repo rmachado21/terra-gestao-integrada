@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { SecurityProvider } from "@/components/SecurityProvider";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import PageTransition from "@/components/PageTransition";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,7 @@ const App = () => (
           <AuthProvider>
             <SecurityProvider>
               <Routes>
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/" element={
                   <ProtectedRoute>
