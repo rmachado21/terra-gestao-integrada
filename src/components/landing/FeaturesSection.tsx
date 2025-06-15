@@ -53,13 +53,13 @@ const FeaturesSection = () => {
       icon: Smartphone,
       title: "Acesso Mobile",
       description: "Use em qualquer lugar",
-      details: ["App responsivo", "Funciona offline", "Sincronização automática"]
+      details: ["App responsivo", "Atualize de qualquer lugar"]
     },
     {
-      icon: Users,
-      title: "Gestão de Equipe",
-      description: "Controle de funcionários e atividades",
-      details: ["Cadastro de funcionários", "Controle de atividades", "Relatórios de produtividade"]
+      icon: Calendar,
+      title: "Controle de Produção",
+      description: "Controle de produção e validade",
+      details: ["Cadastro de colheitas e produção", "Controle de lotes e validades", "Alertas de validades"]
     }
   ];
 
