@@ -33,7 +33,7 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
       {isLoading && (
         <div className="flex items-center justify-center mt-2">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-          <span className="ml-2 text-sm text-gray-600">Verificando...</span>
+          <span className="ml-2 text-sm text-gray-300">Verificando...</span>
         </div>
       )}
       {error && (
