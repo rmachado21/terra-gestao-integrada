@@ -18,13 +18,13 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Facebook
+                
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Instagram
+                
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                YouTube
+                
               </a>
             </div>
           </div>
@@ -55,10 +55,10 @@ const Footer = () => {
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>contato@gestorraiz.com</span>
+                <span>gestorraiz@digitrail.com.br</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
+                <Chat className="h-4 w-4" />
                 <span>(11) 5198-7533</span>
               </div>
             </div>
