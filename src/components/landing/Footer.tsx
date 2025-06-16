@@ -62,23 +62,22 @@ const Footer = () => {
     <p className="text-gray-400 text-sm">
       © 2025 Gestor Raiz. Todos os direitos reservados.
     </p>
-
+    <div className="flex space-x-6 text-sm text-gray-400">
+      <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
+      <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
+      <a href="#" className="hover:text-white transition-colors">Cookies</a>
+    </div>
+    
     {/* Bloco adicionado */}
     <div className="flex items-center space-x-2 text-sm text-gray-400">
       <span>Feito com</span>
       <span className="text-red-500">♥</span>
       <span>por</span>
       <a href="https://digitrail.com.br/" target="_blank" rel="noopener noreferrer">
-        <img src="https://digitrail.com.br/wp-content/uploads/2023/02/logo_digitrail.svg" alt="Digitrail" className="h-4" />
+        <img src="https://drive.google.com/file/d/1csTom22sSLoX9wS2Y_1dbtdJw-UwWDkt" alt="Digitrail" className="h-4" />
       </a>
     </div>
     {/* Fim do bloco adicionado */}
-
-    <div className="flex space-x-6 text-sm text-gray-400">
-      <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-      <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-      <a href="#" className="hover:text-white transition-colors">Cookies</a>
-    </div>
   </div>
 </div>
       </div>
