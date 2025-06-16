@@ -69,6 +69,16 @@ const Footer = () => {
             </div>
           </div>
         </div>
+        <div className="flex justify-center mt-8">
+    <div className="flex items-center space-x-2 text-sm text-gray-400">
+      <span>Feito com</span>
+      <span className="text-red-500">♥</span>
+      <span>por</span>
+      <a href="https://digitrail.com.br/" target="_blank" rel="noopener noreferrer">
+        <img src="https://digitrail.com.br/wp-content/uploads/2023/02/logo_digitrail.svg" alt="Digitrail" className="h-4" />
+      </a>
+    </div>
+  </div>
       </div>
     </footer>
   );
