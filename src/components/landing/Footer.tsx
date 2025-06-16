@@ -1,10 +1,7 @@
-
 import { Sprout, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white py-16">
+  return <footer className="bg-gray-900 text-white py-16">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -75,13 +72,11 @@ const Footer = () => {
       <span className="text-red-500">♥</span>
       <span>por</span>
       <a href="https://digitrail.com.br/" target="_blank" rel="noopener noreferrer">
-<img src="https://drive.google.com/file/d/1b-UzPnhZTXvuCKUCz5LjiYbWrrOv0OcG/view" alt="Digitrail" className="h-4" max-w-px="80px" />
+            <img alt="Digitrail" className="h-4" max-w-px="80px" src="/lovable-uploads/ccd7d96b-5c0e-41cc-9220-73cd984f5a52.png" />
       </a>
     </div>
   </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
