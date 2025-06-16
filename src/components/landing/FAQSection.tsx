@@ -10,19 +10,19 @@ const FAQSection = () => {
   const faqs = [
     {
       question: "Como funciona o período grátis?",
-      answer: "Você tem 30 dias para testar todas as funcionalidades do sistema gratuitamente. Não é necessário cartão de crédito e você pode cancelar a qualquer momento."
+      answer: "Você tem 7 dias para testar todas as funcionalidades do sistema gratuitamente. Não é necessário cartão de crédito e você pode cancelar a qualquer momento."
     },
     {
       question: "O sistema funciona offline?",
-      answer: "Sim, o sistema foi desenvolvido para funcionar mesmo sem internet. Os dados são sincronizados automaticamente quando a conexão é restabelecida."
+      answer: "Não, você pode acessar do computador, tablet ou celular, desde que conectado a internet."
     },
     {
       question: "Posso importar meus dados atuais?",
-      answer: "Sim, nossa equipe de suporte ajuda você a importar seus dados de planilhas ou outros sistemas durante a configuração inicial."
+      answer: "Ainda não, nossa equipe está desenvolvendo a pção de importar seus dados através de planilhas."
     },
     {
       question: "Como funciona o suporte?",
-      answer: "Oferecemos suporte especializado em agricultura via WhatsApp, email e telefone. No plano anual, incluímos consultoria mensal gratuita."
+      answer: "Oferecemos suporte via WhatsApp e email."
     },
     {
       question: "O sistema é adequado para pequenos produtores?",
@@ -34,7 +34,7 @@ const FAQSection = () => {
     },
     {
       question: "Os dados ficam seguros?",
-      answer: "Sim, utilizamos criptografia de ponta e backups automáticos. Seus dados ficam armazenados em servidores seguros com certificação internacional."
+      answer: "Sim, utilizamos criptografia de ponta e você pode fazer backups e baixar para o seu dispositivo a qualquer momento. Seus dados ficam armazenados em servidores seguros com certificação internacional."
     },
     {
       question: "Posso usar em vários dispositivos?",
@@ -79,7 +79,7 @@ const FAQSection = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="https://wa.me/5561999999999" 
+              href="https://wa.me/551151987533" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
@@ -87,7 +87,7 @@ const FAQSection = () => {
               Falar no WhatsApp
             </a>
             <a 
-              href="mailto:suporte@gestorraiz.com"
+              href="mailto:suporte@gestorraiz.com.br"
               className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Enviar Email
