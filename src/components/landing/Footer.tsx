@@ -16,7 +16,9 @@ const Footer = () => {
             <p className="text-gray-400">
               Sistema completo de gestão agrícola para pequenos e médios produtores.
             </p>
-            
+            <div className="flex space-x-4">
+              
+            </div>
           </div>
 
           {/* Product */}
@@ -56,31 +58,18 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
-  {/* --- Linha 1: Copyright e Links --- */}
-  <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-    <p className="text-gray-400 text-sm">
-      © 2025 Gestor Raiz. Todos os direitos reservados.
-    </p>
-    <div className="flex space-x-6 text-sm text-gray-400">
-      <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-      <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-      <a href="#" className="hover:text-white transition-colors">Cookies</a>
-    </div>
-  </div>
-
-  {/* --- Linha 2: Logo Centralizada (Bloco Adicionado) --- */}
-  <div className="flex justify-center mt-8">
-    <div className="flex items-center space-x-2 text-sm text-gray-400">
-      <span>Feito com</span>
-      <span className="text-red-500">♥</span>
-      <span>por</span>
-      <a href="https://digitrail.com.br/" target="_blank" rel="noopener noreferrer">
-        <img src="https://digitrail.com.br/wp-content/uploads/2023/02/logo_digitrail.svg" alt="Digitrail" className="h-4" />
-      </a>
-    </div>
-  </div>
-  
-</div>
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-gray-400 text-sm">
+              © 2025 Gestor Raiz. Todos os direitos reservados.
+            </p>
+            <div className="flex space-x-6 text-sm text-gray-400">
+              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
+              <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
+              <a href="#" className="hover:text-white transition-colors">Cookies</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 };
