@@ -87,7 +87,7 @@ const FAQSection = () => {
               Falar no WhatsApp
             </a>
             <a 
-              href="mailto:suporte@gestorraiz.com.br"
+              href="mailto:gestorraiz@digitrail.com.br"
               className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Enviar Email
