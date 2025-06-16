@@ -75,7 +75,7 @@ const Footer = () => {
       <span className="text-red-500">♥</span>
       <span>por</span>
       <a href="https://digitrail.com.br/" target="_blank" rel="noopener noreferrer">
-        <img src="https://digitrail.com.br/wp-content/uploads/2023/02/logo_digitrail.svg" alt="Digitrail" className="h-4" />
+        <img src="https://drive.google.com/file/d/1b-UzPnhZTXvuCKUCz5LjiYbWrrOv0OcG/view" alt="Digitrail" className="h-4" />
       </a>
     </div>
   </div>
