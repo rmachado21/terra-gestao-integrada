@@ -61,8 +61,6 @@ const Footer = () => {
                 <Phone className="h-4 w-4" />
                 <span>(11) 5198-7533</span>
               </div>
-                <span></span>
-              </div>
             </div>
           </div>
         </div>
