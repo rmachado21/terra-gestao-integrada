@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,7 @@ import PasswordResetForm from '@/components/PasswordResetForm';
 import TurnstileWidget from '@/components/TurnstileWidget';
 import { Sprout, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
-
 const Auth = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -28,7 +25,6 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileError, setTurnstileError] = useState('');
-
   const {
     signIn,
     signUp
@@ -42,7 +38,6 @@ const Auth = () => {
     isBlocked
   } = useSafeSecurity();
   const navigate = useNavigate();
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     try {
@@ -73,28 +68,29 @@ const Auth = () => {
     if (!turnstileToken) {
       newErrors.turnstile = 'Complete a verificação de segurança';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleTurnstileVerified = (token: string) => {
     setTurnstileToken(token);
     setTurnstileError('');
     // Limpar erro do Turnstile se existir
     setErrors(prev => {
-      const newErrors = { ...prev };
+      const newErrors = {
+        ...prev
+      };
       delete newErrors.turnstile;
       return newErrors;
     });
   };
-
   const handleTurnstileError = (error: string) => {
     setTurnstileError(error);
     setTurnstileToken('');
-    setErrors(prev => ({ ...prev, turnstile: error }));
+    setErrors(prev => ({
+      ...prev,
+      turnstile: error
+    }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isBlocked) {
@@ -105,7 +101,6 @@ const Auth = () => {
       });
       return;
     }
-
     if (!validateForm()) {
       return;
     }
@@ -119,7 +114,6 @@ const Auth = () => {
       });
       return;
     }
-
     setLoading(true);
     try {
       if (mode === 'login') {
@@ -191,7 +185,6 @@ const Auth = () => {
       setLoading(false);
     }
   };
-
   const handleResetSuccess = () => {
     toast({
       title: "Senha Alterada",
@@ -201,7 +194,6 @@ const Auth = () => {
     setEmail('');
     setPassword('');
   };
-
   const handleModeChange = (value: string) => {
     setMode(value as AuthMode);
     setErrors({});
@@ -211,7 +203,6 @@ const Auth = () => {
     setTurnstileToken('');
     setTurnstileError('');
   };
-
   const renderContent = () => {
     switch (mode) {
       case 'reset-request':
@@ -259,11 +250,7 @@ const Auth = () => {
                     {/* Turnstile Widget */}
                     <div className="space-y-2">
                       <Label>Verificação de Segurança</Label>
-                      <TurnstileWidget 
-                        onVerified={handleTurnstileVerified}
-                        onError={handleTurnstileError}
-                        className="flex justify-center"
-                      />
+                      <TurnstileWidget onVerified={handleTurnstileVerified} onError={handleTurnstileError} className="flex justify-center" />
                       {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
                     </div>
 
@@ -302,11 +289,7 @@ const Auth = () => {
                     {/* Turnstile Widget */}
                     <div className="space-y-2">
                       <Label>Verificação de Segurança</Label>
-                      <TurnstileWidget 
-                        onVerified={handleTurnstileVerified}
-                        onError={handleTurnstileError}
-                        className="flex justify-center"
-                      />
+                      <TurnstileWidget onVerified={handleTurnstileVerified} onError={handleTurnstileError} className="flex justify-center" />
                       {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
                     </div>
 
@@ -320,15 +303,13 @@ const Auth = () => {
           </Card>;
     }
   };
-
   return <div className="relative min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 z-10" aria-label="Voltar para a página inicial">
-        <Button variant="ghost" size="icon" className="rounded-full text-white bg-amber-300 hover:bg-amber-200">
+        <Button variant="ghost" size="icon" className="rounded-full text-white bg-emerald-300 hover:bg-emerald-200">
           <ArrowLeft className="h-6 w-6 text-gray-700" />
         </Button>
       </Link>
       {renderContent()}
     </div>;
 };
-
 export default Auth;
