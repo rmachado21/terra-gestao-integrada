@@ -17,7 +17,15 @@ const Footer = () => {
               Sistema completo de gestão agrícola para pequenos e médios produtores.
             </p>
             <div className="flex space-x-4">
-              
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                Facebook
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                Instagram
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                YouTube
+              </a>
             </div>
           </div>
 
@@ -47,10 +55,10 @@ const Footer = () => {
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4" />
-                <span>gestorraiz@digitrail.com.br</span>
+                <span>contato@gestorraiz.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Chat className="h-4 w-4" />
+                <Phone className="h-4 w-4" />
                 <span>(11) 5198-7533</span>
               </div>
             </div>
@@ -58,28 +66,18 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
-
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-
-            <p className="text-gray-400 text-sm">
-
-              © 2025 Gestor Raiz. Todos os direitos reservados.
-
-            </p>
-
-            <div className="flex space-x-6 text-sm text-gray-400">
-
-              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-
-              <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
-
-              <a href="#" className="hover:text-white transition-colors">Cookies</a>
-
-            </div>
-
-          </div>
-
-        </div>
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-gray-400 text-sm">
+              © 2025 Gestor Raiz. Todos os direitos reservados.
+            </p>
+            <div className="flex space-x-6 text-sm text-gray-400">
+              <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
+              <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
+              <a href="#" className="hover:text-white transition-colors">Cookies</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </footer>
   );
 };
