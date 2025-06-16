@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,9 +12,12 @@ import { emailSchema, passwordSchema, nameSchema, secureLogger } from '@/lib/sec
 import { z } from 'zod';
 import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
+import TurnstileWidget from '@/components/TurnstileWidget';
 import { Sprout, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
+
 const Auth = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -22,6 +26,9 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileError, setTurnstileError] = useState('');
+
   const {
     signIn,
     signUp
@@ -35,6 +42,7 @@ const Auth = () => {
     isBlocked
   } = useSafeSecurity();
   const navigate = useNavigate();
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     try {
@@ -60,9 +68,33 @@ const Auth = () => {
         }
       }
     }
+
+    // Verificar Turnstile
+    if (!turnstileToken) {
+      newErrors.turnstile = 'Complete a verificação de segurança';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const handleTurnstileVerified = (token: string) => {
+    setTurnstileToken(token);
+    setTurnstileError('');
+    // Limpar erro do Turnstile se existir
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.turnstile;
+      return newErrors;
+    });
+  };
+
+  const handleTurnstileError = (error: string) => {
+    setTurnstileError(error);
+    setTurnstileToken('');
+    setErrors(prev => ({ ...prev, turnstile: error }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isBlocked) {
@@ -73,6 +105,7 @@ const Auth = () => {
       });
       return;
     }
+
     if (!validateForm()) {
       return;
     }
@@ -86,11 +119,13 @@ const Auth = () => {
       });
       return;
     }
+
     setLoading(true);
     try {
       if (mode === 'login') {
-        secureLogger.security('login_attempt', {
-          email
+        secureLogger.security('login_attempt_with_turnstile', {
+          email,
+          turnstileVerified: !!turnstileToken
         });
         const {
           error
@@ -118,8 +153,9 @@ const Auth = () => {
           navigate('/dashboard');
         }
       } else if (mode === 'register') {
-        secureLogger.security('signup_attempt', {
-          email
+        secureLogger.security('signup_attempt_with_turnstile', {
+          email,
+          turnstileVerified: !!turnstileToken
         });
         const {
           error
@@ -155,6 +191,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
   const handleResetSuccess = () => {
     toast({
       title: "Senha Alterada",
@@ -164,6 +201,17 @@ const Auth = () => {
     setEmail('');
     setPassword('');
   };
+
+  const handleModeChange = (value: string) => {
+    setMode(value as AuthMode);
+    setErrors({});
+    setEmail('');
+    setPassword('');
+    setNome('');
+    setTurnstileToken('');
+    setTurnstileError('');
+  };
+
   const renderContent = () => {
     switch (mode) {
       case 'reset-request':
@@ -187,13 +235,7 @@ const Auth = () => {
                 </div>}
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue={mode} className="w-full" onValueChange={value => {
-              setMode(value as AuthMode);
-              setErrors({});
-              setEmail('');
-              setPassword('');
-              setNome('');
-            }}>
+              <Tabs defaultValue={mode} className="w-full" onValueChange={handleModeChange}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="login">Login</TabsTrigger>
                   <TabsTrigger value="register">Registro</TabsTrigger>
@@ -213,7 +255,19 @@ const Auth = () => {
                       <Input id="password-login" type="password" placeholder="Digite sua senha" value={password} onChange={e => setPassword(e.target.value)} required disabled={loading || isBlocked} />
                       {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
                     </div>
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
+                    
+                    {/* Turnstile Widget */}
+                    <div className="space-y-2">
+                      <Label>Verificação de Segurança</Label>
+                      <TurnstileWidget 
+                        onVerified={handleTurnstileVerified}
+                        onError={handleTurnstileError}
+                        className="flex justify-center"
+                      />
+                      {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
+                    </div>
+
+                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked || !turnstileToken}>
                       {loading ? 'Carregando...' : 'Entrar'}
                     </Button>
                   </form>
@@ -244,7 +298,19 @@ const Auth = () => {
                           Senha deve conter: 8+ caracteres, maiúscula, minúscula, número e símbolo
                         </p>
                     </div>
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked}>
+
+                    {/* Turnstile Widget */}
+                    <div className="space-y-2">
+                      <Label>Verificação de Segurança</Label>
+                      <TurnstileWidget 
+                        onVerified={handleTurnstileVerified}
+                        onError={handleTurnstileError}
+                        className="flex justify-center"
+                      />
+                      {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
+                    </div>
+
+                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading || isBlocked || !turnstileToken}>
                       {loading ? 'Carregando...' : 'Cadastrar'}
                     </Button>
                   </form>
@@ -254,6 +320,7 @@ const Auth = () => {
           </Card>;
     }
   };
+
   return <div className="relative min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
       <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 z-10" aria-label="Voltar para a página inicial">
         <Button variant="ghost" size="icon" className="rounded-full text-white bg-amber-300 hover:bg-amber-200">
@@ -263,4 +330,5 @@ const Auth = () => {
       {renderContent()}
     </div>;
 };
+
 export default Auth;
