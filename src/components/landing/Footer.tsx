@@ -36,7 +36,6 @@ const Footer = () => {
               <li><a href="#funcionalidades" className="hover:text-white transition-colors">Funcionalidades</a></li>
               <li><a href="#precos" className="hover:text-white transition-colors">Preços</a></li>
               <li><Link to="/auth" className="hover:text-white transition-colors">Teste Grátis</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">Demonstração</a></li>
             </ul>
           </div>
 
@@ -47,7 +46,6 @@ const Footer = () => {
               <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Central de Ajuda</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Documentação</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Status do Sistema</a></li>
             </ul>
           </div>
 
@@ -61,11 +59,9 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4" />
-                <span>(61) 9999-9999</span>
+                <span>(11) 5198-7533</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
-                <span>Brasília - DF</span>
+                <span></span>
               </div>
             </div>
           </div>
@@ -74,7 +70,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 Gestor Raiz. Todos os direitos reservados.
+              © 2025 Gestor Raiz. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6 text-sm text-gray-400">
               <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
