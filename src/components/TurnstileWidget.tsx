@@ -37,7 +37,7 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
         </div>
       )}
       {error && (
-        <p className="text-xm text-red-600 mt-2">{error}</p>
+        <p className="text-xs text-red-600 mt-2">{error}</p>
       )}
     </div>
   );
