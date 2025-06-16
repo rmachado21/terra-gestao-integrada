@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Site Key do Turnstile (chave pública - pode ser exposta)
-const TURNSTILE_SITE_KEY = '0x4AAAAAAAkA8kJM8sSTs_xA'; // Substitua pela sua Site Key
+const TURNSTILE_SITE_KEY = '0x4AAAAAABgxh3tXWTPnB9_1'; // Substitua pela sua Site Key
 
 interface TurnstileOptions {
   sitekey: string;
