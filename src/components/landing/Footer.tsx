@@ -17,15 +17,7 @@ const Footer = () => {
               Sistema completo de gestão agrícola para pequenos e médios produtores.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                .
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                .
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                .
-              </a>
+              
             </div>
           </div>
 
