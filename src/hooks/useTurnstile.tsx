@@ -3,7 +3,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Site Key do Turnstile (chave pública - pode ser exposta)
-const TURNSTILE_SITE_KEY = '0x4AAAAAABgxh3tXWTPnB9_1'; // Substitua pela sua Site Key
+// IMPORTANTE: Substitua pela sua Site Key real do Cloudflare Dashboard
+const TURNSTILE_SITE_KEY = '0x4AAAAAAAk_bYlP5tOMPKS2'; // Esta é uma chave de exemplo - substitua pela sua
 
 interface TurnstileOptions {
   sitekey: string;
@@ -79,6 +80,13 @@ export const useTurnstile = () => {
       return;
     }
 
+    // Verificar se a Site Key está configurada
+    if (!TURNSTILE_SITE_KEY || TURNSTILE_SITE_KEY === '0x4AAAAAABgxh3tXWTPnB9_1') {
+      setError('Site Key do Turnstile não configurada');
+      console.error('TURNSTILE_SITE_KEY needs to be configured with your real Site Key from Cloudflare Dashboard');
+      return;
+    }
+
     try {
       widgetIdRef.current = window.turnstile.render(widgetRef.current, {
         sitekey: TURNSTILE_SITE_KEY,
@@ -94,6 +102,7 @@ export const useTurnstile = () => {
         theme: 'light',
         size: 'normal'
       });
+      console.log('Turnstile widget initialized with Site Key:', TURNSTILE_SITE_KEY);
     } catch (err) {
       console.error('Erro ao inicializar Turnstile:', err);
       setError('Erro ao carregar verificação de segurança');
