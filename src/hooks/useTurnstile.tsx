@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Site Key do Turnstile (chave pública - pode ser exposta)
 // IMPORTANTE: Substitua pela sua Site Key real do Cloudflare Dashboard
-const TURNSTILE_SITE_KEY = '0x4AAAAAAAk_bYlP5tOMPKS2'; // Esta é uma chave de exemplo - substitua pela sua
+const TURNSTILE_SITE_KEY = '0x4AAAAAABgxh3tXWTPnB9_1'; // Esta é uma chave de exemplo - substitua pela sua
 
 interface TurnstileOptions {
   sitekey: string;
