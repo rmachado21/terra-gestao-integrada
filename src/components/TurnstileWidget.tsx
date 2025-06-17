@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTurnstile } from '@/hooks/useTurnstile';
 
 interface TurnstileWidgetProps {
@@ -14,15 +14,21 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
   className = ''
 }) => {
   const { widgetRef, token, isLoading, error, isValid } = useTurnstile();
+  
+  // Use refs to track previous values and prevent infinite loops
+  const prevTokenRef = useRef<string>('');
+  const prevErrorRef = useRef<string>('');
 
-  React.useEffect(() => {
-    if (isValid && token && onVerified) {
+  useEffect(() => {
+    if (isValid && token && token !== prevTokenRef.current && onVerified) {
+      prevTokenRef.current = token;
       onVerified(token);
     }
   }, [isValid, token, onVerified]);
 
-  React.useEffect(() => {
-    if (error && onError) {
+  useEffect(() => {
+    if (error && error !== prevErrorRef.current && onError) {
+      prevErrorRef.current = error;
       onError(error);
     }
   }, [error, onError]);
