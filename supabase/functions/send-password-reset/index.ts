@@ -24,25 +24,49 @@ const generateSecureToken = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+const extractFirstValidIP = (forwardedFor: string | null): string => {
+  if (!forwardedFor) {
+    return '127.0.0.1'; // fallback IP
+  }
+  
+  // Pegar apenas o primeiro IP da lista (antes da primeira vírgula)
+  const firstIP = forwardedFor.split(',')[0].trim();
+  
+  // Validar se é um IP válido (IPv4 básico)
+  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (ipv4Regex.test(firstIP)) {
+    return firstIP;
+  }
+  
+  console.log('[RESET] IP inválido detectado:', firstIP, 'usando fallback');
+  return '127.0.0.1'; // fallback para IP inválido
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('[RESET] Iniciando processo de recuperação de senha');
+    
     const { email }: PasswordResetRequest = await req.json();
+    console.log('[RESET] Email solicitado:', email);
 
     if (!email || typeof email !== 'string') {
+      console.log('[RESET] Email inválido ou ausente');
       return new Response(
         JSON.stringify({ error: "Email é obrigatório" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
+    console.log('[RESET] Verificando se usuário existe...');
+    
     // Verificar se o usuário existe
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
     if (userError) {
-      console.error("Erro ao buscar usuários:", userError);
+      console.error("[RESET] Erro ao buscar usuários:", userError);
       return new Response(
         JSON.stringify({ error: "Erro interno do servidor" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -51,12 +75,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     const user = userData.users.find(u => u.email === email);
     if (!user) {
+      console.log('[RESET] Usuário não encontrado para email:', email);
       // Por segurança, sempre retornar sucesso mesmo se o email não existir
       return new Response(
         JSON.stringify({ success: true, message: "Se o email existir, você receberá instruções de recuperação" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    console.log('[RESET] Usuário encontrado, verificando rate limit...');
 
     // Verificar rate limiting (máximo 3 tentativas por hora)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
@@ -67,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
       .gte('created_at', oneHourAgo);
 
     if (countError) {
-      console.error("Erro ao verificar rate limit:", countError);
+      console.error("[RESET] Erro ao verificar rate limit:", countError);
       return new Response(
         JSON.stringify({ error: "Erro interno do servidor" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -75,6 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (recentTokens && recentTokens.length >= 3) {
+      console.log('[RESET] Rate limit atingido para email:', email);
       return new Response(
         JSON.stringify({ error: "Muitas tentativas de recuperação. Tente novamente em 1 hora." }),
         { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -84,6 +112,12 @@ const handler = async (req: Request): Promise<Response> => {
     // Gerar token seguro
     const token = generateSecureToken();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+    
+    console.log('[RESET] Token gerado, preparando para salvar no banco...');
+
+    // Extrair IP corretamente
+    const clientIP = extractFirstValidIP(req.headers.get('x-forwarded-for'));
+    console.log('[RESET] IP extraído:', clientIP);
 
     // Salvar token no banco
     const { error: insertError } = await supabaseAdmin
@@ -93,21 +127,34 @@ const handler = async (req: Request): Promise<Response> => {
         token,
         email,
         expires_at: expiresAt.toISOString(),
-        ip_address: req.headers.get('x-forwarded-for') || 'unknown',
+        ip_address: clientIP,
         user_agent: req.headers.get('user-agent') || 'unknown'
       });
 
     if (insertError) {
-      console.error("Erro ao salvar token:", insertError);
+      console.error("[RESET] Erro ao salvar token:", insertError);
       return new Response(
         JSON.stringify({ error: "Erro interno do servidor" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
+    console.log('[RESET] Token salvo com sucesso, preparando para enviar email...');
+
+    // Verificar se a chave do Resend está configurada
+    if (!Deno.env.get("RESEND_API_KEY")) {
+      console.error("[RESET] RESEND_API_KEY não configurada");
+      return new Response(
+        JSON.stringify({ error: "Serviço de email não configurado" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     // Enviar email com token
+    console.log('[RESET] Enviando email via Resend...');
+    
     const emailResponse = await resend.emails.send({
-      from: "Gestor Raiz <noreply@gestorraiz.com.br>",
+      from: "Gestor Raiz <noreply@resend.dev>", // Usando domínio padrão do Resend
       to: [email],
       subject: "Recuperação de Senha - Gestor Raiz",
       html: `
@@ -154,14 +201,18 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (emailResponse.error) {
-      console.error("Erro ao enviar email:", emailResponse.error);
+      console.error("[RESET] Erro ao enviar email:", emailResponse.error);
       return new Response(
-        JSON.stringify({ error: "Erro ao enviar email" }),
+        JSON.stringify({ error: "Erro ao enviar email de recuperação" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    console.log("Email de recuperação enviado:", { email, tokenId: token.substring(0, 2) + '****' });
+    console.log("[RESET] Email enviado com sucesso!", {
+      email,
+      tokenPrefix: token.substring(0, 2) + '****',
+      emailId: emailResponse.data?.id
+    });
 
     return new Response(
       JSON.stringify({ 
@@ -172,7 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
   } catch (error: any) {
-    console.error("Erro na função send-password-reset:", error);
+    console.error("[RESET] Erro geral na função:", error);
     return new Response(
       JSON.stringify({ error: "Erro interno do servidor" }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
