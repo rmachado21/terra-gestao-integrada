@@ -215,7 +215,7 @@ const Auth = () => {
       case 'login':
       case 'register':
       default:
-        return <Card className="w-full max-w-md rounded-md">
+        return <Card className="w-full max-w-md rounded-lg">
             <CardHeader className="text-center">
               <div className="flex justify-center items-center space-x-2 mb-4">
                 <Sprout className="h-8 w-8 text-green-600" />
