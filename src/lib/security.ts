@@ -145,7 +145,7 @@ export const validateUrl = (url: string): boolean => {
 export const getSecurityHeaders = () => ({
   'Content-Security-Policy': `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.gpteng.co;
+    script-src 'self' 'unsafe-inline' https://cdn.gpteng.co https://challenges.cloudflare.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: https: blob:;
     font-src 'self' data:;

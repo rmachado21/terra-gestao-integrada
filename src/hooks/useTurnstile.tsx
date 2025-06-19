@@ -34,8 +34,13 @@ export const useTurnstile = () => {
   const widgetRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string>('');
   const initAttemptRef = useRef<number>(0);
+  const scriptLoadedRef = useRef<boolean>(false);
 
-  console.log('[TURNSTILE] Hook initialized with site key:', TURNSTILE_SITE_KEY);
+  console.log('[TURNSTILE] Hook initialized - Environment:', {
+    isDev: import.meta.env.DEV,
+    currentDomain: window.location.hostname,
+    siteKey: TURNSTILE_SITE_KEY
+  });
 
   const resetWidget = useCallback(() => {
     console.log('[TURNSTILE] Resetting widget');
@@ -89,22 +94,88 @@ export const useTurnstile = () => {
     }
   }, [resetWidget]);
 
-  const waitForTurnstile = useCallback(async (maxWait = 10000): Promise<boolean> => {
+  const checkScriptAvailability = useCallback((): boolean => {
+    const scriptExists = document.querySelector('script[src*="challenges.cloudflare.com"]');
+    const apiAvailable = window.turnstile;
+    
+    console.log('[TURNSTILE] Script availability check:', {
+      scriptExists: !!scriptExists,
+      apiAvailable: !!apiAvailable,
+      scriptLoaded: scriptLoadedRef.current
+    });
+    
+    return !!apiAvailable;
+  }, []);
+
+  const waitForTurnstile = useCallback(async (maxWait = 30000): Promise<boolean> => {
     console.log('[TURNSTILE] Waiting for Turnstile script to load...');
     const startTime = Date.now();
     
-    while (Date.now() - startTime < maxWait) {
-      if (window.turnstile) {
-        console.log('[TURNSTILE] Script loaded successfully');
-        setScriptLoaded(true);
-        return true;
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        
+        if (checkScriptAvailability()) {
+          console.log('[TURNSTILE] Script loaded successfully after', elapsed, 'ms');
+          clearInterval(checkInterval);
+          setScriptLoaded(true);
+          scriptLoadedRef.current = true;
+          resolve(true);
+          return;
+        }
+        
+        if (elapsed >= maxWait) {
+          console.error('[TURNSTILE] Script loading timeout after', maxWait, 'ms');
+          clearInterval(checkInterval);
+          resolve(false);
+        }
+      }, 200);
+    });
+  }, [checkScriptAvailability]);
+
+  const loadScriptManually = useCallback((): Promise<boolean> => {
+    return new Promise((resolve) => {
+      console.log('[TURNSTILE] Attempting manual script load');
+      
+      // Verificar se já existe
+      if (checkScriptAvailability()) {
+        resolve(true);
+        return;
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    console.error('[TURNSTILE] Script loading timeout after', maxWait, 'ms');
-    return false;
-  }, []);
+
+      const existingScript = document.querySelector('script[src*="challenges.cloudflare.com"]');
+      if (existingScript) {
+        existingScript.remove();
+        console.log('[TURNSTILE] Removed existing script tag');
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.async = true;
+      script.defer = true;
+      
+      script.onload = () => {
+        console.log('[TURNSTILE] Manual script load successful');
+        setTimeout(() => {
+          if (checkScriptAvailability()) {
+            setScriptLoaded(true);
+            scriptLoadedRef.current = true;
+            resolve(true);
+          } else {
+            console.error('[TURNSTILE] API not available after manual load');
+            resolve(false);
+          }
+        }, 1000);
+      };
+      
+      script.onerror = (err) => {
+        console.error('[TURNSTILE] Manual script load failed:', err);
+        resolve(false);
+      };
+      
+      document.head.appendChild(script);
+    });
+  }, [checkScriptAvailability]);
 
   const initializeWidget = useCallback(async () => {
     console.log('[TURNSTILE] Attempting widget initialization, attempt:', initAttemptRef.current + 1);
@@ -126,14 +197,24 @@ export const useTurnstile = () => {
       return;
     }
 
-    // Aguardar o script carregar se necessário
-    if (!window.turnstile) {
-      console.log('[TURNSTILE] Script not loaded, waiting...');
-      const loaded = await waitForTurnstile();
-      if (!loaded) {
-        setError('Erro ao carregar script de segurança');
-        return;
+    // Tentar carregar o script se necessário
+    let scriptAvailable = checkScriptAvailability();
+    
+    if (!scriptAvailable) {
+      console.log('[TURNSTILE] Script not available, waiting...');
+      scriptAvailable = await waitForTurnstile();
+      
+      if (!scriptAvailable && initAttemptRef.current < 2) {
+        console.log('[TURNSTILE] Attempting manual script load...');
+        scriptAvailable = await loadScriptManually();
       }
+    }
+
+    if (!scriptAvailable) {
+      const errorMsg = 'Não foi possível carregar o script de segurança';
+      console.error('[TURNSTILE]', errorMsg);
+      setError(errorMsg);
+      return;
     }
 
     try {
@@ -170,44 +251,60 @@ export const useTurnstile = () => {
       if (initAttemptRef.current < 3) {
         setTimeout(() => {
           initializeWidget();
-        }, 2000);
+        }, 3000);
       }
     }
-  }, [verifyToken, resetWidget, waitForTurnstile]);
+  }, [verifyToken, resetWidget, waitForTurnstile, loadScriptManually, checkScriptAvailability]);
 
   useEffect(() => {
-    console.log('[TURNSTILE] useEffect triggered, script loaded:', scriptLoaded);
+    console.log('[TURNSTILE] useEffect triggered');
+    
+    // Reset counters on mount
+    initAttemptRef.current = 0;
+    scriptLoadedRef.current = false;
     
     // Verificar se o script já foi carregado
-    if (window.turnstile) {
+    if (checkScriptAvailability()) {
       console.log('[TURNSTILE] Script already available');
       setScriptLoaded(true);
+      scriptLoadedRef.current = true;
       initializeWidget();
       return;
     }
 
-    // Aguardar carregamento do script com polling
+    // Aguardar carregamento do script com polling mais robusto
+    let attempts = 0;
+    const maxAttempts = 150; // 30 segundos com intervalo de 200ms
+    
     const checkTurnstile = setInterval(() => {
-      if (window.turnstile) {
-        console.log('[TURNSTILE] Script detected via polling');
+      attempts++;
+      
+      if (checkScriptAvailability()) {
+        console.log('[TURNSTILE] Script detected via polling after', attempts * 200, 'ms');
         clearInterval(checkTurnstile);
         setScriptLoaded(true);
+        scriptLoadedRef.current = true;
         initializeWidget();
+        return;
+      }
+      
+      if (attempts >= maxAttempts) {
+        console.error('[TURNSTILE] Script loading timeout after polling');
+        clearInterval(checkTurnstile);
+        
+        // Tentar carregamento manual como último recurso
+        loadScriptManually().then((success) => {
+          if (success) {
+            initializeWidget();
+          } else {
+            setError('Timeout ao carregar script de segurança');
+          }
+        });
       }
     }, 200);
 
-    // Timeout para evitar polling infinito
-    const timeout = setTimeout(() => {
-      clearInterval(checkTurnstile);
-      if (!window.turnstile) {
-        console.error('[TURNSTILE] Script loading timeout');
-        setError('Timeout ao carregar script de segurança');
-      }
-    }, 15000);
-
     return () => {
       clearInterval(checkTurnstile);
-      clearTimeout(timeout);
       if (window.turnstile && widgetIdRef.current) {
         try {
           console.log('[TURNSTILE] Cleaning up widget');
@@ -217,7 +314,7 @@ export const useTurnstile = () => {
         }
       }
     };
-  }, [initializeWidget]);
+  }, [initializeWidget, checkScriptAvailability, loadScriptManually]);
 
   return {
     widgetRef,
