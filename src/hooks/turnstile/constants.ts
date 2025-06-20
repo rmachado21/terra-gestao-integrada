@@ -1,0 +1,2 @@
+
+export const TURNSTILE_SITE_KEY = '0x4AAAAAABgxh3tXWTPnB9_1';
