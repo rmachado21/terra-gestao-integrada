@@ -1,70 +1,54 @@
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { TURNSTILE_SITE_KEY } from './turnstile/constants';
-import { verifyTurnstileToken, isScriptLoaded } from './turnstile/utils';
+import { useEffect } from 'react';
+import { useScriptLoader } from './turnstile/useScriptLoader';
+import { useTurnstileWidget } from './turnstile/useTurnstileWidget';
+import { secureLogger } from '@/lib/security';
 import type { UseTurnstileReturn } from './turnstile/types';
 
-export const useTurnstile = (): UseTurnstileReturn => {
-  const [token, setToken] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [isValid, setIsValid] = useState(false);
-  const widgetRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string>('');
+const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 
-  const resetWidget = useCallback(() => {
-    if (window.turnstile && widgetIdRef.current) {
-      window.turnstile.reset(widgetIdRef.current);
-    }
-    setToken('');
-    setIsValid(false);
-    setError('');
-  }, []);
+export const useTurnstile = (
+  onVerified?: (token: string) => void,
+  onError?: (error: string) => void
+): UseTurnstileReturn => {
+  const { isLoaded: scriptLoaded, isLoading: scriptLoading, error: scriptError } = useScriptLoader(TURNSTILE_SCRIPT_URL);
+  
+  const {
+    widgetRef,
+    token,
+    isValid,
+    error: widgetError,
+    isVerifying,
+    resetWidget,
+    renderWidget
+  } = useTurnstileWidget(onVerified, onError);
 
-  const handleTokenVerification = useCallback(async (turnstileToken: string) => {
-    setIsLoading(true);
-    setError('');
+  // Determinar o estado de loading geral
+  const isLoading = scriptLoading || isVerifying;
+  
+  // Determinar o erro geral
+  const error = scriptError || widgetError;
 
-    const result = await verifyTurnstileToken(turnstileToken);
-
-    if (result.success) {
-      setIsValid(true);
-      setToken(turnstileToken);
-    } else {
-      setError(result.error || 'Verificação de segurança falhou');
-      resetWidget();
-    }
-
-    setIsLoading(false);
-  }, [resetWidget]);
-
+  // Renderizar widget quando script carregar
   useEffect(() => {
-    if (!widgetRef.current || widgetIdRef.current || !isScriptLoaded()) {
-      return;
+    if (scriptLoaded && !widgetError && !token) {
+      secureLogger.info('[TURNSTILE] Script carregado, renderizando widget...');
+      renderWidget();
     }
+  }, [scriptLoaded, widgetError, token, renderWidget]);
 
-    try {
-      widgetIdRef.current = window.turnstile!.render(widgetRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: handleTokenVerification,
-        'error-callback': () => setError('Erro no widget de segurança'),
-        'expired-callback': () => {
-          setError('Verificação expirada');
-          resetWidget();
-        },
-        theme: 'light',
-        size: 'normal'
-      });
-    } catch (err) {
-      setError('Erro ao carregar verificação de segurança');
-    }
-
-    return () => {
-      if (window.turnstile && widgetIdRef.current) {
-        window.turnstile.remove(widgetIdRef.current);
-      }
-    };
-  }, [handleTokenVerification, resetWidget]);
+  // Log do estado atual para debugging
+  useEffect(() => {
+    secureLogger.info('[TURNSTILE] Estado atual:', {
+      scriptLoaded,
+      scriptLoading,
+      scriptError,
+      widgetError,
+      token: !!token,
+      isValid,
+      isVerifying
+    });
+  }, [scriptLoaded, scriptLoading, scriptError, widgetError, token, isValid, isVerifying]);
 
   return {
     widgetRef,
@@ -73,6 +57,6 @@ export const useTurnstile = (): UseTurnstileReturn => {
     error,
     isValid,
     resetWidget,
-    scriptLoaded: isScriptLoaded()
+    scriptLoaded
   };
 };
