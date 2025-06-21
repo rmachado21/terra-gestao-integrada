@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import TurnstileWidget from '@/components/TurnstileWidget';
 
 interface RegisterFormProps {
   nome: string;
@@ -14,10 +13,7 @@ interface RegisterFormProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
-  turnstileToken: string;
   onSubmit: (e: React.FormEvent) => void;
-  onTurnstileVerified: (token: string) => void;
-  onTurnstileError: (error: string) => void;
 }
 
 export const RegisterForm = ({
@@ -30,10 +26,7 @@ export const RegisterForm = ({
   errors,
   loading,
   isBlocked,
-  turnstileToken,
-  onSubmit,
-  onTurnstileVerified,
-  onTurnstileError
+  onSubmit
 }: RegisterFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -82,20 +75,10 @@ export const RegisterForm = ({
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label>Verificação de Segurança</Label>
-        <TurnstileWidget
-          onVerified={onTurnstileVerified}
-          onError={onTurnstileError}
-          className="flex justify-center"
-        />
-        {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
-      </div>
-
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
-        disabled={loading || isBlocked || !turnstileToken}
+        disabled={loading || isBlocked}
       >
         {loading ? 'Carregando...' : 'Cadastrar'}
       </Button>

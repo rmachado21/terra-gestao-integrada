@@ -17,10 +17,7 @@ interface AuthTabsProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
-  turnstileToken: string;
   onSubmit: (e: React.FormEvent) => void;
-  onTurnstileVerified: (token: string) => void;
-  onTurnstileError: (error: string) => void;
   onForgotPassword: () => void;
   onModeChange: (value: string) => void;
 }
@@ -36,10 +33,7 @@ export const AuthTabs = ({
   errors,
   loading,
   isBlocked,
-  turnstileToken,
   onSubmit,
-  onTurnstileVerified,
-  onTurnstileError,
   onForgotPassword,
   onModeChange
 }: AuthTabsProps) => {
@@ -64,10 +58,7 @@ export const AuthTabs = ({
               errors={errors}
               loading={loading}
               isBlocked={isBlocked}
-              turnstileToken={turnstileToken}
               onSubmit={onSubmit}
-              onTurnstileVerified={onTurnstileVerified}
-              onTurnstileError={onTurnstileError}
               onForgotPassword={onForgotPassword}
             />
           </TabsContent>
@@ -86,10 +77,7 @@ export const AuthTabs = ({
               errors={errors}
               loading={loading}
               isBlocked={isBlocked}
-              turnstileToken={turnstileToken}
               onSubmit={onSubmit}
-              onTurnstileVerified={onTurnstileVerified}
-              onTurnstileError={onTurnstileError}
             />
           </TabsContent>
         </Tabs>

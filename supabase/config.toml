@@ -39,9 +39,6 @@ port = 54323
 enabled = true
 port = 54325
 
-[functions.verify-turnstile]
-verify_jwt = false
-
 [functions.check-subscription]
 verify_jwt = true
 

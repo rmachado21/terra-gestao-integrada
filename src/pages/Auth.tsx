@@ -21,8 +21,6 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const [turnstileError, setTurnstileError] = useState('');
 
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -58,28 +56,8 @@ const Auth = () => {
       }
     }
 
-    if (!turnstileToken) {
-      newErrors.turnstile = 'Complete a verificação de segurança';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleTurnstileVerified = (token: string) => {
-    setTurnstileToken(token);
-    setTurnstileError('');
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.turnstile;
-      return newErrors;
-    });
-  };
-
-  const handleTurnstileError = (error: string) => {
-    setTurnstileError(error);
-    setTurnstileToken('');
-    setErrors(prev => ({ ...prev, turnstile: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,10 +89,7 @@ const Auth = () => {
     
     try {
       if (mode === 'login') {
-        secureLogger.security('login_attempt_with_turnstile', {
-          email,
-          turnstileVerified: !!turnstileToken
-        });
+        secureLogger.security('login_attempt', { email });
         
         const { error } = await signIn(email, password);
         recordLoginAttempt(email, !error);
@@ -141,10 +116,7 @@ const Auth = () => {
           navigate('/dashboard');
         }
       } else if (mode === 'register') {
-        secureLogger.security('signup_attempt_with_turnstile', {
-          email,
-          turnstileVerified: !!turnstileToken
-        });
+        secureLogger.security('signup_attempt', { email });
         
         const { error } = await signUp(email, password, nome);
         
@@ -197,8 +169,6 @@ const Auth = () => {
     setEmail('');
     setPassword('');
     setNome('');
-    setTurnstileToken('');
-    setTurnstileError('');
   };
 
   const renderContent = () => {
@@ -236,10 +206,7 @@ const Auth = () => {
             errors={errors}
             loading={loading}
             isBlocked={isBlocked}
-            turnstileToken={turnstileToken}
             onSubmit={handleSubmit}
-            onTurnstileVerified={handleTurnstileVerified}
-            onTurnstileError={handleTurnstileError}
             onForgotPassword={() => setMode('reset-request')}
             onModeChange={handleModeChange}
           />

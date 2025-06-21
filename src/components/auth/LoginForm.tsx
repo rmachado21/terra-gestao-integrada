@@ -1,9 +1,7 @@
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import TurnstileWidget from '@/components/TurnstileWidget';
 
 interface LoginFormProps {
   email: string;
@@ -13,10 +11,7 @@ interface LoginFormProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
-  turnstileToken: string;
   onSubmit: (e: React.FormEvent) => void;
-  onTurnstileVerified: (token: string) => void;
-  onTurnstileError: (error: string) => void;
   onForgotPassword: () => void;
 }
 
@@ -28,10 +23,7 @@ export const LoginForm = ({
   errors,
   loading,
   isBlocked,
-  turnstileToken,
   onSubmit,
-  onTurnstileVerified,
-  onTurnstileError,
   onForgotPassword
 }: LoginFormProps) => {
   return (
@@ -63,21 +55,11 @@ export const LoginForm = ({
         />
         {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
       </div>
-      
-      <div className="space-y-2">
-        <Label>Verificação de Segurança</Label>
-        <TurnstileWidget
-          onVerified={onTurnstileVerified}
-          onError={onTurnstileError}
-          className="flex justify-center"
-        />
-        {errors.turnstile && <p className="text-sm text-red-600">{errors.turnstile}</p>}
-      </div>
 
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
-        disabled={loading || isBlocked || !turnstileToken}
+        disabled={loading || isBlocked}
       >
         {loading ? 'Carregando...' : 'Entrar'}
       </Button>
