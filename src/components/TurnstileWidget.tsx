@@ -15,7 +15,7 @@ export const TurnstileWidget = ({
   disabled 
 }: TurnstileWidgetProps) => {
   // Site key do Cloudflare Turnstile (exemplo - substituir pela chave real)
-  const siteKey = "0x4AAAAAAABkMYinukE8nzYS"; // Esta é uma chave de teste
+  const siteKey = "0x4AAAAAABgxh3tXWTPnB9_1"; // Esta é uma chave de teste
 
   return (
     <div className="flex justify-center my-4">
