@@ -19,6 +19,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
   const [resetEmail, setResetEmail] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -56,6 +57,11 @@ const Auth = () => {
       }
     }
 
+    // Validar captcha token
+    if (!captchaToken) {
+      newErrors.captcha = 'Por favor, complete a verificação de segurança';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -89,7 +95,7 @@ const Auth = () => {
     
     try {
       if (mode === 'login') {
-        secureLogger.security('login_attempt', { email });
+        secureLogger.security('login_attempt', { email, captchaVerified: !!captchaToken });
         
         const { error } = await signIn(email, password);
         recordLoginAttempt(email, !error);
@@ -112,13 +118,16 @@ const Auth = () => {
             description: errorMessage,
             variant: "destructive"
           });
+          
+          // Reset captcha on error
+          setCaptchaToken(null);
         } else {
           navigate('/dashboard');
         }
       } else if (mode === 'register') {
-        secureLogger.security('signup_attempt', { email });
+        secureLogger.security('signup_attempt', { email, captchaVerified: !!captchaToken });
         
-        const { error } = await signUp(email, password, nome);
+        const { error } = await signUp(email, password, nome, captchaToken);
         
         if (error) {
           let errorMessage = "Erro no cadastro";
@@ -133,12 +142,16 @@ const Auth = () => {
             description: errorMessage,
             variant: "destructive"
           });
+          
+          // Reset captcha on error
+          setCaptchaToken(null);
         } else {
           toast({
             title: "Cadastro realizado",
             description: "Verifique seu email para confirmar a conta"
           });
           setMode('login');
+          setCaptchaToken(null);
         }
       }
     } catch (error) {
@@ -148,6 +161,7 @@ const Auth = () => {
         description: "Ocorreu um erro inesperado",
         variant: "destructive"
       });
+      setCaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -161,6 +175,7 @@ const Auth = () => {
     setMode('login');
     setEmail('');
     setPassword('');
+    setCaptchaToken(null);
   };
 
   const handleModeChange = (value: string) => {
@@ -169,6 +184,7 @@ const Auth = () => {
     setEmail('');
     setPassword('');
     setNome('');
+    setCaptchaToken(null);
   };
 
   const renderContent = () => {
@@ -206,6 +222,8 @@ const Auth = () => {
             errors={errors}
             loading={loading}
             isBlocked={isBlocked}
+            captchaToken={captchaToken}
+            setCaptchaToken={setCaptchaToken}
             onSubmit={handleSubmit}
             onForgotPassword={() => setMode('reset-request')}
             onModeChange={handleModeChange}

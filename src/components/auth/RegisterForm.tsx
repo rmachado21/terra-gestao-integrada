@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 
 interface RegisterFormProps {
   nome: string;
@@ -13,6 +14,8 @@ interface RegisterFormProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
+  captchaToken: string | null;
+  setCaptchaToken: (token: string | null) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -26,6 +29,8 @@ export const RegisterForm = ({
   errors,
   loading,
   isBlocked,
+  captchaToken,
+  setCaptchaToken,
   onSubmit
 }: RegisterFormProps) => {
   return (
@@ -75,10 +80,18 @@ export const RegisterForm = ({
         </p>
       </div>
 
+      <TurnstileWidget
+        onSuccess={(token) => setCaptchaToken(token)}
+        onError={() => setCaptchaToken(null)}
+        onExpire={() => setCaptchaToken(null)}
+        disabled={loading || isBlocked}
+      />
+      {errors.captcha && <p className="text-sm text-red-600">{errors.captcha}</p>}
+
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
-        disabled={loading || isBlocked}
+        disabled={loading || isBlocked || !captchaToken}
       >
         {loading ? 'Carregando...' : 'Cadastrar'}
       </Button>
