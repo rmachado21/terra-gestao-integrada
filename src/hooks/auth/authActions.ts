@@ -59,22 +59,24 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-export const signUp = async (email: string, password: string, nome: string, captchaToken?: string | null) => {
+export const signUp = async (email: string, password: string, options?: { data?: any; captchaToken?: string | null }) => {
   try {
     cleanupAuthState();
     
     const redirectUrl = `${window.location.origin}/dashboard`;
     
     const signUpOptions: any = {
-      data: {
-        nome,
-      },
       emailRedirectTo: redirectUrl,
     };
 
+    // Incluir data do usuário se fornecida
+    if (options?.data) {
+      signUpOptions.data = options.data;
+    }
+
     // Incluir captchaToken se fornecido
-    if (captchaToken) {
-      signUpOptions.captchaToken = captchaToken;
+    if (options?.captchaToken) {
+      signUpOptions.captchaToken = options.captchaToken;
     }
     
     const { error } = await supabase.auth.signUp({

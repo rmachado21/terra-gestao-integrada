@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -127,7 +126,10 @@ const Auth = () => {
       } else if (mode === 'register') {
         secureLogger.security('signup_attempt', { email, captchaVerified: !!captchaToken });
         
-        const { error } = await signUp(email, password, nome, captchaToken);
+        const { error } = await signUp(email, password, {
+          data: { nome },
+          captchaToken
+        });
         
         if (error) {
           let errorMessage = "Erro no cadastro";
