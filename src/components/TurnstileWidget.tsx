@@ -113,8 +113,7 @@ export const TurnstileWidget = ({
         options={{
           theme: 'light',
           size: 'normal',
-          retry: 'auto',
-          'retry-interval': 8000,
+          retry: 'auto'
         }}
         style={{
           opacity: disabled ? 0.5 : 1,
