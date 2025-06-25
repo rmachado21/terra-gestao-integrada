@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from '@/components/TurnstileWidget';
 
 interface LoginFormProps {
   email: string;
@@ -12,8 +11,6 @@ interface LoginFormProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
-  captchaToken: string | null;
-  setCaptchaToken: (token: string | null) => void;
   onSubmit: (e: React.FormEvent) => void;
   onForgotPassword: () => void;
 }
@@ -26,8 +23,6 @@ export const LoginForm = ({
   errors,
   loading,
   isBlocked,
-  captchaToken,
-  setCaptchaToken,
   onSubmit,
   onForgotPassword
 }: LoginFormProps) => {
@@ -61,18 +56,10 @@ export const LoginForm = ({
         {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
       </div>
 
-      <TurnstileWidget
-        onSuccess={(token) => setCaptchaToken(token)}
-        onError={() => setCaptchaToken(null)}
-        onExpire={() => setCaptchaToken(null)}
-        disabled={loading || isBlocked}
-      />
-      {errors.captcha && <p className="text-sm text-red-600">{errors.captcha}</p>}
-
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
-        disabled={loading || isBlocked || !captchaToken}
+        disabled={loading || isBlocked}
       >
         {loading ? 'Carregando...' : 'Entrar'}
       </Button>

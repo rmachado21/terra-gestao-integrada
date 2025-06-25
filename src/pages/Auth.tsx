@@ -10,7 +10,6 @@ import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { AuthTabs } from '@/components/auth/AuthTabs';
-import { TurnstileDebugInfo } from '@/components/TurnstileDebugInfo';
 
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
 
@@ -20,7 +19,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [nome, setNome] = useState('');
   const [resetEmail, setResetEmail] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -58,12 +56,6 @@ const Auth = () => {
       }
     }
 
-    // Validar captcha token
-    if (!captchaToken) {
-      newErrors.captcha = 'Por favor, complete a verificação de segurança';
-      secureLogger.warn('Auth: Tentativa de submit sem captcha token', { mode });
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -97,7 +89,7 @@ const Auth = () => {
     
     try {
       if (mode === 'login') {
-        secureLogger.security('login_attempt', { email, captchaVerified: !!captchaToken });
+        secureLogger.security('login_attempt', { email });
         
         const { error } = await signIn(email, password);
         recordLoginAttempt(email, !error);
@@ -120,18 +112,14 @@ const Auth = () => {
             description: errorMessage,
             variant: "destructive"
           });
-          
-          // Reset captcha on error
-          setCaptchaToken(null);
         } else {
           navigate('/dashboard');
         }
       } else if (mode === 'register') {
-        secureLogger.security('signup_attempt', { email, captchaVerified: !!captchaToken });
+        secureLogger.security('signup_attempt', { email });
         
         const { error } = await signUp(email, password, {
-          data: { nome },
-          captchaToken
+          data: { nome }
         });
         
         if (error) {
@@ -147,16 +135,12 @@ const Auth = () => {
             description: errorMessage,
             variant: "destructive"
           });
-          
-          // Reset captcha on error
-          setCaptchaToken(null);
         } else {
           toast({
             title: "Cadastro realizado",
             description: "Verifique seu email para confirmar a conta"
           });
           setMode('login');
-          setCaptchaToken(null);
         }
       }
     } catch (error) {
@@ -166,7 +150,6 @@ const Auth = () => {
         description: "Ocorreu um erro inesperado",
         variant: "destructive"
       });
-      setCaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -180,7 +163,6 @@ const Auth = () => {
     setMode('login');
     setEmail('');
     setPassword('');
-    setCaptchaToken(null);
   };
 
   const handleModeChange = (value: string) => {
@@ -189,7 +171,6 @@ const Auth = () => {
     setEmail('');
     setPassword('');
     setNome('');
-    setCaptchaToken(null);
   };
 
   const renderContent = () => {
@@ -216,28 +197,21 @@ const Auth = () => {
       case 'register':
       default:
         return (
-          <>
-            <AuthTabs
-              mode={mode}
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              nome={nome}
-              setNome={setNome}
-              errors={errors}
-              loading={loading}
-              isBlocked={isBlocked}
-              captchaToken={captchaToken}
-              setCaptchaToken={setCaptchaToken}
-              onSubmit={handleSubmit}
-              onForgotPassword={() => setMode('reset-request')}
-              onModeChange={handleModeChange}
-            />
-            {import.meta.env.DEV && (
-              <TurnstileDebugInfo />
-            )}
-          </>
+          <AuthTabs
+            mode={mode}
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            nome={nome}
+            setNome={setNome}
+            errors={errors}
+            loading={loading}
+            isBlocked={isBlocked}
+            onSubmit={handleSubmit}
+            onForgotPassword={() => setMode('reset-request')}
+            onModeChange={handleModeChange}
+          />
         );
     }
   };

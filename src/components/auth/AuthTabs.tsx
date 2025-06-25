@@ -17,8 +17,6 @@ interface AuthTabsProps {
   errors: Record<string, string>;
   loading: boolean;
   isBlocked: boolean;
-  captchaToken: string | null;
-  setCaptchaToken: (token: string | null) => void;
   onSubmit: (e: React.FormEvent) => void;
   onForgotPassword: () => void;
   onModeChange: (value: string) => void;
@@ -35,8 +33,6 @@ export const AuthTabs = ({
   errors,
   loading,
   isBlocked,
-  captchaToken,
-  setCaptchaToken,
   onSubmit,
   onForgotPassword,
   onModeChange
@@ -62,8 +58,6 @@ export const AuthTabs = ({
               errors={errors}
               loading={loading}
               isBlocked={isBlocked}
-              captchaToken={captchaToken}
-              setCaptchaToken={setCaptchaToken}
               onSubmit={onSubmit}
               onForgotPassword={onForgotPassword}
             />
@@ -83,8 +77,6 @@ export const AuthTabs = ({
               errors={errors}
               loading={loading}
               isBlocked={isBlocked}
-              captchaToken={captchaToken}
-              setCaptchaToken={setCaptchaToken}
               onSubmit={onSubmit}
             />
           </TabsContent>
