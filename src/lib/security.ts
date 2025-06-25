@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Configurações de segurança
@@ -145,11 +144,13 @@ export const validateUrl = (url: string): boolean => {
 export const getSecurityHeaders = () => ({
   'Content-Security-Policy': `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.gpteng.co https://challenges.cloudflare.com;
-    style-src 'self' 'unsafe-inline';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co https://challenges.cloudflare.com;
+    style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com;
     img-src 'self' data: https: blob:;
     font-src 'self' data:;
     connect-src 'self' https://tgfnznsvscgvlcizcfzw.supabase.co https://challenges.cloudflare.com;
+    frame-src https://challenges.cloudflare.com;
+    worker-src https://challenges.cloudflare.com;
     frame-ancestors 'none';
     base-uri 'self';
     form-action 'self';

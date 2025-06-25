@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +10,7 @@ import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { AuthTabs } from '@/components/auth/AuthTabs';
+import { TurnstileDebugInfo } from '@/components/TurnstileDebugInfo';
 
 type AuthMode = 'login' | 'register' | 'reset-request' | 'reset-form';
 
@@ -59,6 +61,7 @@ const Auth = () => {
     // Validar captcha token
     if (!captchaToken) {
       newErrors.captcha = 'Por favor, complete a verificação de segurança';
+      secureLogger.warn('Auth: Tentativa de submit sem captcha token', { mode });
     }
 
     setErrors(newErrors);
@@ -213,23 +216,28 @@ const Auth = () => {
       case 'register':
       default:
         return (
-          <AuthTabs
-            mode={mode}
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            nome={nome}
-            setNome={setNome}
-            errors={errors}
-            loading={loading}
-            isBlocked={isBlocked}
-            captchaToken={captchaToken}
-            setCaptchaToken={setCaptchaToken}
-            onSubmit={handleSubmit}
-            onForgotPassword={() => setMode('reset-request')}
-            onModeChange={handleModeChange}
-          />
+          <>
+            <AuthTabs
+              mode={mode}
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              nome={nome}
+              setNome={setNome}
+              errors={errors}
+              loading={loading}
+              isBlocked={isBlocked}
+              captchaToken={captchaToken}
+              setCaptchaToken={setCaptchaToken}
+              onSubmit={handleSubmit}
+              onForgotPassword={() => setMode('reset-request')}
+              onModeChange={handleModeChange}
+            />
+            {import.meta.env.DEV && (
+              <TurnstileDebugInfo />
+            )}
+          </>
         );
     }
   };
