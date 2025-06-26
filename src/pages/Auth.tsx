@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useSafeSecurity } from '@/components/SecurityProvider';
@@ -25,6 +25,15 @@ const Auth = () => {
   const { toast } = useToast();
   const { checkRateLimit, recordLoginAttempt, isBlocked } = useSafeSecurity();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Verificar se chegou pela URL de reset de senha
+  useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'reset-form') {
+      setMode('reset-form');
+    }
+  }, [searchParams]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -162,6 +171,8 @@ const Auth = () => {
     setMode('login');
     setEmail('');
     setPassword('');
+    // Limpar parâmetros da URL
+    navigate('/auth', { replace: true });
   };
 
   const handleModeChange = (value: string) => {
@@ -180,15 +191,23 @@ const Auth = () => {
             onBack={() => setMode('login')}
             onEmailSent={email => {
               setResetEmail(email);
-              setMode('reset-form');
+              // Para o sistema nativo, não mudamos para reset-form aqui
+              // O usuário receberá um email com link
+              toast({
+                title: "Email Enviado",
+                description: "Clique no link enviado para seu email para redefinir sua senha."
+              });
+              setMode('login');
             }}
           />
         );
       case 'reset-form':
         return (
           <PasswordResetForm
-            email={resetEmail}
-            onBack={() => setMode('reset-request')}
+            onBack={() => {
+              setMode('login');
+              navigate('/auth', { replace: true });
+            }}
             onSuccess={handleResetSuccess}
           />
         );

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,26 +12,33 @@ import { ArrowLeft, Key, Eye, EyeOff, Sprout } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading';
 
 interface PasswordResetFormProps {
-  email: string;
   onBack: () => void;
   onSuccess: () => void;
 }
 
-const PasswordResetForm = ({ email, onBack, onSuccess }: PasswordResetFormProps) => {
-  const [token, setToken] = useState('');
+const PasswordResetForm = ({ onBack, onSuccess }: PasswordResetFormProps) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { loading, resetPassword } = usePasswordReset();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // Verificar se há um token de recuperação na URL
+  useEffect(() => {
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    
+    if (!accessToken || !refreshToken) {
+      console.log('[RESET FORM] Tokens não encontrados na URL, redirecionando');
+      onBack();
+    }
+  }, [searchParams, onBack]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    if (!token || token.length !== 6) {
-      newErrors.token = 'Código deve ter 6 dígitos';
-    }
 
     try {
       passwordSchema.parse(password);
@@ -54,7 +63,7 @@ const PasswordResetForm = ({ email, onBack, onSuccess }: PasswordResetFormProps)
       return;
     }
 
-    const result = await resetPassword(token, password);
+    const result = await resetPassword(password);
     if (result.success) {
       onSuccess();
     }
@@ -72,27 +81,11 @@ const PasswordResetForm = ({ email, onBack, onSuccess }: PasswordResetFormProps)
           Nova Senha
         </CardTitle>
         <CardDescription>
-          Digite o código enviado para {email} e sua nova senha
+          Digite sua nova senha
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="token">Código de Verificação</Label>
-            <Input
-              id="token"
-              type="text"
-              placeholder="Digite o código de 6 dígitos"
-              value={token}
-              onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              maxLength={6}
-              required
-              disabled={loading}
-              className="text-center text-lg tracking-widest transition-all duration-200 focus:scale-105"
-            />
-            {errors.token && <p className="text-sm text-red-600 animate-fade-in">{errors.token}</p>}
-          </div>
-          
           <div className="space-y-2">
             <Label htmlFor="password">Nova Senha</Label>
             <div className="relative">
