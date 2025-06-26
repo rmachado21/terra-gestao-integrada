@@ -23,15 +23,22 @@ export const usePasswordReset = () => {
     
     try {
       secureLogger.security('password_reset_requested', { email });
+      console.log('[FRONTEND] Iniciando solicitação de recuperação para:', email);
       
       // Chamar edge function para gerar token e enviar email
+      console.log('[FRONTEND] Chamando edge function send-password-reset...');
       const { data, error } = await supabase.functions.invoke('send-password-reset', {
         body: { email }
       });
 
+      console.log('[FRONTEND] Resposta da edge function:', { data, error });
+
       if (error) {
+        console.error('[FRONTEND] Erro retornado pela edge function:', error);
         throw error;
       }
+
+      console.log('[FRONTEND] Solicitação processada com sucesso:', data);
 
       setState({ loading: false, emailSent: true, error: null });
       toast({
@@ -41,6 +48,7 @@ export const usePasswordReset = () => {
 
       return { success: true };
     } catch (error: any) {
+      console.error('[FRONTEND] Erro na solicitação de recuperação:', error);
       secureLogger.error('Erro na solicitação de recuperação:', error);
       setState({ loading: false, emailSent: false, error: error.message });
       
@@ -49,6 +57,8 @@ export const usePasswordReset = () => {
         errorMessage = "Email não encontrado em nossos registros";
       } else if (error.message?.includes('Rate limit')) {
         errorMessage = "Muitas tentativas. Tente novamente em alguns minutos.";
+      } else if (error.message?.includes('Serviço de email não configurado')) {
+        errorMessage = "Serviço de email temporariamente indisponível";
       }
 
       toast({
@@ -66,13 +76,17 @@ export const usePasswordReset = () => {
     
     try {
       secureLogger.security('password_reset_attempt', { token: token.substring(0, 2) + '****' });
+      console.log('[FRONTEND] Tentando redefinir senha com token:', token.substring(0, 2) + '****');
       
       // Chamar edge function para validar token e alterar senha
       const { data, error } = await supabase.functions.invoke('reset-password', {
         body: { token, newPassword }
       });
 
+      console.log('[FRONTEND] Resposta da redefinição:', { data, error });
+
       if (error) {
+        console.error('[FRONTEND] Erro na redefinição:', error);
         throw error;
       }
 
@@ -84,6 +98,7 @@ export const usePasswordReset = () => {
 
       return { success: true };
     } catch (error: any) {
+      console.error('[FRONTEND] Erro na redefinição de senha:', error);
       secureLogger.error('Erro na redefinição de senha:', error);
       setState({ loading: false, emailSent: false, error: error.message });
       
