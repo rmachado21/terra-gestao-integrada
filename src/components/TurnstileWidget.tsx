@@ -16,7 +16,6 @@ const TurnstileWidget = ({ onVerify, onError }: TurnstileWidgetProps) => {
         siteKey={siteKey}
         onSuccess={onVerify}
         onError={onError}
-        theme="light"
         size="normal"
       />
     </div>
