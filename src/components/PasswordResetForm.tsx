@@ -26,13 +26,25 @@ const PasswordResetForm = ({ onBack, onSuccess }: PasswordResetFormProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Verificar se há um token de recuperação na URL
+  // Verificar se há tokens de recuperação na URL
   useEffect(() => {
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const token = searchParams.get('token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
-      console.log('[RESET FORM] Tokens não encontrados na URL, redirecionando');
+    console.log('[RESET FORM] Parâmetros da URL:', {
+      accessToken: accessToken ? 'presente' : 'ausente',
+      refreshToken: refreshToken ? 'presente' : 'ausente',
+      token: token ? 'presente' : 'ausente',
+      type
+    });
+    
+    // Verificar se há tokens de recuperação (formato novo ou antigo)
+    const hasTokens = (accessToken && refreshToken) || (token && type === 'recovery');
+    
+    if (!hasTokens) {
+      console.log('[RESET FORM] Tokens de recuperação não encontrados, redirecionando');
       onBack();
     }
   }, [searchParams, onBack]);

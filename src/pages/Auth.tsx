@@ -30,8 +30,29 @@ const Auth = () => {
   // Verificar se chegou pela URL de reset de senha
   useEffect(() => {
     const modeParam = searchParams.get('mode');
-    if (modeParam === 'reset-form') {
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    const token = searchParams.get('token');
+    const type = searchParams.get('type');
+    
+    console.log('[AUTH] Parâmetros da URL:', {
+      mode: modeParam,
+      accessToken: accessToken ? 'presente' : 'ausente',
+      refreshToken: refreshToken ? 'presente' : 'ausente',
+      token: token ? 'presente' : 'ausente',
+      type
+    });
+    
+    // Verificar se é um link de recuperação de senha
+    const isPasswordReset = modeParam === 'reset-form' || 
+                           (accessToken && refreshToken) || 
+                           (token && type === 'recovery');
+    
+    if (isPasswordReset) {
+      console.log('[AUTH] Detectado link de recuperação de senha');
       setMode('reset-form');
+    } else if (modeParam) {
+      setMode(modeParam as AuthMode);
     }
   }, [searchParams]);
 
