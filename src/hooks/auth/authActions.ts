@@ -87,6 +87,12 @@ export const signUp = async (email: string, password: string, options?: { data?:
 
     if (error) {
       secureLogger.security('signup_failed', { email, error: error.message });
+      
+      // Verificar se é erro de captcha
+      if (error.message?.includes('Captcha verification failed') || 
+          error.message?.includes('captcha')) {
+        return { error: { ...error, needsCaptcha: true } };
+      }
     } else {
       secureLogger.security('signup_success', { email });
     }

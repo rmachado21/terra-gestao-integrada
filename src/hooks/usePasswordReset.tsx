@@ -18,20 +18,34 @@ export const usePasswordReset = () => {
   });
   const { toast } = useToast();
 
-  const requestPasswordReset = async (email: string) => {
+  const requestPasswordReset = async (email: string, captchaToken?: string) => {
     setState({ loading: true, emailSent: false, error: null });
     
     try {
       secureLogger.security('password_reset_requested', { email });
       console.log('[PASSWORD RESET] Solicitando recuperação para:', email);
       
-      // Usar o sistema nativo do Supabase
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // Configurar opções do reset incluindo captcha se disponível
+      const resetOptions: any = {
         redirectTo: `${window.location.origin}/auth?mode=reset-form`,
-      });
+      };
+
+      // Incluir captcha token se fornecido
+      if (captchaToken) {
+        resetOptions.captchaToken = captchaToken;
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, resetOptions);
 
       if (error) {
         console.error('[PASSWORD RESET] Erro do Supabase:', error);
+        
+        // Tratamento específico de erros
+        if (error.message?.includes('Captcha verification failed') || 
+            error.message?.includes('captcha')) {
+          throw new Error('Verificação de captcha necessária. Tente novamente.');
+        }
+        
         throw error;
       }
 
@@ -54,6 +68,8 @@ export const usePasswordReset = () => {
         errorMessage = "Email não encontrado em nossos registros";
       } else if (error.message?.includes('Email rate limit')) {
         errorMessage = "Muitas tentativas. Tente novamente em alguns minutos.";
+      } else if (error.message?.includes('captcha') || error.message?.includes('Captcha')) {
+        errorMessage = "Verificação de segurança necessária. Tente novamente.";
       }
 
       toast({
@@ -73,7 +89,6 @@ export const usePasswordReset = () => {
       secureLogger.security('password_reset_attempt');
       console.log('[PASSWORD RESET] Tentando alterar senha');
       
-      // Usar o sistema nativo do Supabase para atualizar a senha
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });

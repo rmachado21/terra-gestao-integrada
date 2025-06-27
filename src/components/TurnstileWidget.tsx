@@ -1,18 +1,26 @@
 
-// Componente removido - Turnstile desabilitado
+import { Turnstile } from '@marsidev/react-turnstile';
+
 interface TurnstileWidgetProps {
-  onSuccess: (token: string) => void;
+  onVerify: (token: string) => void;
   onError?: () => void;
-  onExpire?: () => void;
-  disabled?: boolean;
 }
 
-export const TurnstileWidget = ({ onSuccess }: TurnstileWidgetProps) => {
-  // Simular sucesso imediato para manter compatibilidade
-  // mas sem exibir nenhum widget visual
-  setTimeout(() => {
-    onSuccess('disabled');
-  }, 100);
+const TurnstileWidget = ({ onVerify, onError }: TurnstileWidgetProps) => {
+  // Chave do site para Cloudflare Turnstile (substitua pela sua chave real)
+  const siteKey = '0x4AAAAAAAkC_8nJb7dp8sLN'; // Esta é uma chave de teste, substitua pela real
 
-  return null;
+  return (
+    <div className="flex justify-center">
+      <Turnstile
+        siteKey={siteKey}
+        onSuccess={onVerify}
+        onError={onError}
+        theme="light"
+        size="normal"
+      />
+    </div>
+  );
 };
+
+export { TurnstileWidget };

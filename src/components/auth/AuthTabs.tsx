@@ -3,6 +3,9 @@ import { Card, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from './LoginForm';
 import { RegisterForm } from './RegisterForm';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
+import { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 type AuthMode = 'login' | 'register';
 
@@ -37,6 +40,22 @@ export const AuthTabs = ({
   onForgotPassword,
   onModeChange
 }: AuthTabsProps) => {
+  const [captchaToken, setCaptchaToken] = useState<string>('');
+  const [showCaptchaForRegister, setShowCaptchaForRegister] = useState(false);
+
+  const handleSubmitWithCaptcha = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Para registro, verificar se precisa de captcha
+    if (mode === 'register' && !captchaToken && !showCaptchaForRegister) {
+      // Tentar primeiro sem captcha
+      onSubmit(e);
+      return;
+    }
+    
+    onSubmit(e);
+  };
+
   return (
     <Card className="w-full rounded-xl">
       <CardContent className="p-6">
@@ -67,18 +86,42 @@ export const AuthTabs = ({
             <CardDescription className="text-center pb-4">
               Crie sua conta. Grátis por 7 dias!
             </CardDescription>
-            <RegisterForm
-              nome={nome}
-              setNome={setNome}
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              errors={errors}
-              loading={loading}
-              isBlocked={isBlocked}
-              onSubmit={onSubmit}
-            />
+            
+            <form onSubmit={handleSubmitWithCaptcha} className="space-y-4">
+              <RegisterForm
+                nome={nome}
+                setNome={setNome}
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                errors={errors}
+                loading={loading}
+                isBlocked={isBlocked}
+                onSubmit={handleSubmitWithCaptcha}
+              />
+
+              {showCaptchaForRegister && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-800">
+                      Verificação de segurança necessária para criar conta
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-center">
+                    <TurnstileWidget
+                      onVerify={(token) => {
+                        setCaptchaToken(token);
+                        setShowCaptchaForRegister(false);
+                      }}
+                      onError={() => setShowCaptchaForRegister(true)}
+                    />
+                  </div>
+                </div>
+              )}
+            </form>
           </TabsContent>
         </Tabs>
       </CardContent>

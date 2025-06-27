@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { usePasswordReset } from '@/hooks/usePasswordReset';
 import { emailSchema } from '@/lib/security';
 import { z } from 'zod';
-import { ArrowLeft, Mail, Sprout } from 'lucide-react';
+import { ArrowLeft, Mail, Sprout, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
 
 interface PasswordResetRequestProps {
   onBack: () => void;
@@ -17,6 +19,8 @@ interface PasswordResetRequestProps {
 const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps) => {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string>('');
+  const [showCaptchaError, setShowCaptchaError] = useState(false);
   const { loading, requestPasswordReset } = usePasswordReset();
 
   const validateEmail = (email: string): boolean => {
@@ -39,7 +43,27 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
       return;
     }
 
-    const result = await requestPasswordReset(email);
+    // Tentar primeiro sem captcha
+    let result = await requestPasswordReset(email);
+    
+    // Se falhar por captcha, mostrar captcha e tentar novamente
+    if (!result.success && result.error?.includes('captcha')) {
+      setShowCaptchaError(true);
+      return;
+    }
+
+    if (result.success) {
+      onEmailSent(email);
+    }
+  };
+
+  const handleCaptchaSubmit = async () => {
+    if (!captchaToken) {
+      setShowCaptchaError(true);
+      return;
+    }
+
+    const result = await requestPasswordReset(email, captchaToken);
     if (result.success) {
       onEmailSent(email);
     }
@@ -76,21 +100,62 @@ const PasswordResetRequest = ({ onBack, onEmailSent }: PasswordResetRequestProps
             />
             {emailError && <p className="text-sm text-red-600 animate-fade-in">{emailError}</p>}
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105" 
-            disabled={loading}
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <LoadingSpinner size="sm" />
-                Enviando...
+
+          {showCaptchaError && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm text-yellow-800">
+                  Verificação de segurança necessária
+                </span>
               </div>
-            ) : (
-              'Enviar Código de Recuperação'
-            )}
-          </Button>
+              
+              <div className="flex justify-center">
+                <TurnstileWidget
+                  onVerify={(token) => {
+                    setCaptchaToken(token);
+                    setShowCaptchaError(false);
+                  }}
+                  onError={() => setShowCaptchaError(true)}
+                />
+              </div>
+
+              {captchaToken && (
+                <Button 
+                  type="button"
+                  onClick={handleCaptchaSubmit}
+                  className="w-full bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105" 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      Enviando...
+                    </div>
+                  ) : (
+                    'Enviar Código de Recuperação'
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {!showCaptchaError && (
+            <Button 
+              type="submit" 
+              className="w-full bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105" 
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <LoadingSpinner size="sm" />
+                  Enviando...
+                </div>
+              ) : (
+                'Enviar Código de Recuperação'
+              )}
+            </Button>
+          )}
         </form>
         
         <div className="mt-4 text-center">
