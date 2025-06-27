@@ -40,7 +40,6 @@ const VendasPage = () => {
         </TabsList>
 
         <TabsContent value="pedidos" className="space-y-6">
-          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
           <Card>
             <CardHeader>
               <CardTitle>Gestão de Pedidos</CardTitle>
@@ -52,10 +51,10 @@ const VendasPage = () => {
               <PedidosList />
             </CardContent>
           </Card>
+          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
         </TabsContent>
 
         <TabsContent value="clientes" className="space-y-6">
-          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
           <Card>
             <CardHeader>
               <CardTitle>Gestão de Clientes</CardTitle>
@@ -67,10 +66,10 @@ const VendasPage = () => {
               <ClientesList />
             </CardContent>
           </Card>
+          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
         </TabsContent>
 
         <TabsContent value="entregas" className="space-y-6">
-          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
           <Card>
             <CardHeader>
               <CardTitle>Controle de Entregas</CardTitle>
@@ -82,10 +81,10 @@ const VendasPage = () => {
               <EntregasList />
             </CardContent>
           </Card>
+          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
         </TabsContent>
 
         <TabsContent value="relatorios" className="space-y-6">
-          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
           <Card>
             <CardHeader>
               <CardTitle>Relatórios de Vendas</CardTitle>
@@ -97,6 +96,7 @@ const VendasPage = () => {
               <RelatoriosVendas />
             </CardContent>
           </Card>
+          <VendasStats data={isLoadingStats ? null : vendasStatsData} />
         </TabsContent>
       </Tabs>
     </div>
