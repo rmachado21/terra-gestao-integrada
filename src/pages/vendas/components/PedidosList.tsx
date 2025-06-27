@@ -13,7 +13,6 @@ import PedidoForm from './PedidoForm';
 import PedidoDetalhes from './PedidoDetalhes';
 import PedidoImpressaoButton from './PedidoImpressaoButton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 interface Pedido {
   id: string;
   cliente_id: string | null;
@@ -284,16 +283,10 @@ const PedidosList = () => {
                         <div className="flex items-center space-x-1">
                           <span className="font-medium">Cliente:</span>
                           <span className="font-bold">{pedido.cliente?.nome || 'Cliente não informado'}</span>
-                          {pedido.cliente?.telefone && (
-                            <TooltipProvider>
+                          {pedido.cliente?.telefone && <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                    onClick={() => handleWhatsAppClick(pedido.cliente!.nome, pedido.cliente!.telefone!, pedido.id)}
-                                  >
+                                  <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => handleWhatsAppClick(pedido.cliente!.nome, pedido.cliente!.telefone!, pedido.id)}>
                                     <MessageCircle className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
@@ -301,8 +294,7 @@ const PedidosList = () => {
                                   <p>Conversar no WhatsApp</p>
                                 </TooltipContent>
                               </Tooltip>
-                            </TooltipProvider>
-                          )}
+                            </TooltipProvider>}
                         </div>
                         <div className="flex items-center space-x-1">
                           <Calendar className="h-4 w-4" />
@@ -310,7 +302,7 @@ const PedidosList = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <DollarSign className="h-4 w-4" />
-                          <span>R$ {pedido.valor_total.toLocaleString('pt-BR', {
+                          <span className="font-bold">R$ {pedido.valor_total.toLocaleString('pt-BR', {
                         minimumFractionDigits: 2
                       })}</span>
                         </div>
