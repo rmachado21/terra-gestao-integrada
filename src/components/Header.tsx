@@ -15,11 +15,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useState as useStateHook } from 'react';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
-import { useEffectiveUser } from '@/hooks/useEffectiveUser';
+import { useEffectiveProfile } from '@/hooks/useEffectiveProfile';
 
 const Header = () => {
   const { signOut } = useAuth();
-  const { user, isImpersonating } = useEffectiveUser();
+  const { profile, isImpersonating, loading } = useEffectiveProfile();
   const { impersonatedUser, stopImpersonation } = useImpersonation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useStateHook(false);
@@ -38,11 +38,28 @@ const Header = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const displayUser = isImpersonating ? impersonatedUser : user;
-  const userInitials = displayUser?.email?.substring(0, 2).toUpperCase() || 'U';
-  const displayName = isImpersonating && impersonatedUser?.nome 
-    ? impersonatedUser.nome 
-    : displayUser?.email;
+  // Determine display information
+  const displayName = profile?.nome || profile?.email;
+  const userInitials = displayName?.substring(0, 2).toUpperCase() || 'U';
+  const displayEmail = profile?.email;
+  const displayCargo = profile?.cargo;
+
+  if (loading) {
+    return (
+      <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+          <div className="flex items-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-green-600">
+              GestorRaiz
+            </h1>
+          </div>
+          <div className="animate-pulse">
+            <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
@@ -77,8 +94,16 @@ const Header = () => {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {isImpersonating ? `Visualizando: ${displayName}` : displayUser?.email}
+                    {isImpersonating ? `Visualizando: ${displayName}` : displayName}
                   </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {displayEmail}
+                  </p>
+                  {displayCargo && (
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {displayCargo}
+                    </p>
+                  )}
                   {isImpersonating && (
                     <p className="text-xs leading-none text-orange-600 font-medium">
                       Modo Super Admin
@@ -133,8 +158,16 @@ const Header = () => {
               </Avatar>
               <div className="flex-1">
                 <p className="text-sm font-medium">
-                  {isImpersonating ? `Visualizando: ${displayName}` : displayUser?.email}
+                  {isImpersonating ? `Visualizando: ${displayName}` : displayName}
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  {displayEmail}
+                </p>
+                {displayCargo && (
+                  <p className="text-xs text-muted-foreground">
+                    {displayCargo}
+                  </p>
+                )}
                 {isImpersonating && (
                   <p className="text-xs text-orange-600 font-medium">
                     Modo Super Admin
