@@ -138,24 +138,31 @@ const EditUserProfilePage = () => {
 
       const logoUrl = data.publicUrl;
 
-      const success = await updateProfile({ 
-        nome: profile?.nome || '',
-        telefone: profile?.telefone || '',
-        cargo: profile?.cargo || '',
-        empresa_nome: profile?.empresa_nome || '',
-        cnpj: profile?.cnpj || '',
-        logo_url: logoUrl 
-      });
-      
-      if (success) {
+      // Update profile with new logo URL directly
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          logo_url: logoUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) {
         toast({
-          title: "Sucesso",
-          description: "Logo da empresa enviado com sucesso",
+          title: "Erro",
+          description: "Erro ao atualizar logo",
+          variant: "destructive",
         });
-        return logoUrl;
+        return null;
       }
 
-      return null;
+      setProfile(prev => prev ? { ...prev, logo_url: logoUrl } : null);
+      toast({
+        title: "Sucesso",
+        description: "Logo da empresa enviado com sucesso",
+      });
+      
+      return logoUrl;
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast({
