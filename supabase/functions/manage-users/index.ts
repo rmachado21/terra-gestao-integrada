@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { authenticateAndAuthorize } from './auth.ts'
@@ -12,7 +11,8 @@ import {
   getAdminLogs,
   updateUserStatus,
   updateUserRole,
-  updateUserPlanById
+  updateUserPlanById,
+  resetUserPassword
 } from './user-actions.ts'
 
 const corsHeaders = {
@@ -41,7 +41,7 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization')
     const user = await authenticateAndAuthorize(supabaseClient, authHeader)
 
-    const { action, userData, userId, planData, targetUserId, active, newRole }: RequestBody = await req.json()
+    const { action, userData, userId, planData, targetUserId, active, newRole, newPassword }: RequestBody = await req.json()
 
     console.log('Processing action:', action)
 
@@ -122,6 +122,17 @@ serve(async (req) => {
           throw new Error('Missing required parameters')
         }
         const result = await updateUserRole(supabaseClient, userId, userData as any, user.id)
+        return new Response(
+          JSON.stringify(result),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'reset_user_password': {
+        if (!targetUserId || !newPassword) {
+          throw new Error('Missing required parameters')
+        }
+        const result = await resetUserPassword(supabaseClient, targetUserId, newPassword, user.id)
         return new Response(
           JSON.stringify(result),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

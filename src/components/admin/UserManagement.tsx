@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { format } from 'date-fns';
 import { UserRole } from '@/hooks/useUserRoles';
 import { TipoPlano } from '@/hooks/useAdminUsers';
 import PlanEditDialog from './PlanEditDialog';
+import PasswordResetDialog from './PasswordResetDialog';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -43,6 +45,7 @@ interface UserManagementProps {
   }) => Promise<boolean>;
   onRefresh: () => void;
   calculateRemainingDays: (dataFim: string) => number;
+  resetUserPassword: (userId: string, newPassword: string) => Promise<boolean>;
 }
 
 const UserManagement = ({
@@ -52,7 +55,8 @@ const UserManagement = ({
   onChangeRole,
   onUpdatePlan,
   onRefresh,
-  calculateRemainingDays
+  calculateRemainingDays,
+  resetUserPassword
 }: UserManagementProps) => {
   const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
@@ -170,7 +174,7 @@ const UserManagement = ({
                       <TableHead>Status</TableHead>
                       <TableHead className="min-w-[150px]">Role</TableHead>
                       <TableHead className="min-w-[220px]">Plano</TableHead>
-                      <TableHead>Ações</TableHead>
+                      <TableHead className="min-w-[200px]">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -240,9 +244,16 @@ const UserManagement = ({
                             )}
                           </TableCell>
                           <TableCell>
-                            {!isUserSuperAdmin && (
-                              <PlanEditDialog userId={user.id} currentPlan={user.user_plan} onUpdatePlan={onUpdatePlan} />
-                            )}
+                            <div className="flex gap-2">
+                              {!isUserSuperAdmin && (
+                                <PlanEditDialog userId={user.id} currentPlan={user.user_plan} onUpdatePlan={onUpdatePlan} />
+                              )}
+                              <PasswordResetDialog
+                                userId={user.id}
+                                userName={user.nome}
+                                onResetPassword={resetUserPassword}
+                              />
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -256,4 +267,5 @@ const UserManagement = ({
       </Card>
     </div>;
 };
+
 export default UserManagement;

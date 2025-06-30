@@ -200,6 +200,36 @@ export const useAdminUsers = () => {
     return Math.max(0, diffDays);
   }, []);
 
+  const resetUserPassword = useCallback(async (userId: string, newPassword: string) => {
+    try {
+      console.log(`Resetting password for user ${userId}`);
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: { 
+          action: 'reset_user_password',
+          targetUserId: userId,
+          newPassword
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Senha do usuário redefinida com sucesso",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error resetting user password:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao redefinir senha do usuário",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }, [toast]);
+
   return {
     users,
     logs,
@@ -210,5 +240,6 @@ export const useAdminUsers = () => {
     updateUserPlan,
     fetchAdminLogs,
     calculateRemainingDays,
+    resetUserPassword,
   };
 };

@@ -19,7 +19,8 @@ const UsersPage = () => {
     changeUserRole, 
     updateUserPlan,
     fetchAdminLogs,
-    calculateRemainingDays
+    calculateRemainingDays,
+    resetUserPassword
   } = useAdminUsers();
   const [activeTab, setActiveTab] = useState<'users' | 'logs'>('users');
 
@@ -95,6 +96,7 @@ const UsersPage = () => {
             onUpdatePlan={updateUserPlan}
             onRefresh={fetchUsers}
             calculateRemainingDays={calculateRemainingDays}
+            resetUserPassword={resetUserPassword}
           />
         ) : (
           <AdminLogs logs={logs} onRefresh={fetchAdminLogs} />

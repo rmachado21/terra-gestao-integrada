@@ -514,3 +514,42 @@ export const updateUserPlanById = async (
     throw error;
   }
 };
+
+export const resetUserPassword = async (
+  supabaseClient: SupabaseClient,
+  targetUserId: string,
+  newPassword: string,
+  adminUserId: string
+) => {
+  console.log(`Resetting password for user ${targetUserId}`);
+  
+  try {
+    // Update user password using admin API
+    const { error: updateError } = await supabaseClient.auth.admin.updateUserById(
+      targetUserId,
+      { password: newPassword }
+    );
+
+    if (updateError) {
+      console.error('Error updating user password:', updateError);
+      throw updateError;
+    }
+
+    console.log('Password updated successfully for user:', targetUserId);
+
+    // Log admin action
+    await supabaseClient
+      .from('admin_logs')
+      .insert({
+        admin_user_id: adminUserId,
+        action: 'reset_user_password',
+        target_user_id: targetUserId,
+        details: { password_reset: true }
+      });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in resetUserPassword:', error);
+    throw error;
+  }
+};

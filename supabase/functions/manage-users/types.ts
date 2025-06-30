@@ -3,6 +3,7 @@ export interface UserData {
   nome: string;
   email: string;
   ativo?: boolean;
+  empresa_nome?: string;
 }
 
 export interface PlanData {
@@ -18,4 +19,5 @@ export interface RequestBody {
   targetUserId?: string;
   active?: boolean;
   newRole?: string;
+  newPassword?: string;
 }
