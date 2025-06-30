@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,6 @@ import { UserRole } from '@/hooks/useUserRoles';
 import { TipoPlano } from '@/hooks/useAdminUsers';
 import PlanEditDialog from './PlanEditDialog';
 import PasswordResetDialog from './PasswordResetDialog';
-import ImpersonationDialog from './ImpersonationDialog';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from 'react-router-dom';
@@ -252,17 +252,7 @@ const UserManagement = ({
                           <TableCell>
                             <div className="flex gap-2">
                               {!isUserSuperAdmin && (
-                                <>
-                                  <PlanEditDialog userId={user.id} currentPlan={user.user_plan} onUpdatePlan={onUpdatePlan} />
-                                  <ImpersonationDialog 
-                                    user={{
-                                      id: user.id,
-                                      nome: user.nome,
-                                      email: user.email,
-                                      empresa_nome: user.empresa_nome
-                                    }}
-                                  />
-                                </>
+                                <PlanEditDialog userId={user.id} currentPlan={user.user_plan} onUpdatePlan={onUpdatePlan} />
                               )}
                               <PasswordResetDialog
                                 userId={user.id}

@@ -6,9 +6,9 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 
 const DashboardStats = () => {
   const navigate = useNavigate();
-  const { stats, loading } = useDashboardData();
+  const { data: dashboardData, isLoading } = useDashboardData();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
@@ -24,48 +24,48 @@ const DashboardStats = () => {
     );
   }
 
-  const statsData = [
+  const stats = [
     {
       title: "Área Plantada",
-      value: `${stats.totalAreas} áreas`,
-      subtitle: "Áreas cadastradas",
+      value: dashboardData?.stats.areaPlantada.value || "0 ha",
+      subtitle: dashboardData?.stats.areaPlantada.subtitle || "Nenhuma área ativa",
       icon: Sprout,
       color: "text-green-600",
       bg: "bg-green-100",
-      route: "/areas"
-    },
-    {
-      title: "Plantios",
-      value: `${stats.totalPlantios}`,
-      subtitle: "Plantios registrados",
-      icon: Package,
-      color: "text-orange-600",
-      bg: "bg-orange-100",
       route: "/plantios"
     },
     {
-      title: "Colheitas",
-      value: `${stats.totalColheitas}`,
-      subtitle: "Colheitas realizadas",
-      icon: TrendingUp,
-      color: "text-purple-600",
-      bg: "bg-purple-100",
+      title: "Produção Mensal",
+      value: dashboardData?.stats.producaoMensal.value || "0 kg",
+      subtitle: dashboardData?.stats.producaoMensal.subtitle || "0% vs mês anterior",
+      icon: Package,
+      color: "text-orange-600",
+      bg: "bg-orange-100",
       route: "/colheitas"
     },
     {
-      title: "Estoque",
-      value: `${stats.totalEstoque}`,
-      subtitle: "Itens em estoque",
+      title: "Vendas do Mês",
+      value: dashboardData?.stats.vendasMes.value || "R$ 0,00",
+      subtitle: dashboardData?.stats.vendasMes.subtitle || "0 pedidos entregues",
+      icon: TrendingUp,
+      color: "text-purple-600",
+      bg: "bg-purple-100",
+      route: "/vendas"
+    },
+    {
+      title: "Lucro Líquido",
+      value: dashboardData?.stats.lucroLiquido.value || "R$ 0,00",
+      subtitle: dashboardData?.stats.lucroLiquido.subtitle || "Margem de 0%",
       icon: DollarSign,
       color: "text-blue-600",
       bg: "bg-blue-100",
-      route: "/estoque"
+      route: "/financeiro"
     }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {statsData.map((stat, index) => (
+      {stats.map((stat, index) => (
         <Card 
           key={index} 
           className="hover:shadow-md transition-all duration-300 cursor-pointer transform hover:-translate-y-1"

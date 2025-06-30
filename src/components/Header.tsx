@@ -1,216 +1,94 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Bell, Settings, LogOut, User, Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { useState as useStateHook } from 'react';
-import { useImpersonation } from '@/contexts/ImpersonationContext';
-import { useEffectiveProfile } from '@/hooks/useEffectiveProfile';
+import { useProfile } from '@/hooks/useProfile';
+import { LogOut, User, Home, Settings, Shield, Sprout } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useUserRoles } from '@/hooks/useUserRoles';
 
 const Header = () => {
-  const { signOut } = useAuth();
-  const { profile, isImpersonating, loading } = useEffectiveProfile();
-  const { impersonatedUser, stopImpersonation } = useImpersonation();
+  const { user, signOut } = useAuth();
+  const { profile } = useProfile();
+  const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useStateHook(false);
-
-  const handleSignOut = async () => {
-    if (isImpersonating) {
-      stopImpersonation();
-      navigate('/admin/users');
-    } else {
-      await signOut();
-    }
-  };
-
-  const handleProfileClick = () => {
-    navigate('/profile');
-    setIsMobileMenuOpen(false);
-  };
-
-  // Determine display information
-  const displayName = profile?.nome || profile?.email;
-  const userInitials = displayName?.substring(0, 2).toUpperCase() || 'U';
-  const displayEmail = profile?.email;
-  const displayCargo = profile?.cargo;
-
-  if (loading) {
-    return (
-      <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
-        <div className="flex items-center justify-between px-4 sm:px-6 h-16">
-          <div className="flex items-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-green-600">
-              GestorRaiz
-            </h1>
-          </div>
-          <div className="animate-pulse">
-            <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
-          </div>
-        </div>
-      </header>
-    );
-  }
+  const location = useLocation();
+  const isDashboard = location.pathname === '/dashboard';
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
-      <div className="flex items-center justify-between px-4 sm:px-6 h-16">
-        {/* Logo */}
-        <div className="flex items-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-green-600">
-            GestorRaiz
-          </h1>
-        </div>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              3
-            </span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className={`${isImpersonating ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {isImpersonating ? `Visualizando: ${displayName}` : displayName}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {displayEmail}
-                  </p>
-                  {displayCargo && (
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {displayCargo}
-                    </p>
-                  )}
-                  {isImpersonating && (
-                    <p className="text-xs leading-none text-orange-600 font-medium">
-                      Modo Super Admin
-                    </p>
-                  )}
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleProfileClick}>
-                <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Configurações</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>{isImpersonating ? 'Sair da Visualização' : 'Sair'}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2"
+    <header className="bg-white shadow-sm border-b border-gray-200">
+      <div className="flex justify-between items-center h-16 px-4">
+        {/* Logo alinhado com o sidebar */}
+        <div className="w-64 flex items-center">
+          <button 
+            onClick={() => navigate(user ? '/dashboard' : '/')} 
+            className="flex items-center space-x-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-lg p-1 -m-1"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+            <div className="flex items-center space-x-2">
+              <Sprout className="h-8 w-8 text-green-600" />
+              <span className="text-2xl font-bold text-gray-900">Gestor Raiz</span>
+            </div>
+          </button>
         </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
-          <div className="px-4 py-2 space-y-2">
-            <div className="flex items-center space-x-3 py-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className={`${isImpersonating ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <p className="text-sm font-medium">
-                  {isImpersonating ? `Visualizando: ${displayName}` : displayName}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {displayEmail}
-                </p>
-                {displayCargo && (
-                  <p className="text-xs text-muted-foreground">
-                    {displayCargo}
-                  </p>
-                )}
-                {isImpersonating && (
-                  <p className="text-xs text-orange-600 font-medium">
-                    Modo Super Admin
-                  </p>
-                )}
-              </div>
+        
+        {user && (
+          <div className="flex items-center space-x-2 sm:space-x-3 pr-2 sm:pr-4">
+            {!isDashboard && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/dashboard')} 
+                className="lg:hidden flex items-center justify-center p-2"
+              >
+                <Home className="h-4 w-4" />
+              </Button>
+            )}
+            
+            <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-md">
+              <User className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600 font-medium max-w-32 lg:max-w-none truncate">
+                {profile?.nome || user.email}
+              </span>
+              {isSuperAdmin && (
+                <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-medium">
+                  Super Admin
+                </span>
+              )}
             </div>
             
+            {isSuperAdmin && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/admin/users')} 
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline font-medium">Admin</span>
+              </Button>
+            )}
+            
             <Button 
-              variant="ghost" 
-              className="w-full justify-start" 
-              size="sm"
-              onClick={handleProfileClick}
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/profile')} 
+              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
             >
-              <User className="mr-2 h-4 w-4" />
-              Perfil
-            </Button>
-            
-            <Button variant="ghost" className="w-full justify-start relative" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              Notificações
-              <span className="absolute right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                3
-              </span>
-            </Button>
-            
-            <Button variant="ghost" className="w-full justify-start" size="sm">
-              <Settings className="mr-2 h-4 w-4" />
-              Configurações
+              <Settings className="h-4 w-4" />
             </Button>
             
             <Button 
-              variant="ghost" 
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" 
-              size="sm"
-              onClick={handleSignOut}
+              variant="outline" 
+              size="sm" 
+              onClick={() => signOut()} 
+              className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3"
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              {isImpersonating ? 'Sair da Visualização' : 'Sair'}
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline font-medium">Sair</span>
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </header>
   );
 };
