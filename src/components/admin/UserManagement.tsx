@@ -13,6 +13,7 @@ import PlanEditDialog from './PlanEditDialog';
 import PasswordResetDialog from './PasswordResetDialog';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Link } from 'react-router-dom';
 
 interface AdminUser {
   id: string;
@@ -185,7 +186,12 @@ const UserManagement = ({
                         <TableRow key={user.id}>
                           <TableCell>
                             <div className="font-medium flex items-center gap-2">
-                              {user.nome}
+                              <Link 
+                                to={`/admin/users/${user.id}/edit`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                              >
+                                {user.nome}
+                              </Link>
                               {isUserSuperAdmin && <Crown className="h-4 w-4 text-yellow-500" />}
                             </div>
                             {user.empresa_nome && <div className="text-sm text-muted-foreground">{user.empresa_nome}</div>}

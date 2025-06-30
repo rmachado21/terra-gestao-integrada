@@ -23,6 +23,7 @@ import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import AlertasPage from "./pages/alertas/AlertasPage";
 import UsersPage from "./pages/admin/UsersPage";
+import EditUserProfilePage from "./pages/admin/EditUserProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Header from "./components/Header";
@@ -144,6 +145,13 @@ const App = () => (
                   <AdminRoute requireSuperAdmin={true}>
                     <AppLayout>
                       <UsersPage />
+                    </AppLayout>
+                  </AdminRoute>
+                } />
+                <Route path="/admin/users/:userId/edit" element={
+                  <AdminRoute requireSuperAdmin={true}>
+                    <AppLayout>
+                      <EditUserProfilePage />
                     </AppLayout>
                   </AdminRoute>
                 } />
