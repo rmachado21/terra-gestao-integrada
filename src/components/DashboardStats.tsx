@@ -6,9 +6,9 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 
 const DashboardStats = () => {
   const navigate = useNavigate();
-  const { data: dashboardData, isLoading } = useDashboardData();
+  const { stats, loading } = useDashboardData();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
@@ -24,48 +24,48 @@ const DashboardStats = () => {
     );
   }
 
-  const stats = [
+  const statsData = [
     {
       title: "Área Plantada",
-      value: dashboardData?.stats.areaPlantada.value || "0 ha",
-      subtitle: dashboardData?.stats.areaPlantada.subtitle || "Nenhuma área ativa",
+      value: `${stats.totalAreas} áreas`,
+      subtitle: "Áreas cadastradas",
       icon: Sprout,
       color: "text-green-600",
       bg: "bg-green-100",
-      route: "/plantios"
+      route: "/areas"
     },
     {
-      title: "Produção Mensal",
-      value: dashboardData?.stats.producaoMensal.value || "0 kg",
-      subtitle: dashboardData?.stats.producaoMensal.subtitle || "0% vs mês anterior",
+      title: "Plantios",
+      value: `${stats.totalPlantios}`,
+      subtitle: "Plantios registrados",
       icon: Package,
       color: "text-orange-600",
       bg: "bg-orange-100",
-      route: "/colheitas"
+      route: "/plantios"
     },
     {
-      title: "Vendas do Mês",
-      value: dashboardData?.stats.vendasMes.value || "R$ 0,00",
-      subtitle: dashboardData?.stats.vendasMes.subtitle || "0 pedidos entregues",
+      title: "Colheitas",
+      value: `${stats.totalColheitas}`,
+      subtitle: "Colheitas realizadas",
       icon: TrendingUp,
       color: "text-purple-600",
       bg: "bg-purple-100",
-      route: "/vendas"
+      route: "/colheitas"
     },
     {
-      title: "Lucro Líquido",
-      value: dashboardData?.stats.lucroLiquido.value || "R$ 0,00",
-      subtitle: dashboardData?.stats.lucroLiquido.subtitle || "Margem de 0%",
+      title: "Estoque",
+      value: `${stats.totalEstoque}`,
+      subtitle: "Itens em estoque",
       icon: DollarSign,
       color: "text-blue-600",
       bg: "bg-blue-100",
-      route: "/financeiro"
+      route: "/estoque"
     }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {stats.map((stat, index) => (
+      {statsData.map((stat, index) => (
         <Card 
           key={index} 
           className="hover:shadow-md transition-all duration-300 cursor-pointer transform hover:-translate-y-1"

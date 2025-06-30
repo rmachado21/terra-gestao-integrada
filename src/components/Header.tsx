@@ -40,6 +40,9 @@ const Header = () => {
 
   const displayUser = isImpersonating ? impersonatedUser : user;
   const userInitials = displayUser?.email?.substring(0, 2).toUpperCase() || 'U';
+  const displayName = isImpersonating && impersonatedUser?.nome 
+    ? impersonatedUser.nome 
+    : displayUser?.email;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
@@ -74,7 +77,7 @@ const Header = () => {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {isImpersonating ? `Visualizando: ${displayUser?.nome || displayUser?.email}` : displayUser?.email}
+                    {isImpersonating ? `Visualizando: ${displayName}` : displayUser?.email}
                   </p>
                   {isImpersonating && (
                     <p className="text-xs leading-none text-orange-600 font-medium">
@@ -130,7 +133,7 @@ const Header = () => {
               </Avatar>
               <div className="flex-1">
                 <p className="text-sm font-medium">
-                  {isImpersonating ? `Visualizando: ${displayUser?.nome || displayUser?.email}` : displayUser?.email}
+                  {isImpersonating ? `Visualizando: ${displayName}` : displayUser?.email}
                 </p>
                 {isImpersonating && (
                   <p className="text-xs text-orange-600 font-medium">
