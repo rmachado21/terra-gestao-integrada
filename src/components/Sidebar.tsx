@@ -104,7 +104,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-700 transform transition-transform duration-300 ease-in-out lg:transform-none lg:translate-x-0",
+        "fixed lg:relative inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-700 transform transition-transform duration-300 ease-in-out lg:transform-none lg:translate-x-0",
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <ScrollArea className="h-full px-3 py-4 bg-gray-900">
