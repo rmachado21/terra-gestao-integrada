@@ -5,187 +5,190 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
-
-interface Pedido {
-  id: string;
-  cliente_id: string | null;
-  data_pedido: string;
-  data_entrega: string | null;
-  valor_total: number;
-  status: 'pendente' | 'processando' | 'entregue' | 'cancelado';
-  observacoes: string | null;
-}
-
-interface ItemPedido {
-  id?: string;
-  produto_id: string;
-  quantidade: number;
-  preco_unitario: number;
-  subtotal: number;
-}
+import { Pedido } from '../types/pedido';
 
 interface PedidoFormProps {
   pedido?: Pedido | null;
   onClose: () => void;
 }
 
+interface ItemPedido {
+  produto_id: string;
+  quantidade: number;
+  preco_unitario: number;
+  subtotal: number;
+}
+
 const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [formData, setFormData] = useState({
-    cliente_id: pedido?.cliente_id || '',
-    data_pedido: pedido?.data_pedido || new Date().toISOString().split('T')[0],
-    data_entrega: pedido?.data_entrega || '',
-    status: pedido?.status || 'pendente' as const,
-    observacoes: pedido?.observacoes || ''
+    cliente_id: '',
+    data_pedido: new Date().toISOString().split('T')[0],
+    status: 'pendente' as const,
+    observacoes: ''
   });
 
-  const [itens, setItens] = useState<ItemPedido[]>([]);
+  const [itens, setItens] = useState<ItemPedido[]>([{
+    produto_id: '',
+    quantidade: 1,
+    preco_unitario: 0,
+    subtotal: 0
+  }]);
 
   // Buscar clientes
   const { data: clientes } = useQuery({
-    queryKey: ['clientes-select', user?.id],
+    queryKey: ['clientes-form', effectiveUserId],
     queryFn: async () => {
-      if (!user?.id) return [];
-      
       const { data, error } = await supabase
         .from('clientes')
         .select('id, nome')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('ativo', true)
         .order('nome');
       
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
   // Buscar produtos
   const { data: produtos } = useQuery({
-    queryKey: ['produtos-select', user?.id],
+    queryKey: ['produtos-form', effectiveUserId],
     queryFn: async () => {
-      if (!user?.id) return [];
-      
       const { data, error } = await supabase
         .from('produtos')
         .select('id, nome, preco_venda, unidade_medida')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('ativo', true)
         .order('nome');
       
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
-  // Buscar itens do pedido se estiver editando
+  // Buscar dados do pedido para edição
   useEffect(() => {
-    if (pedido?.id) {
+    if (pedido) {
+      setFormData({
+        cliente_id: pedido.cliente_id || '',
+        data_pedido: pedido.data_pedido,
+        status: pedido.status,
+        observacoes: pedido.observacoes || ''
+      });
+
+      // Buscar itens do pedido
       const fetchItens = async () => {
         const { data, error } = await supabase
           .from('itens_pedido')
-          .select('*')
+          .select('produto_id, quantidade, preco_unitario, subtotal')
           .eq('pedido_id', pedido.id);
-        
+
         if (error) {
           console.error('Erro ao buscar itens:', error);
           return;
         }
-        
-        setItens(data || []);
+
+        if (data && data.length > 0) {
+          setItens(data);
+        }
       };
-      
+
       fetchItens();
     }
-  }, [pedido?.id]);
+  }, [pedido]);
 
-  const mutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      if (!user?.id) throw new Error('Usuário não autenticado');
-
-      const valorTotal = itens.reduce((sum, item) => sum + item.subtotal, 0);
-
-      const pedidoData = {
-        ...data,
-        user_id: user.id,
-        valor_total: valorTotal,
-        cliente_id: data.cliente_id || null,
-        data_entrega: data.data_entrega || null,
-        observacoes: data.observacoes || null
-      };
-
-      let pedidoId: string;
-
+  // Criar/atualizar pedido
+  const savePedidoMutation = useMutation({
+    mutationFn: async (data: any) => {
       if (pedido) {
-        const { error } = await supabase
+        // Atualizar pedido existente
+        const { error: pedidoError } = await supabase
           .from('pedidos')
-          .update(pedidoData)
+          .update({
+            cliente_id: data.cliente_id,
+            data_pedido: data.data_pedido,
+            status: data.status,
+            observacoes: data.observacoes,
+            valor_total: data.valor_total
+          })
           .eq('id', pedido.id)
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-        pedidoId = pedido.id;
-      } else {
-        const { data: novoPedido, error } = await supabase
-          .from('pedidos')
-          .insert([pedidoData])
-          .select('id')
-          .single();
-        
-        if (error) throw error;
-        pedidoId = novoPedido.id;
-      }
+          .eq('user_id', effectiveUserId!);
 
-      // Deletar itens existentes se estiver editando
-      if (pedido) {
-        await supabase
+        if (pedidoError) throw pedidoError;
+
+        // Deletar itens antigos
+        const { error: deleteError } = await supabase
           .from('itens_pedido')
           .delete()
-          .eq('pedido_id', pedidoId);
-      }
+          .eq('pedido_id', pedido.id);
 
-      // Inserir novos itens
-      if (itens.length > 0) {
-        const itensData = itens.map(item => ({
-          pedido_id: pedidoId,
-          produto_id: item.produto_id,
-          quantidade: item.quantidade,
-          preco_unitario: item.preco_unitario,
-          subtotal: item.subtotal,
-          user_id: user.id
-        }));
+        if (deleteError) throw deleteError;
 
-        const { error } = await supabase
+        // Inserir novos itens
+        const { error: itensError } = await supabase
           .from('itens_pedido')
-          .insert(itensData);
-        
-        if (error) throw error;
+          .insert(
+            data.itens.map((item: ItemPedido) => ({
+              ...item,
+              pedido_id: pedido.id,
+              user_id: effectiveUserId
+            }))
+          );
+
+        if (itensError) throw itensError;
+      } else {
+        // Criar novo pedido
+        const { data: novoPedido, error: pedidoError } = await supabase
+          .from('pedidos')
+          .insert([{
+            ...data,
+            user_id: effectiveUserId
+          }])
+          .select()
+          .single();
+
+        if (pedidoError) throw pedidoError;
+
+        // Inserir itens
+        const { error: itensError } = await supabase
+          .from('itens_pedido')
+          .insert(
+            data.itens.map((item: ItemPedido) => ({
+              ...item,
+              pedido_id: novoPedido.id,
+              user_id: effectiveUserId
+            }))
+          );
+
+        if (itensError) throw itensError;
       }
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
       toast({
         title: pedido ? 'Pedido atualizado' : 'Pedido criado',
-        description: `Pedido ${pedido ? 'atualizado' : 'criado'} com sucesso.`,
+        description: `Pedido ${pedido ? 'atualizado' : 'criado'} com sucesso.`
       });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       onClose();
     },
     onError: (error) => {
-      console.error('Erro ao salvar pedido:', error);
       toast({
-        title: 'Erro ao salvar',
+        title: 'Erro ao salvar pedido',
         description: 'Não foi possível salvar o pedido.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   });
@@ -193,25 +196,47 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.cliente_id) {
-      toast({
-        title: 'Campo obrigatório',
-        description: 'Selecione um cliente.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const itensValidos = itens.filter(item => 
+      item.produto_id && item.quantidade > 0 && item.preco_unitario > 0
+    );
 
-    if (itens.length === 0) {
+    if (itensValidos.length === 0) {
       toast({
-        title: 'Itens obrigatórios',
+        title: 'Erro de validação',
         description: 'Adicione pelo menos um item ao pedido.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
 
-    mutation.mutate(formData);
+    const valorTotal = itensValidos.reduce((sum, item) => sum + item.subtotal, 0);
+
+    savePedidoMutation.mutate({
+      ...formData,
+      valor_total: valorTotal,
+      itens: itensValidos
+    });
+  };
+
+  const handleItemChange = (index: number, field: keyof ItemPedido, value: any) => {
+    const novosItens = [...itens];
+    novosItens[index] = { ...novosItens[index], [field]: value };
+
+    // Recalcular subtotal quando quantidade ou preço mudar
+    if (field === 'quantidade' || field === 'preco_unitario') {
+      novosItens[index].subtotal = novosItens[index].quantidade * novosItens[index].preco_unitario;
+    }
+
+    // Se produto mudou, atualizar preço automaticamente
+    if (field === 'produto_id') {
+      const produto = produtos?.find(p => p.id === value);
+      if (produto) {
+        novosItens[index].preco_unitario = produto.preco_venda || 0;
+        novosItens[index].subtotal = novosItens[index].quantidade * (produto.preco_venda || 0);
+      }
+    }
+
+    setItens(novosItens);
   };
 
   const adicionarItem = () => {
@@ -224,56 +249,38 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
   };
 
   const removerItem = (index: number) => {
-    setItens(itens.filter((_, i) => i !== index));
-  };
-
-  const atualizarItem = (index: number, campo: keyof ItemPedido, valor: any) => {
-    const novosItens = [...itens];
-    novosItens[index] = { ...novosItens[index], [campo]: valor };
-    
-    // Recalcular subtotal
-    if (campo === 'quantidade' || campo === 'preco_unitario') {
-      novosItens[index].subtotal = novosItens[index].quantidade * novosItens[index].preco_unitario;
+    if (itens.length > 1) {
+      setItens(itens.filter((_, i) => i !== index));
     }
-    
-    // Se mudou o produto, atualizar o preço
-    if (campo === 'produto_id') {
-      const produto = produtos?.find(p => p.id === valor);
-      if (produto?.preco_venda) {
-        novosItens[index].preco_unitario = produto.preco_venda;
-        novosItens[index].subtotal = novosItens[index].quantidade * produto.preco_venda;
-      }
-    }
-    
-    setItens(novosItens);
   };
 
   const valorTotal = itens.reduce((sum, item) => sum + item.subtotal, 0);
 
   return (
-    <Card className="fixed inset-0 z-50 bg-white shadow-lg overflow-y-auto">
-      <CardHeader className="border-b">
-        <div className="flex items-center justify-between">
-          <CardTitle>
-            {pedido ? 'Editar Pedido' : 'Novo Pedido'}
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <Card className="fixed inset-0 z-50 bg-white shadow-xl overflow-auto">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>
+          {pedido ? 'Editar Pedido' : 'Novo Pedido'}
+        </CardTitle>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
       </CardHeader>
-
+      
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="cliente_id">Cliente *</Label>
-              <Select value={formData.cliente_id} onValueChange={(value) => setFormData(prev => ({ ...prev, cliente_id: value }))}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="cliente_id">Cliente</Label>
+              <Select 
+                value={formData.cliente_id} 
+                onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clientes?.map((cliente) => (
+                  {clientes?.map(cliente => (
                     <SelectItem key={cliente.id} value={cliente.id}>
                       {cliente.nome}
                     </SelectItem>
@@ -281,109 +288,106 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="processando">Processando</SelectItem>
-                  <SelectItem value="entregue">Entregue</SelectItem>
-                  <SelectItem value="cancelado">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
+            
+            <div>
               <Label htmlFor="data_pedido">Data do Pedido</Label>
-              <Input
-                id="data_pedido"
-                type="date"
-                value={formData.data_pedido}
-                onChange={(e) => setFormData(prev => ({ ...prev, data_pedido: e.target.value }))}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="data_entrega">Data de Entrega</Label>
-              <Input
-                id="data_entrega"
-                type="date"
-                value={formData.data_entrega}
-                onChange={(e) => setFormData(prev => ({ ...prev, data_entrega: e.target.value }))}
+              <Input 
+                id="data_pedido" 
+                type="date" 
+                value={formData.data_pedido} 
+                onChange={(e) => setFormData({ ...formData, data_pedido: e.target.value })} 
+                required 
               />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Itens do Pedido</h3>
-              <Button type="button" onClick={adicionarItem}>
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select 
+              value={formData.status} 
+              onValueChange={(value) => setFormData({ ...formData, status: value as any })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pendente">Pendente</SelectItem>
+                <SelectItem value="processando">Processando</SelectItem>
+                <SelectItem value="entregue">Entregue</SelectItem>
+                <SelectItem value="cancelado">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <Label>Itens do Pedido</Label>
+              <Button type="button" onClick={adicionarItem} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar Item
               </Button>
             </div>
-
+            
             <div className="space-y-4">
               {itens.map((item, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    <div className="space-y-2">
-                      <Label>Produto</Label>
-                      <Select value={item.produto_id} onValueChange={(value) => atualizarItem(index, 'produto_id', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um produto" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {produtos?.map((produto) => (
-                            <SelectItem key={produto.id} value={produto.id}>
-                              {produto.nome} - {produto.unidade_medida}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Quantidade</Label>
-                      <Input
-                        type="number"
-                        value={item.quantidade}
-                        onChange={(e) => atualizarItem(index, 'quantidade', Number(e.target.value))}
-                        min="1"
-                        step="0.1"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Preço Unitário</Label>
-                      <Input
-                        type="number"
-                        value={item.preco_unitario}
-                        onChange={(e) => atualizarItem(index, 'preco_unitario', Number(e.target.value))}
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Subtotal</Label>
-                      <Input
-                        value={`R$ ${item.subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                        disabled
-                      />
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="outline"
+                <div key={index} className="grid grid-cols-12 gap-2 items-end p-4 border rounded">
+                  <div className="col-span-4">
+                    <Label>Produto</Label>
+                    <Select 
+                      value={item.produto_id} 
+                      onValueChange={(value) => handleItemChange(index, 'produto_id', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {produtos?.map(produto => (
+                          <SelectItem key={produto.id} value={produto.id}>
+                            {produto.nome} ({produto.unidade_medida})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="col-span-2">
+                    <Label>Quantidade</Label>
+                    <Input 
+                      type="number" 
+                      value={item.quantidade} 
+                      onChange={(e) => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div className="col-span-2">
+                    <Label>Preço Unit.</Label>
+                    <Input 
+                      type="number" 
+                      value={item.preco_unitario} 
+                      onChange={(e) => handleItemChange(index, 'preco_unitario', parseFloat(e.target.value) || 0)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div className="col-span-3">
+                    <Label>Subtotal</Label>
+                    <Input 
+                      type="text" 
+                      value={`R$ ${item.subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                      disabled
+                    />
+                  </div>
+                  
+                  <div className="col-span-1">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
                       size="sm"
                       onClick={() => removerItem(index)}
-                      className="text-red-600"
+                      disabled={itens.length === 1}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -391,34 +395,30 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
                 </div>
               ))}
             </div>
-
-            {itens.length > 0 && (
-              <div className="text-right">
-                <p className="text-lg font-semibold">
-                  Total: R$ {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-            )}
+            
+            <div className="text-right mt-4 p-4 bg-gray-50 rounded">
+              <span className="text-lg font-semibold">
+                Total: R$ {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="observacoes">Observações</Label>
-            <Textarea
-              id="observacoes"
-              value={formData.observacoes}
-              onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
-              placeholder="Observações sobre o pedido..."
-              rows={3}
+            <Textarea 
+              id="observacoes" 
+              value={formData.observacoes} 
+              onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} 
+              placeholder="Observações sobre o pedido..." 
             />
           </div>
-
-          <div className="flex justify-end space-x-3 pt-6 border-t">
+          
+          <div className="flex gap-4 pt-6">
+            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+              {pedido ? 'Atualizar' : 'Criar'} Pedido
+            </Button>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
-            </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              <Save className="h-4 w-4 mr-2" />
-              {mutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </form>

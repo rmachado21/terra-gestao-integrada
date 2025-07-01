@@ -5,239 +5,180 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Eye, Calendar, DollarSign, ShoppingCart, MessageCircle } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, FileText, Printer } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
 import PedidoForm from './PedidoForm';
-import PedidoDetalhes from './PedidoDetalhes';
-import PedidoImpressaoButton from './PedidoImpressaoButton';
+import PedidoDetails from './PedidoDetails';
+import { usePedidoImpressao } from '../hooks/usePedidoImpressao';
+import { Pedido } from '../types/pedido';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-interface Pedido {
-  id: string;
-  cliente_id: string | null;
-  data_pedido: string;
-  data_entrega: string | null;
-  valor_total: number;
-  status: 'pendente' | 'processando' | 'entregue' | 'cancelado';
-  observacoes: string | null;
-  cliente: {
-    id: string;
-    nome: string;
-    telefone?: string | null;
-  } | null;
-}
+
 const PedidosList = () => {
-  const {
-    user
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { effectiveUserId } = useEffectiveUser();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
-  const [showDetalhes, setShowDetalhes] = useState(false);
   const [editingPedido, setEditingPedido] = useState<Pedido | null>(null);
-  const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
+  const [viewingPedido, setViewingPedido] = useState<Pedido | null>(null);
 
-  // Buscar pedidos
-  const {
-    data: pedidos,
-    isLoading
-  } = useQuery({
-    queryKey: ['pedidos', user?.id, searchTerm, statusFilter],
+  // Buscar pedidos  
+  const { data: pedidos, isLoading } = useQuery({
+    queryKey: ['pedidos', effectiveUserId, searchTerm, statusFilter],
     queryFn: async () => {
-      if (!user?.id) return [];
-      let query = supabase.from('pedidos').select(`
+      if (!effectiveUserId) return [];
+
+      let query = supabase
+        .from('pedidos')
+        .select(`
           *,
           clientes:cliente_id (
             id,
             nome,
-            telefone
+            telefone,
+            endereco
           )
-        `).eq('user_id', user.id).order('created_at', {
-        ascending: false
-      });
+        `)
+        .eq('user_id', effectiveUserId)
+        .order('data_pedido', { ascending: false });
+
       if (statusFilter && statusFilter !== 'all') {
         query = query.eq('status', statusFilter as 'pendente' | 'processando' | 'entregue' | 'cancelado');
       }
-      const {
-        data,
-        error
-      } = await query;
+
+      const { data, error } = await query;
       if (error) throw error;
+      
       const pedidosFormatted = data?.map(pedido => ({
         ...pedido,
         cliente: pedido.clientes
       })) || [];
+
       if (searchTerm) {
-        return pedidosFormatted.filter(pedido => pedido.cliente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) || pedido.id.toLowerCase().includes(searchTerm.toLowerCase()));
+        return pedidosFormatted.filter(pedido => 
+          pedido.cliente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          pedido.id.toLowerCase().includes(searchTerm.toLowerCase())
+        );
       }
+
       return pedidosFormatted;
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
-  // Mutation para atualizar status do pedido
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({
-      pedidoId,
-      newStatus
-    }: {
-      pedidoId: string;
-      newStatus: 'pendente' | 'processando' | 'entregue' | 'cancelado';
-    }) => {
-      // Buscar dados do pedido antes de atualizar
-      const {
-        data: pedidoData,
-        error: pedidoError
-      } = await supabase.from('pedidos').select('*').eq('id', pedidoId).eq('user_id', user?.id).single();
-      if (pedidoError) throw pedidoError;
+  // Deletar pedido
+  const deletePedidoMutation = useMutation({
+    mutationFn: async (pedidoId: string) => {
+      // Primeiro deletar itens do pedido
+      const { error: itensError } = await supabase
+        .from('itens_pedido')
+        .delete()
+        .eq('pedido_id', pedidoId)
+        .eq('user_id', effectiveUserId!);
+      
+      if (itensError) throw itensError;
 
-      // Atualizar status do pedido
-      const {
-        error
-      } = await supabase.from('pedidos').update({
-        status: newStatus
-      }).eq('id', pedidoId).eq('user_id', user?.id);
+      // Depois deletar o pedido
+      const { error } = await supabase
+        .from('pedidos')
+        .delete()
+        .eq('id', pedidoId)
+        .eq('user_id', effectiveUserId!);
+      
       if (error) throw error;
-
-      // Se o novo status é "entregue", criar lançamento financeiro
-      if (newStatus === 'entregue' && pedidoData.status !== 'entregue') {
-        // Verificar se já existe um lançamento para este pedido
-        const {
-          data: existingLancamento
-        } = await supabase.from('movimentacoes_financeiras').select('id').eq('pedido_id', pedidoId).eq('user_id', user?.id).maybeSingle();
-
-        // Só criar se não existir um lançamento
-        if (!existingLancamento) {
-          const {
-            error: lancamentoError
-          } = await supabase.from('movimentacoes_financeiras').insert({
-            user_id: user.id,
-            descricao: `Pedido #${pedidoId.slice(-8)}`,
-            valor: pedidoData.valor_total,
-            tipo: 'receita',
-            categoria: 'Vendas',
-            data_movimentacao: pedidoData.data_pedido,
-            pedido_id: pedidoId
-          });
-          if (lancamentoError) {
-            console.error('Erro ao criar lançamento financeiro:', lancamentoError);
-            throw new Error('Erro ao criar lançamento financeiro automático');
-          }
-        }
-      }
-      return {
-        pedidoData,
-        newStatus
-      };
     },
-    onSuccess: data => {
-      queryClient.invalidateQueries({
-        queryKey: ['pedidos']
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['movimentacoes-financeiras']
-      });
-      if (data.newStatus === 'entregue' && data.pedidoData.status !== 'entregue') {
-        toast({
-          title: "Status atualizado",
-          description: "O pedido foi marcado como entregue e um lançamento financeiro foi criado automaticamente."
-        });
-      } else {
-        toast({
-          title: "Status atualizado",
-          description: "O status do pedido foi atualizado com sucesso."
-        });
-      }
-    },
-    onError: error => {
-      console.error('Erro ao atualizar status:', error);
+    onSuccess: () => {
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar o status do pedido.",
-        variant: "destructive"
+        title: 'Pedido excluído',
+        description: 'Pedido excluído com sucesso.'
+      });
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao excluir',
+        description: 'Não foi possível excluir o pedido.',
+        variant: 'destructive'
       });
     }
   });
-  const handleWhatsAppClick = (nome: string, telefone: string, pedidoId: string) => {
-    const cleanTelefone = telefone.replace(/\D/g, '');
-    const message = encodeURIComponent(`Olá ${nome}, tudo bem? Referente ao seu pedido #${pedidoId.slice(-8)}`);
-    // Adicionando o código do país (55 para o Brasil)
-    const whatsappUrl = `https://wa.me/55${cleanTelefone}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-  };
-  const handleStatusChange = (pedidoId: string, newStatus: string) => {
-    updateStatusMutation.mutate({
-      pedidoId,
-      newStatus: newStatus as 'pendente' | 'processando' | 'entregue' | 'cancelado'
-    });
-  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processando':
-        return 'bg-blue-100 text-blue-800';
-      case 'entregue':
-        return 'bg-green-100 text-green-800';
-      case 'cancelado':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'pendente': return 'bg-yellow-100 text-yellow-800';
+      case 'processando': return 'bg-blue-100 text-blue-800';
+      case 'entregue': return 'bg-green-100 text-green-800';
+      case 'cancelado': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
+
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pendente':
-        return 'Pendente';
-      case 'processando':
-        return 'Processando';
-      case 'entregue':
-        return 'Entregue';
-      case 'cancelado':
-        return 'Cancelado';
-      default:
-        return status;
+      case 'pendente': return 'Pendente';
+      case 'processando': return 'Processando';
+      case 'entregue': return 'Entregue';
+      case 'cancelado': return 'Cancelado';
+      default: return status;
     }
   };
+
   const handleEdit = (pedido: Pedido) => {
     setEditingPedido(pedido);
     setShowForm(true);
   };
-  const handleDetalhes = (pedido: Pedido) => {
-    setSelectedPedido(pedido);
-    setShowDetalhes(true);
+
+  const handleDelete = (pedidoId: string) => {
+    if (confirm('Tem certeza que deseja excluir este pedido?')) {
+      deletePedidoMutation.mutate(pedidoId);
+    }
   };
+
+  const handleView = (pedido: Pedido) => {
+    setViewingPedido(pedido);
+  };
+
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingPedido(null);
   };
-  const handleCloseDetalhes = () => {
-    setShowDetalhes(false);
-    setSelectedPedido(null);
+
+  const handlePrint = (pedidoId: string) => {
+    // Implementar lógica de impressão usando o hook usePedidoImpressao
+    window.open(`/pedidos/${pedidoId}/print`, '_blank');
   };
+
   if (isLoading) {
-    return <Card>
+    return (
+      <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            {[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-gray-200 rounded"></div>)}
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded"></div>
+            ))}
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
-              <ShoppingCart className="h-5 w-5" />
+              <FileText className="h-5 w-5" />
               <span>Pedidos</span>
             </CardTitle>
-            <Button onClick={() => setShowForm(true)} className="bg-green-600 hover:bg-green-700">
+            <Button 
+              onClick={() => setShowForm(true)} 
+              className="bg-green-600 hover:bg-green-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Novo Pedido
             </Button>
@@ -246,7 +187,12 @@ const PedidosList = () => {
           <div className="flex flex-col md:flex-row gap-4 mt-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Buscar por cliente ou ID do pedido..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Buscar pedidos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40">
@@ -265,88 +211,121 @@ const PedidosList = () => {
 
         <CardContent className="p-6">
           <div className="space-y-4">
-            {pedidos?.length === 0 ? <div className="text-center py-8 text-gray-500">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            {pedidos?.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>Nenhum pedido encontrado</p>
                 <p className="text-sm">Comece criando um novo pedido</p>
-              </div> : pedidos?.map(pedido => <div key={pedido.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              </div>
+            ) : (
+              pedidos?.map((pedido) => (
+                <div key={pedido.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="font-semibold text-lg">Pedido #{pedido.id.slice(-8)}</h3>
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="font-semibold">Pedido #{pedido.id.slice(-8)}</h3>
                         <Badge className={getStatusColor(pedido.status)}>
                           {getStatusLabel(pedido.status)}
                         </Badge>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mt-2 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <span className="font-medium">Cliente:</span>
-                          <span className="font-bold">{pedido.cliente?.nome || 'Cliente não informado'}</span>
-                          {pedido.cliente?.telefone && <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => handleWhatsAppClick(pedido.cliente!.nome, pedido.cliente!.telefone!, pedido.id)}>
-                                    <MessageCircle className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Conversar no WhatsApp</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                        <div>
+                          <strong>Cliente:</strong> {pedido.cliente?.nome || 'Cliente não informado'}
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</span>
+                        <div>
+                          <strong>Data:</strong> {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <DollarSign className="h-4 w-4" />
-                          <span className="font-bold">R$ {pedido.valor_total.toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2
-                      })}</span>
-                        </div>
-                        {pedido.data_entrega ? <div className="flex items-center space-x-1">
-                            <span className="font-medium">Entrega:</span>
-                            <span>{new Date(pedido.data_entrega).toLocaleDateString('pt-BR')}</span>
-                          </div> : <div className="flex items-center space-x-1 text-gray-400">
-                            <span>Sem data de entrega</span>
-                          </div>}
-                        <div className="flex items-center space-x-1">
-                          <span className="font-medium">Status:</span>
-                          <Select value={pedido.status} onValueChange={value => handleStatusChange(pedido.id, value)} disabled={updateStatusMutation.isPending}>
-                            <SelectTrigger className="w-32 h-7 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pendente">Pendente</SelectItem>
-                              <SelectItem value="processando">Processando</SelectItem>
-                              <SelectItem value="entregue">Entregue</SelectItem>
-                              <SelectItem value="cancelado">Cancelado</SelectItem>
-                            </SelectContent>
-                          </Select>
+                        <div>
+                          <strong>Total:</strong> R$ {pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </div>
                       </div>
+                      
+                      {pedido.observacoes && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          <strong>Obs:</strong> {pedido.observacoes}
+                        </p>
+                      )}
                     </div>
                     
                     <div className="flex space-x-2">
-                      <PedidoImpressaoButton pedidoId={pedido.id} showText={false} size="sm" />
-                      <Button variant="outline" size="sm" onClick={() => handleDetalhes(pedido)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(pedido)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleView(pedido)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Visualizar Pedido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handlePrint(pedido.id)}>
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Imprimir Pedido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleEdit(pedido)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Editar Pedido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(pedido.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Excluir Pedido</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
-                </div>)}
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {showForm && <PedidoForm pedido={editingPedido} onClose={handleCloseForm} />}
+      {showForm && (
+        <PedidoForm 
+          pedido={editingPedido} 
+          onClose={handleCloseForm} 
+        />
+      )}
 
-      {showDetalhes && selectedPedido && <PedidoDetalhes pedido={selectedPedido} onClose={handleCloseDetalhes} />}
-    </div>;
+      {viewingPedido && (
+        <PedidoDetails
+          pedido={viewingPedido}
+          onClose={() => setViewingPedido(null)}
+        />
+      )}
+    </div>
+  );
 };
+
 export default PedidosList;

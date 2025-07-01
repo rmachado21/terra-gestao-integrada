@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, MapPin, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LoadingPage, LoadingCard } from '@/components/ui/loading';
 
@@ -24,7 +25,7 @@ interface Area {
 }
 
 const AreasPage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { effectiveUserId, isImpersonating } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,23 +39,24 @@ const AreasPage = () => {
   });
 
   const { data: areas, isLoading } = useQuery({
-    queryKey: ['areas'],
+    queryKey: ['areas', effectiveUserId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('areas')
         .select('*')
+        .eq('user_id', effectiveUserId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as Area[];
     },
-    enabled: !!user
+    enabled: !!effectiveUserId
   });
 
   const createAreaMutation = useMutation({
     mutationFn: async (data: any) => {
       const { error } = await supabase
         .from('areas')
-        .insert([{ ...data, user_id: user?.id }]);
+        .insert([{ ...data, user_id: effectiveUserId }]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -78,7 +80,8 @@ const AreasPage = () => {
       const { error } = await supabase
         .from('areas')
         .update(data)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', effectiveUserId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -102,7 +105,8 @@ const AreasPage = () => {
       const { error } = await supabase
         .from('areas')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', effectiveUserId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -162,7 +166,7 @@ const AreasPage = () => {
     }
   };
 
-  if (authLoading) {
+  if (!effectiveUserId) {
     return <LoadingPage message="Carregando autenticação..." />;
   }
 
@@ -173,7 +177,10 @@ const AreasPage = () => {
           <MapPin className="h-8 w-8 text-teal-600" />
           <div>
             <h1 className="font-bold text-gray-900 text-2xl">Gestão de Áreas</h1>
-            <p className="text-gray-600">Gerencie os setores e áreas de plantio</p>
+            <p className="text-gray-600">
+              Gerencie os setores e áreas de plantio
+              {isImpersonating && <span className="text-orange-600 ml-2">(Visualizando como usuário)</span>}
+            </p>
           </div>
         </div>
         
@@ -197,7 +204,10 @@ const AreasPage = () => {
         <MapPin className="h-8 w-8 text-teal-600" />
         <div>
           <h1 className="font-bold text-gray-900 text-2xl">Gestão de Áreas</h1>
-          <p className="text-gray-600">Gerencie os setores e áreas de plantio</p>
+          <p className="text-gray-600">
+            Gerencie os setores e áreas de plantio
+            {isImpersonating && <span className="text-orange-600 ml-2">(Visualizando como usuário)</span>}
+          </p>
         </div>
       </div>
       
@@ -253,7 +263,7 @@ const AreasPage = () => {
                   id="localizacao" 
                   value={formData.localizacao} 
                   onChange={e => setFormData({ ...formData, localizacao: e.target.value })} 
-                  placeholder="Ex: Norte da propriedade" 
+                  placeholder="Ex: Coordenadas GPS, ponto de referência..." 
                 />
               </div>
               
@@ -263,7 +273,7 @@ const AreasPage = () => {
                   id="solo_tipo" 
                   value={formData.solo_tipo} 
                   onChange={e => setFormData({ ...formData, solo_tipo: e.target.value })} 
-                  placeholder="Ex: Argiloso, Arenoso..." 
+                  placeholder="Ex: Argiloso, Arenoso, Misto..." 
                 />
               </div>
               
@@ -278,15 +288,8 @@ const AreasPage = () => {
               </div>
               
               <DialogFooter>
-                <Button 
-                  type="submit" 
-                  className="bg-green-600 hover:bg-green-700 transition-all duration-200"
-                  disabled={createAreaMutation.isPending || updateAreaMutation.isPending}
-                >
-                  {createAreaMutation.isPending || updateAreaMutation.isPending
-                    ? 'Salvando...'
-                    : editingArea ? 'Atualizar' : 'Criar'
-                  }
+                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                  {editingArea ? 'Atualizar' : 'Criar'} Área
                 </Button>
               </DialogFooter>
             </form>
@@ -295,16 +298,12 @@ const AreasPage = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {areas?.map((area, index) => (
-          <Card 
-            key={area.id} 
-            className="transition-all duration-200 hover:shadow-lg hover:scale-105 animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
+        {areas?.map(area => (
+          <Card key={area.id} className="hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                  <MapPin className="h-4 w-4 mr-2 text-teal-600" />
                   {area.nome}
                 </span>
                 <div className="flex space-x-1">
@@ -312,17 +311,17 @@ const AreasPage = () => {
                     variant="ghost" 
                     size="sm" 
                     onClick={() => handleEdit(area)}
-                    className="transition-all duration-200 hover:scale-110"
+                    className="h-8 w-8 p-0 hover:bg-teal-50"
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 text-teal-600" />
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={() => handleDelete(area.id)}
-                    className="transition-all duration-200 hover:scale-110 hover:text-red-600"
+                    className="h-8 w-8 p-0 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-red-600" />
                   </Button>
                 </div>
               </CardTitle>
@@ -332,17 +331,26 @@ const AreasPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
-                {area.localizacao && <p><strong>Localização:</strong> {area.localizacao}</p>}
-                {area.solo_tipo && <p><strong>Solo:</strong> {area.solo_tipo}</p>}
-                {area.observacoes && <p><strong>Observações:</strong> {area.observacoes}</p>}
+                {area.localizacao && (
+                  <p><strong>Local:</strong> {area.localizacao}</p>
+                )}
+                {area.solo_tipo && (
+                  <p><strong>Solo:</strong> {area.solo_tipo}</p>
+                )}
+                {area.observacoes && (
+                  <p><strong>Obs:</strong> {area.observacoes}</p>
+                )}
+                <p className="text-gray-500">
+                  Criada em {new Date(area.created_at).toLocaleDateString('pt-BR')}
+                </p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {areas?.length === 0 && (
-        <Card className="animate-fade-in">
+      {(!areas || areas.length === 0) && (
+        <Card>
           <CardContent className="text-center py-8">
             <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -351,10 +359,7 @@ const AreasPage = () => {
             <p className="text-gray-600 mb-4">
               Comece criando sua primeira área de plantio
             </p>
-            <Button 
-              onClick={() => setIsDialogOpen(true)} 
-              className="bg-green-600 hover:bg-green-700 transition-all duration-200 hover:scale-105"
-            >
+            <Button onClick={() => setIsDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeira Área
             </Button>
