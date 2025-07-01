@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 
 interface Colheita {
   id: string;
+  plantio_id?: string;
   data_colheita: string;
   quantidade_kg: number;
   qualidade: string;
@@ -103,7 +104,7 @@ const ColheitasPage = () => {
           areas(nome)
         `)
         .eq('user_id', effectiveUserId)
-        .in('status', ['plantado', 'crescimento', 'maduro'])
+        .in('status', ['plantado', 'crescendo', 'pronto_colheita'])
         .order('data_plantio', { ascending: false });
 
       if (error) throw error;

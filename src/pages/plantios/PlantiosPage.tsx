@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 
 interface Plantio {
   id: string;
+  area_id?: string;
   variedade: string;
   data_plantio: string;
   data_previsao_colheita: string;
