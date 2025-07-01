@@ -29,9 +29,9 @@ const menuItems: MenuItem[] = [{
   color: 'text-green-400'
 }, {
   title: 'Colheitas',
-  icon: Package2,
+  icon: Wheat,
   path: '/colheitas',
-  color: 'text-green-500'
+  color: 'text-amber-500'
 }, {
   title: 'Produção',
   icon: Package,
