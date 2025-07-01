@@ -113,7 +113,7 @@ const App = () => (
                   <Route path="/processamento" element={
                     <ProtectedRoute>
                       <AppLayout>
-                        <PlantiosPage />
+                        <ProcessamentoPage />
                       </AppLayout>
                     </ProtectedRoute>
                   } />
