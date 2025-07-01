@@ -101,7 +101,7 @@ const Sidebar = () => {
           <div className="space-y-1">
             {menuItems.map(item => <Button key={item.title} variant="ghost" className={cn("w-full justify-start mb-1 h-auto py-3 px-3 font-medium text-left", "hover:bg-gray-100 transition-colors duration-200", isActive(item.path) && "bg-green-100 text-green-800 hover:bg-green-100")} onClick={() => handleNavigation(item.path)}>
                 <item.icon className={cn("mr-3 h-4 w-4 flex-shrink-0", item.color)} />
-                <span className="flex-1 truncate">{item.title}</span>
+                <span className="flex-1 truncate text-white">{item.title}</span>
               </Button>)}
           </div>
         </ScrollArea>
