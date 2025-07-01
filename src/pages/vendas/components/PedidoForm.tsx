@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,7 +32,7 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
   const [formData, setFormData] = useState({
     cliente_id: '',
     data_pedido: new Date().toISOString().split('T')[0],
-    status: 'pendente' as const,
+    status: 'pendente' as 'pendente' | 'processando' | 'entregue' | 'cancelado',
     observacoes: ''
   });
 
