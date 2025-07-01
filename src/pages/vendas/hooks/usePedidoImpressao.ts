@@ -1,10 +1,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/hooks/useProfile';
+import { useEffectiveProfile } from '@/hooks/useEffectiveProfile';
 
 export const usePedidoImpressao = (pedidoId: string) => {
-  const { profile } = useProfile();
+  const { profile } = useEffectiveProfile();
 
   return useQuery({
     queryKey: ['pedido-impressao', pedidoId],

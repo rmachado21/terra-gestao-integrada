@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 
 export interface VendasStatsData {
   totalClientes: number;
@@ -13,12 +13,12 @@ export interface VendasStatsData {
 }
 
 export const useVendasStats = () => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
 
   return useQuery({
-    queryKey: ['vendas-stats', user?.id],
+    queryKey: ['vendas-stats', effectiveUserId],
     queryFn: async (): Promise<VendasStatsData> => {
-      if (!user?.id) {
+      if (!effectiveUserId) {
         throw new Error('Usuário não autenticado');
       }
 
@@ -26,14 +26,14 @@ export const useVendasStats = () => {
       const { count: totalClientes } = await supabase
         .from('clientes')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('ativo', true);
 
       // Buscar dados dos pedidos
       const { data: pedidos } = await supabase
         .from('pedidos')
         .select('status, valor_total, data_pedido')
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (!pedidos) {
         throw new Error('Erro ao buscar pedidos');
@@ -64,6 +64,6 @@ export const useVendasStats = () => {
         faturamentoMes,
       };
     },
-    enabled: !!user?.id,
+    enabled: !!effectiveUserId,
   });
 };

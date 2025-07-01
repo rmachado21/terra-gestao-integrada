@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from "@/hooks/use-toast";
 import { RelatorioFiltros } from './relatorios/RelatorioFiltros';
 import { RelatorioResumo } from './relatorios/RelatorioResumo';
@@ -13,7 +14,7 @@ import { GraficoVendasCategoria } from './relatorios/GraficoVendasCategoria';
 import { DadosVendas } from './relatorios/types';
 
 const RelatoriosVendas = () => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
   const [periodo, setPeriodo] = useState('mes');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
@@ -53,9 +54,9 @@ const RelatoriosVendas = () => {
 
   // Buscar dados de vendas por período
   const { data: dadosVendas, isLoading } = useQuery<DadosVendas | null>({
-    queryKey: ['relatorio-vendas', user?.id, periodo, dataInicio, dataFim],
+    queryKey: ['relatorio-vendas', effectiveUserId, periodo, dataInicio, dataFim],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!effectiveUserId) return null;
 
       const { inicio, fim } = calcularPeriodo();
       
@@ -71,7 +72,7 @@ const RelatoriosVendas = () => {
             produtos:produto_id (nome, categoria)
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .gte('data_pedido', inicio.toISOString().split('T')[0])
         .lte('data_pedido', fim.toISOString().split('T')[0])
         .order('data_pedido', { ascending: true });
@@ -139,7 +140,7 @@ const RelatoriosVendas = () => {
           .map(([categoria, valor]) => ({ categoria, valor }))
       };
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
   if (isLoading) {

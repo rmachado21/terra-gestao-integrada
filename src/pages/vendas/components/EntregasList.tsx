@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Truck, Search, CheckCircle, Calendar, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
 
 interface Entrega {
@@ -26,7 +25,7 @@ interface Entrega {
 }
 
 const EntregasList = () => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,9 +33,9 @@ const EntregasList = () => {
 
   // Buscar pedidos para entrega
   const { data: entregas, isLoading } = useQuery({
-    queryKey: ['entregas', user?.id, searchTerm, statusFilter],
+    queryKey: ['entregas', effectiveUserId, searchTerm, statusFilter],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!effectiveUserId) return [];
       
       let query = supabase
         .from('pedidos')
@@ -49,7 +48,7 @@ const EntregasList = () => {
             cidade
           )
         `)
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .order('data_pedido', { ascending: false });
 
       if (statusFilter && statusFilter !== 'all') {
@@ -74,7 +73,7 @@ const EntregasList = () => {
 
       return entregasFormatted;
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
   // Marcar como entregue
@@ -87,7 +86,7 @@ const EntregasList = () => {
           data_entrega: new Date().toISOString().split('T')[0]
         })
         .eq('id', pedidoId)
-        .eq('user_id', user!.id);
+        .eq('user_id', effectiveUserId!);
       
       if (error) throw error;
     },

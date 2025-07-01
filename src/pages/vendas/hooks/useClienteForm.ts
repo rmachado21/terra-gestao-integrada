@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
 import { Cliente, ClienteFormData } from '../types/cliente';
 
@@ -12,7 +12,7 @@ interface UseClienteFormProps {
 }
 
 export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -45,7 +45,7 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
 
   const mutation = useMutation({
     mutationFn: async (data: ClienteFormData) => {
-      if (!user?.id) throw new Error('Usuário não autenticado');
+      if (!effectiveUserId) throw new Error('Usuário não autenticado');
 
       const clienteData = {
         nome: data.nome,
@@ -59,7 +59,7 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
         estado: data.estado || null,
         observacoes: data.observacoes || null,
         ativo: data.ativo,
-        user_id: user.id
+        user_id: effectiveUserId
       };
 
       if (cliente) {
@@ -67,7 +67,7 @@ export const useClienteForm = ({ cliente, onClose }: UseClienteFormProps) => {
           .from('clientes')
           .update(clienteData)
           .eq('id', cliente.id)
-          .eq('user_id', user.id);
+          .eq('user_id', effectiveUserId);
         
         if (error) throw error;
       } else {

@@ -1,10 +1,9 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Package, Calendar, TrendingDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -21,13 +20,13 @@ interface AlertaEstoque {
 }
 
 const AlertasEstoque = () => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
 
   // Buscar alertas de estoque
   const { data: alertas, isLoading } = useQuery({
-    queryKey: ['alertas-estoque', user?.id],
+    queryKey: ['alertas-estoque', effectiveUserId],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!effectiveUserId) return [];
       
       const { data, error } = await supabase
         .from('estoque')
@@ -39,7 +38,7 @@ const AlertasEstoque = () => {
           lote,
           produtos (nome, unidade_medida)
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', effectiveUserId);
 
       if (error) throw error;
 
@@ -102,7 +101,7 @@ const AlertasEstoque = () => {
         return prioridade[b.tipo] - prioridade[a.tipo];
       });
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 
   const getAlertIcon = (tipo: string) => {
