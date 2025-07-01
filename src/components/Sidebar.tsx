@@ -14,7 +14,7 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [{
-  title: 'Dashboard',
+  title: 'Painel',
   icon: Home,
   path: '/dashboard',
   color: 'text-gray-400'
