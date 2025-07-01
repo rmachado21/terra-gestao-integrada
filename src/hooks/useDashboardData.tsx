@@ -1,14 +1,15 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 
 export const useDashboardData = () => {
-  const { user } = useAuth();
+  const { effectiveUserId } = useEffectiveUser();
 
   return useQuery({
-    queryKey: ['dashboard-data', user?.id],
+    queryKey: ['dashboard-data', effectiveUserId],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!effectiveUserId) return null;
 
       // Buscar todas as estatísticas em paralelo
       const [
@@ -21,14 +22,14 @@ export const useDashboardData = () => {
         estoqueRes,
         produtosRes
       ] = await Promise.all([
-        supabase.from('areas').select('id, tamanho_hectares, ativa').eq('user_id', user.id),
-        supabase.from('plantios').select('id, variedade, data_plantio, status, created_at').eq('user_id', user.id),
-        supabase.from('colheitas').select('id, quantidade_kg, data_colheita, created_at').eq('user_id', user.id),
-        supabase.from('pedidos').select('id, valor_total, status, data_pedido, created_at').eq('user_id', user.id),
-        supabase.from('movimentacoes_financeiras').select('id, valor, tipo, data_movimentacao, created_at').eq('user_id', user.id),
-        supabase.from('alertas').select('id, titulo, mensagem, tipo, prioridade, lido, created_at').eq('user_id', user.id).eq('lido', false),
-        supabase.from('estoque').select('id, quantidade, quantidade_minima, data_validade').eq('user_id', user.id),
-        supabase.from('produtos').select('id, nome, ativo').eq('user_id', user.id).eq('ativo', true)
+        supabase.from('areas').select('id, tamanho_hectares, ativa').eq('user_id', effectiveUserId),
+        supabase.from('plantios').select('id, variedade, data_plantio, status, created_at').eq('user_id', effectiveUserId),
+        supabase.from('colheitas').select('id, quantidade_kg, data_colheita, created_at').eq('user_id', effectiveUserId),
+        supabase.from('pedidos').select('id, valor_total, status, data_pedido, created_at').eq('user_id', effectiveUserId),
+        supabase.from('movimentacoes_financeiras').select('id, valor, tipo, data_movimentacao, created_at').eq('user_id', effectiveUserId),
+        supabase.from('alertas').select('id, titulo, mensagem, tipo, prioridade, lido, created_at').eq('user_id', effectiveUserId).eq('lido', false),
+        supabase.from('estoque').select('id, quantidade, quantidade_minima, data_validade').eq('user_id', effectiveUserId),
+        supabase.from('produtos').select('id, nome, ativo').eq('user_id', effectiveUserId).eq('ativo', true)
       ]);
 
       // Calcular estatísticas
@@ -200,7 +201,7 @@ export const useDashboardData = () => {
         alertas: alertasCompletos.slice(0, 5) // Limitar a 5 alertas
       };
     },
-    enabled: !!user?.id
+    enabled: !!effectiveUserId
   });
 };
 

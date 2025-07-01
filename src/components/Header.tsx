@@ -2,14 +2,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { LogOut, User, Home, Settings, Shield, Sprout } from 'lucide-react';
+import { useEffectiveProfile } from '@/hooks/useEffectiveProfile';
+import { LogOut, User, Home, Settings, Shield, Sprout, Eye } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserRoles } from '@/hooks/useUserRoles';
 
 const Header = () => {
   const { user, signOut } = useAuth();
-  const { profile } = useProfile();
+  const { profile, loading, isImpersonating } = useEffectiveProfile();
   const { isSuperAdmin } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,18 +45,30 @@ const Header = () => {
             )}
             
             <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-gray-50 rounded-md">
-              <User className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600 font-medium max-w-32 lg:max-w-none truncate">
-                {profile?.nome || user.email}
-              </span>
-              {isSuperAdmin && (
+              <div className="flex items-center gap-1">
+                <User className="h-4 w-4 text-gray-500" />
+                {isImpersonating && <Eye className="h-4 w-4 text-orange-600" />}
+              </div>
+              {loading ? (
+                <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <span className="text-sm text-gray-600 font-medium max-w-32 lg:max-w-none truncate">
+                  {profile?.nome || user.email}
+                </span>
+              )}
+              {isSuperAdmin && !isImpersonating && (
                 <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-medium">
                   Super Admin
                 </span>
               )}
+              {isImpersonating && (
+                <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-medium">
+                  Impersonando
+                </span>
+              )}
             </div>
             
-            {isSuperAdmin && (
+            {isSuperAdmin && !isImpersonating && (
               <Button 
                 variant="outline" 
                 size="sm" 

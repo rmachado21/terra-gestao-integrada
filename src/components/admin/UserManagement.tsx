@@ -11,6 +11,7 @@ import { UserRole } from '@/hooks/useUserRoles';
 import { TipoPlano } from '@/hooks/useAdminUsers';
 import PlanEditDialog from './PlanEditDialog';
 import PasswordResetDialog from './PasswordResetDialog';
+import ImpersonationDialog from './ImpersonationDialog';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Link } from 'react-router-dom';
@@ -175,7 +176,7 @@ const UserManagement = ({
                       <TableHead>Status</TableHead>
                       <TableHead className="min-w-[150px]">Role</TableHead>
                       <TableHead className="min-w-[220px]">Plano</TableHead>
-                      <TableHead className="min-w-[200px]">Ações</TableHead>
+                      <TableHead className="min-w-[280px]">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -250,7 +251,11 @@ const UserManagement = ({
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                              <ImpersonationDialog
+                                userId={user.id}
+                                userName={user.nome}
+                              />
                               {!isUserSuperAdmin && (
                                 <PlanEditDialog userId={user.id} currentPlan={user.user_plan} onUpdatePlan={onUpdatePlan} />
                               )}
