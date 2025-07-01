@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Sprout, Package2, Package, ShoppingCart, TrendingUp, MapPin, Menu, X, Home } from 'lucide-react';
+import { Sprout, Package2, Package, ShoppingCart, TrendingUp, MapPin, Menu, X, Home, Wheat } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MenuItem {
