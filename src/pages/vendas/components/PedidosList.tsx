@@ -1,169 +1,29 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Eye, FileText, Printer, MessageCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useEffectiveUser } from '@/hooks/useEffectiveUser';
-import { useToast } from '@/hooks/use-toast';
+import { Plus, Search, FileText } from 'lucide-react';
 import PedidoForm from './PedidoForm';
 import PedidoDetails from './PedidoDetails';
-import { usePedidoImpressao } from '../hooks/usePedidoImpressao';
+import PedidoItem from './PedidoItem';
 import { Pedido } from '../types/pedido';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { usePedidosQuery } from '../hooks/usePedidosQuery';
+import { usePedidoMutations } from '../hooks/usePedidoMutations';
 
 const PedidosList = () => {
-  const { effectiveUserId } = useEffectiveUser();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editingPedido, setEditingPedido] = useState<Pedido | null>(null);
   const [viewingPedido, setViewingPedido] = useState<Pedido | null>(null);
 
-  // Buscar pedidos  
-  const { data: pedidos, isLoading } = useQuery({
-    queryKey: ['pedidos', effectiveUserId, searchTerm, statusFilter],
-    queryFn: async () => {
-      if (!effectiveUserId) return [];
-
-      let query = supabase
-        .from('pedidos')
-        .select(`
-          *,
-          clientes:cliente_id (
-            id,
-            nome,
-            telefone,
-            endereco
-          )
-        `)
-        .eq('user_id', effectiveUserId)
-        .order('data_pedido', { ascending: false });
-
-      if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'pendente' | 'processando' | 'entregue' | 'cancelado');
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      
-      const pedidosFormatted = data?.map(pedido => ({
-        ...pedido,
-        cliente: pedido.clientes
-      })) || [];
-
-      if (searchTerm) {
-        return pedidosFormatted.filter(pedido => 
-          pedido.cliente?.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pedido.id.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      return pedidosFormatted;
-    },
-    enabled: !!effectiveUserId
-  });
-
-  // Atualizar status do pedido
-  const updateStatusMutation = useMutation({
-    mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: 'pendente' | 'processando' | 'entregue' | 'cancelado' }) => {
-      const { error } = await supabase
-        .from('pedidos')
-        .update({ status })
-        .eq('id', pedidoId)
-        .eq('user_id', effectiveUserId!);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Status atualizado',
-        description: 'Status do pedido atualizado com sucesso.'
-      });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Erro ao atualizar',
-        description: 'Não foi possível atualizar o status do pedido.',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  // Deletar pedido
-  const deletePedidoMutation = useMutation({
-    mutationFn: async (pedidoId: string) => {
-      // Primeiro deletar itens do pedido
-      const { error: itensError } = await supabase
-        .from('itens_pedido')
-        .delete()
-        .eq('pedido_id', pedidoId)
-        .eq('user_id', effectiveUserId!);
-      
-      if (itensError) throw itensError;
-
-      // Depois deletar o pedido
-      const { error } = await supabase
-        .from('pedidos')
-        .delete()
-        .eq('id', pedidoId)
-        .eq('user_id', effectiveUserId!);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Pedido excluído',
-        description: 'Pedido excluído com sucesso.'
-      });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Erro ao excluir',
-        description: 'Não foi possível excluir o pedido.',
-        variant: 'destructive'
-      });
-    }
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pendente': return 'bg-yellow-100 text-yellow-800';
-      case 'processando': return 'bg-blue-100 text-blue-800';
-      case 'entregue': return 'bg-green-100 text-green-800';
-      case 'cancelado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pendente': return 'Pendente';
-      case 'processando': return 'Processando';
-      case 'entregue': return 'Entregue';
-      case 'cancelado': return 'Cancelado';
-      default: return status;
-    }
-  };
+  const { data: pedidos, isLoading } = usePedidosQuery(searchTerm, statusFilter);
+  const { updateStatusMutation } = usePedidoMutations();
 
   const handleEdit = (pedido: Pedido) => {
     setEditingPedido(pedido);
     setShowForm(true);
-  };
-
-  const handleDelete = (pedidoId: string) => {
-    if (confirm('Tem certeza que deseja excluir este pedido?')) {
-      deletePedidoMutation.mutate(pedidoId);
-    }
   };
 
   const handleView = (pedido: Pedido) => {
@@ -180,26 +40,7 @@ const PedidosList = () => {
   };
 
   const handlePrint = (pedidoId: string) => {
-    // Implementar lógica de impressão usando o hook usePedidoImpressao
     window.open(`/pedidos/${pedidoId}/print`, '_blank');
-  };
-
-  const handleWhatsApp = (pedido: Pedido) => {
-    if (!pedido.cliente?.telefone) {
-      toast({
-        title: 'Telefone não encontrado',
-        description: 'Este cliente não possui telefone cadastrado.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    const phone = pedido.cliente.telefone.replace(/\D/g, ''); // Remove caracteres não numéricos
-    const message = `Olá ${pedido.cliente.nome}, tudo bem? Estou entrando em contato sobre o pedido #${pedido.id.slice(-8)} no valor de R$ ${pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`;
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/55${phone}?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
   };
 
   if (isLoading) {
@@ -269,102 +110,15 @@ const PedidosList = () => {
               </div>
             ) : (
               pedidos?.map((pedido) => (
-                <div key={pedido.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">Pedido #{pedido.id.slice(-8)}</h3>
-                    <div className="flex space-x-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handleView(pedido)}>
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Visualizar Pedido</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handlePrint(pedido.id)}>
-                              <Printer className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Imprimir Pedido</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => handleEdit(pedido)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Editar Pedido</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleWhatsApp(pedido)}
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <MessageCircle className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Conversar no WhatsApp</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                    <div>
-                      <strong>Cliente:</strong> {pedido.cliente?.nome || 'Cliente não informado'}
-                    </div>
-                    <div>
-                      <strong>Data:</strong> {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}
-                    </div>
-                    <div>
-                      <strong>Total:</strong> R$ {pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </div>
-                    <div>
-                      <strong>Status:</strong>
-                      <Select
-                        value={pedido.status}
-                        onValueChange={(value) => handleStatusChange(pedido.id, value as 'pendente' | 'processando' | 'entregue' | 'cancelado')}
-                        disabled={updateStatusMutation.isPending}
-                      >
-                        <SelectTrigger className="w-full mt-1 h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="processando">Processando</SelectItem>
-                          <SelectItem value="entregue">Entregue</SelectItem>
-                          <SelectItem value="cancelado">Cancelado</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  {pedido.observacoes && (
-                    <p className="text-sm text-gray-600 mt-2">
-                      <strong>Obs:</strong> {pedido.observacoes}
-                    </p>
-                  )}
-                </div>
+                <PedidoItem
+                  key={pedido.id}
+                  pedido={pedido}
+                  onEdit={handleEdit}
+                  onView={handleView}
+                  onStatusChange={handleStatusChange}
+                  onPrint={handlePrint}
+                  isUpdatingStatus={updateStatusMutation.isPending}
+                />
               ))
             )}
           </div>
