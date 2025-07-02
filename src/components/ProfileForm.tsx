@@ -20,6 +20,7 @@ const ProfileForm = () => {
       cargo: '',
       empresa_nome: '',
       cnpj: '',
+      endereco: '',
     },
   });
 
@@ -32,6 +33,7 @@ const ProfileForm = () => {
         cargo: profile.cargo || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
+        endereco: profile.endereco || '',
       });
     }
   }, [profile, form]);
@@ -51,6 +53,7 @@ const ProfileForm = () => {
         cargo: profile.cargo || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
+        endereco: profile.endereco || '',
       });
     }
   };

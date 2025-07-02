@@ -13,6 +13,7 @@ export const profileSchema = z.object({
   cargo: z.string().max(100, 'Cargo muito longo').optional(),
   empresa_nome: z.string().max(200, 'Nome da empresa muito longo').optional(),
   cnpj: cnpjSchema,
+  endereco: z.string().max(300, 'Endereço muito longo').optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;

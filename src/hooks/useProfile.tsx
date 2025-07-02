@@ -14,6 +14,7 @@ interface Profile {
   avatar_url?: string;
   empresa_nome?: string;
   cnpj?: string;
+  endereco?: string;
   logo_url?: string;
   created_at: string;
   updated_at: string;

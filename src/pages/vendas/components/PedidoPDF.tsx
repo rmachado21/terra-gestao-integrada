@@ -93,6 +93,9 @@ const PedidoPDF = React.forwardRef<HTMLDivElement, PedidoPDFProps>(
               {empresa?.email && (
                 <p className="text-gray-600">Email: {empresa.email}</p>
               )}
+              {empresa?.endereco && (
+                <p className="text-gray-600">Endereço: {empresa.endereco}</p>
+              )}
             </div>
             <div className="text-right">
               <h2 className="text-xl font-bold text-gray-800">PEDIDO DE VENDA</h2>

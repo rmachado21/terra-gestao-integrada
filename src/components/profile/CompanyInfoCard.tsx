@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Building, Loader2 } from 'lucide-react';
 import { MaskedInput } from '@/components/ui/masked-input';
@@ -66,6 +67,24 @@ const CompanyInfoCard = ({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       placeholder="XX.XXX.XXX/XXXX-XX"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="endereco"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Endereço da Empresa</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Digite o endereço completo da empresa"
+                      {...field}
+                      rows={3}
                     />
                   </FormControl>
                   <FormMessage />
