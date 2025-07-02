@@ -152,7 +152,11 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
         const { data: novoPedido, error: pedidoError } = await supabase
           .from('pedidos')
           .insert([{
-            ...data,
+            cliente_id: data.cliente_id,
+            data_pedido: data.data_pedido,
+            status: data.status,
+            observacoes: data.observacoes,
+            valor_total: data.valor_total,
             user_id: effectiveUserId
           }])
           .select()
@@ -199,9 +203,18 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
       item.produto_id && item.quantidade > 0 && item.preco_unitario > 0
     );
 
+    if (!formData.cliente_id) {
+      toast({
+        title: 'Cliente obrigatório',
+        description: 'Selecione um cliente para o pedido.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     if (itensValidos.length === 0) {
       toast({
-        title: 'Erro de validação',
+        title: 'Itens obrigatórios',
         description: 'Adicione pelo menos um item ao pedido.',
         variant: 'destructive'
       });
@@ -211,7 +224,10 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
     const valorTotal = itensValidos.reduce((sum, item) => sum + item.subtotal, 0);
 
     savePedidoMutation.mutate({
-      ...formData,
+      cliente_id: formData.cliente_id,
+      data_pedido: formData.data_pedido,
+      status: formData.status,
+      observacoes: formData.observacoes,
       valor_total: valorTotal,
       itens: itensValidos
     });

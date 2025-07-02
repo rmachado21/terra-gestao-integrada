@@ -1,16 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, Eye, FileText, Printer, MessageCircle } from 'lucide-react';
+import { Edit, Eye, MessageCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Pedido } from '../types/pedido';
 import { useWhatsAppHandler } from '../utils/pedidoUtils';
+import PedidoImpressaoButton from './PedidoImpressaoButton';
 
 interface PedidoItemProps {
   pedido: Pedido;
   onEdit: (pedido: Pedido) => void;
   onView: (pedido: Pedido) => void;
   onStatusChange: (pedidoId: string, status: 'pendente' | 'processando' | 'entregue' | 'cancelado') => void;
-  onPrint: (pedidoId: string) => void;
   isUpdatingStatus: boolean;
 }
 
@@ -19,7 +19,6 @@ const PedidoItem = ({
   onEdit, 
   onView, 
   onStatusChange, 
-  onPrint, 
   isUpdatingStatus 
 }: PedidoItemProps) => {
   const { handleWhatsApp } = useWhatsAppHandler();
@@ -44,9 +43,12 @@ const PedidoItem = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => onPrint(pedido.id)}>
-                  <Printer className="h-4 w-4" />
-                </Button>
+                <PedidoImpressaoButton 
+                  pedidoId={pedido.id} 
+                  variant="outline" 
+                  size="sm" 
+                  showText={false}
+                />
               </TooltipTrigger>
               <TooltipContent>
                 <p>Imprimir Pedido</p>

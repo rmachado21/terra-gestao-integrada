@@ -39,9 +39,6 @@ const PedidosList = () => {
     updateStatusMutation.mutate({ pedidoId, status });
   };
 
-  const handlePrint = (pedidoId: string) => {
-    window.open(`/pedidos/${pedidoId}/print`, '_blank');
-  };
 
   if (isLoading) {
     return (
@@ -116,7 +113,6 @@ const PedidosList = () => {
                   onEdit={handleEdit}
                   onView={handleView}
                   onStatusChange={handleStatusChange}
-                  onPrint={handlePrint}
                   isUpdatingStatus={updateStatusMutation.isPending}
                 />
               ))
