@@ -41,12 +41,12 @@ const queryClient = new QueryClient({
 });
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="h-screen bg-gray-50 flex flex-col">
     <Header />
     <ImpersonationBanner />
-    <div className="flex">
+    <div className="flex flex-1 overflow-hidden">
       <Sidebar />
-      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200">
+      <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-gray-100 to-gray-200 overflow-auto">
         <PageTransition>
           {children}
         </PageTransition>
