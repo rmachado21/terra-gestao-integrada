@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Edit, Trash2, Eye, FileText, Printer } from 'lucide-react';
+import { Plus, Search, Edit, Eye, FileText, Printer, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
@@ -184,6 +184,24 @@ const PedidosList = () => {
     window.open(`/pedidos/${pedidoId}/print`, '_blank');
   };
 
+  const handleWhatsApp = (pedido: Pedido) => {
+    if (!pedido.cliente?.telefone) {
+      toast({
+        title: 'Telefone não encontrado',
+        description: 'Este cliente não possui telefone cadastrado.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const phone = pedido.cliente.telefone.replace(/\D/g, ''); // Remove caracteres não numéricos
+    const message = `Olá ${pedido.cliente.nome}, tudo bem? Estou entrando em contato sobre o pedido #${pedido.id.slice(-8)} no valor de R$ ${pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/55${phone}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -297,14 +315,14 @@ const PedidosList = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleDelete(pedido.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => handleWhatsApp(pedido)}
+                              className="text-green-600 hover:text-green-700 hover:bg-green-50"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <MessageCircle className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Excluir Pedido</p>
+                            <p>Conversar no WhatsApp</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
