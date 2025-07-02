@@ -69,6 +69,34 @@ const PedidosList = () => {
     enabled: !!effectiveUserId
   });
 
+  // Atualizar status do pedido
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: 'pendente' | 'processando' | 'entregue' | 'cancelado' }) => {
+      const { error } = await supabase
+        .from('pedidos')
+        .update({ status })
+        .eq('id', pedidoId)
+        .eq('user_id', effectiveUserId!);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Status atualizado',
+        description: 'Status do pedido atualizado com sucesso.'
+      });
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível atualizar o status do pedido.',
+        variant: 'destructive'
+      });
+    }
+  });
+
   // Deletar pedido
   const deletePedidoMutation = useMutation({
     mutationFn: async (pedidoId: string) => {
@@ -147,6 +175,10 @@ const PedidosList = () => {
     setEditingPedido(null);
   };
 
+  const handleStatusChange = (pedidoId: string, status: 'pendente' | 'processando' | 'entregue' | 'cancelado') => {
+    updateStatusMutation.mutate({ pedidoId, status });
+  };
+
   const handlePrint = (pedidoId: string) => {
     // Implementar lógica de impressão usando o hook usePedidoImpressao
     window.open(`/pedidos/${pedidoId}/print`, '_blank');
@@ -220,34 +252,8 @@ const PedidosList = () => {
             ) : (
               pedidos?.map((pedido) => (
                 <div key={pedido.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-semibold">Pedido #{pedido.id.slice(-8)}</h3>
-                        <Badge className={getStatusColor(pedido.status)}>
-                          {getStatusLabel(pedido.status)}
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                        <div>
-                          <strong>Cliente:</strong> {pedido.cliente?.nome || 'Cliente não informado'}
-                        </div>
-                        <div>
-                          <strong>Data:</strong> {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}
-                        </div>
-                        <div>
-                          <strong>Total:</strong> R$ {pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </div>
-                      </div>
-                      
-                      {pedido.observacoes && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          <strong>Obs:</strong> {pedido.observacoes}
-                        </p>
-                      )}
-                    </div>
-                    
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Pedido #{pedido.id.slice(-8)}</h3>
                     <div className="flex space-x-2">
                       <TooltipProvider>
                         <Tooltip>
@@ -304,6 +310,42 @@ const PedidosList = () => {
                       </TooltipProvider>
                     </div>
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                    <div>
+                      <strong>Cliente:</strong> {pedido.cliente?.nome || 'Cliente não informado'}
+                    </div>
+                    <div>
+                      <strong>Data:</strong> {new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}
+                    </div>
+                    <div>
+                      <strong>Total:</strong> R$ {pedido.valor_total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div>
+                      <strong>Status:</strong>
+                      <Select
+                        value={pedido.status}
+                        onValueChange={(value) => handleStatusChange(pedido.id, value as 'pendente' | 'processando' | 'entregue' | 'cancelado')}
+                        disabled={updateStatusMutation.isPending}
+                      >
+                        <SelectTrigger className="w-full mt-1 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pendente">Pendente</SelectItem>
+                          <SelectItem value="processando">Processando</SelectItem>
+                          <SelectItem value="entregue">Entregue</SelectItem>
+                          <SelectItem value="cancelado">Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  {pedido.observacoes && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      <strong>Obs:</strong> {pedido.observacoes}
+                    </p>
+                  )}
                 </div>
               ))
             )}
