@@ -43,6 +43,14 @@ const statusColors = {
   'colhido': 'bg-purple-100 text-purple-800'
 } as const;
 
+const statusLabels = {
+  'planejado': 'Planejado',
+  'plantado': 'Plantado',
+  'crescimento': 'Em Crescimento',
+  'maduro': 'Pronto para Colheita',
+  'colhido': 'Colhido'
+} as const;
+
 const PlantiosPage = () => {
   const { effectiveUserId, isImpersonating } = useEffectiveUser();
   const { toast } = useToast();
@@ -217,6 +225,13 @@ const PlantiosPage = () => {
     setIsDialogOpen(true);
   };
 
+  const handleStatusChange = (plantioId: string, newStatus: string) => {
+    updatePlantioMutation.mutate({ 
+      id: plantioId, 
+      data: { status: newStatus }
+    });
+  };
+
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja remover este plantio?')) {
       deletePlantioMutation.mutate(id);
@@ -346,7 +361,7 @@ const PlantiosPage = () => {
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="plantado">Plantado</SelectItem>
                       <SelectItem value="crescimento">Em Crescimento</SelectItem>
-                      <SelectItem value="maduro">Maduro</SelectItem>
+                      <SelectItem value="maduro">Pronto para Colheita</SelectItem>
                       <SelectItem value="colhido">Colhido</SelectItem>
                     </SelectContent>
                   </Select>
@@ -383,13 +398,25 @@ const PlantiosPage = () => {
                   {plantio.variedade}
                 </span>
                 <div className="flex items-center space-x-1">
-                  <Badge className={statusColors[plantio.status as keyof typeof statusColors]}>
-                    {plantio.status === 'planejado' ? 'Planejado' :
-                     plantio.status === 'plantado' ? 'Plantado' :
-                     plantio.status === 'crescimento' ? 'Crescimento' :
-                     plantio.status === 'maduro' ? 'Maduro' :
-                     plantio.status === 'colhido' ? 'Colhido' : plantio.status}
-                  </Badge>
+                  <Select 
+                    value={plantio.status} 
+                    onValueChange={(value) => handleStatusChange(plantio.id, value)}
+                  >
+                    <SelectTrigger className="w-auto h-6 px-2 text-xs border-0 focus:ring-0">
+                      <SelectValue>
+                        <Badge className={statusColors[plantio.status as keyof typeof statusColors]}>
+                          {statusLabels[plantio.status as keyof typeof statusLabels]}
+                        </Badge>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="planejado">Planejado</SelectItem>
+                      <SelectItem value="plantado">Plantado</SelectItem>
+                      <SelectItem value="crescimento">Em Crescimento</SelectItem>
+                      <SelectItem value="maduro">Pronto para Colheita</SelectItem>
+                      <SelectItem value="colhido">Colhido</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Button 
                     variant="ghost" 
                     size="sm" 
