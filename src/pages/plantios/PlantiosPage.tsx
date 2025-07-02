@@ -38,16 +38,16 @@ interface Area {
 const statusColors = {
   'planejado': 'bg-gray-100 text-gray-800',
   'plantado': 'bg-blue-100 text-blue-800',
-  'crescimento': 'bg-yellow-100 text-yellow-800',
-  'maduro': 'bg-green-100 text-green-800',
+  'crescendo': 'bg-yellow-100 text-yellow-800',
+  'pronto_colheita': 'bg-green-100 text-green-800',
   'colhido': 'bg-purple-100 text-purple-800'
 } as const;
 
 const statusLabels = {
   'planejado': 'Planejado',
   'plantado': 'Plantado',
-  'crescimento': 'Em Crescimento',
-  'maduro': 'Pronto para Colheita',
+  'crescendo': 'Em Crescimento',
+  'pronto_colheita': 'Pronto para Colheita',
   'colhido': 'Colhido'
 } as const;
 
@@ -360,8 +360,8 @@ const PlantiosPage = () => {
                     <SelectContent>
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="plantado">Plantado</SelectItem>
-                      <SelectItem value="crescimento">Em Crescimento</SelectItem>
-                      <SelectItem value="maduro">Pronto para Colheita</SelectItem>
+                      <SelectItem value="crescendo">Em Crescimento</SelectItem>
+                      <SelectItem value="pronto_colheita">Pronto para Colheita</SelectItem>
                       <SelectItem value="colhido">Colhido</SelectItem>
                     </SelectContent>
                   </Select>
@@ -412,8 +412,8 @@ const PlantiosPage = () => {
                     <SelectContent>
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="plantado">Plantado</SelectItem>
-                      <SelectItem value="crescimento">Em Crescimento</SelectItem>
-                      <SelectItem value="maduro">Pronto para Colheita</SelectItem>
+                      <SelectItem value="crescendo">Em Crescimento</SelectItem>
+                      <SelectItem value="pronto_colheita">Pronto para Colheita</SelectItem>
                       <SelectItem value="colhido">Colhido</SelectItem>
                     </SelectContent>
                   </Select>
