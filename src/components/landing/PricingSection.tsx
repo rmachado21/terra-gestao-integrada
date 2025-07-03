@@ -24,7 +24,7 @@ const PricingSection = () => {
     name: "Anual",
     price: "R$ 249,00",
     period: "por ano",
-    originalPrice: "R$ 288,80",
+    originalPrice: "R$ 298,80",
     savings: "2 meses grátis",
     description: "",
     features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
