@@ -13,7 +13,7 @@ const SubscriptionManagement = () => {
   const getPlanDetails = (tier?: string) => {
     switch (tier) {
       case 'Basic':
-        return { name: 'Plano Básico', price: 'R$ 7,99/mês', icon: Zap, color: 'bg-blue-100 text-blue-800' };
+        return { name: 'Plano Mensal', price: 'R$ 7,99/mês', icon: Zap, color: 'bg-blue-100 text-blue-800' };
       case 'Premium':
         return { name: 'Plano Premium', price: 'R$ 19,99/mês', icon: Star, color: 'bg-purple-100 text-purple-800' };
       case 'Enterprise':
@@ -103,7 +103,7 @@ const SubscriptionManagement = () => {
               <div className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold">Plano Mensal</h4>
-                  <Badge variant="outline">R$ 19,90/mês</Badge>
+                  <Badge variant="outline">R$ 24,90/mês</Badge>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
                   Perfeito para começar. Pagamento mensal.
@@ -126,8 +126,8 @@ const SubscriptionManagement = () => {
                       2 meses grátis
                     </Badge>
                     <div className="text-sm">
-                      <span className="line-through text-gray-500">R$ 238,80</span>
-                      <span className="font-semibold text-green-600 ml-2">R$ 199,90/ano</span>
+                      <span className="line-through text-gray-500">R$ 298,80</span>
+                      <span className="font-semibold text-green-600 ml-2">R$ 249,00/ano</span>
                     </div>
                   </div>
                 </div>
