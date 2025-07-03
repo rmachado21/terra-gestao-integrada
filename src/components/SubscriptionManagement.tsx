@@ -10,17 +10,13 @@ import { ptBR } from 'date-fns/locale';
 const SubscriptionManagement = () => {
   const { subscriptionData, loading, createCheckout, openCustomerPortal } = useStripeSubscription();
 
-  const getPlanDetails = (tier?: string) => {
-    switch (tier) {
-      case 'Basic':
-        return { name: 'Plano Mensal', price: 'R$ 7,99/mês', icon: Zap, color: 'bg-blue-100 text-blue-800' };
-      case 'Premium':
-        return { name: 'Plano Premium', price: 'R$ 19,99/mês', icon: Star, color: 'bg-purple-100 text-purple-800' };
-      case 'Enterprise':
-        return { name: 'Plano Enterprise', price: 'R$ 49,99/mês', icon: CreditCard, color: 'bg-gold-100 text-gold-800' };
-      default:
-        return { name: 'Plano Free', price: 'Gratuito', icon: Calendar, color: 'bg-gray-100 text-gray-800' };
-    }
+  const getPlanName = (tier?: string) => {
+    return tier || 'Nenhum plano ativo';
+  };
+
+  const getPlanPrice = (tier?: string) => {
+    if (!tier) return '';
+    return tier.includes('mensal') || tier.toLowerCase().includes('month') ? 'R$ 24,90/mês' : 'R$ 249,00/ano';
   };
 
   if (loading) {
@@ -36,8 +32,8 @@ const SubscriptionManagement = () => {
     );
   }
 
-  const planDetails = getPlanDetails(subscriptionData?.subscription_tier);
-  const PlanIcon = planDetails.icon;
+  const planName = getPlanName(subscriptionData?.subscription_tier);
+  const planPrice = getPlanPrice(subscriptionData?.subscription_tier);
 
   return (
     <Card>
@@ -52,17 +48,14 @@ const SubscriptionManagement = () => {
           <>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-600">Plano Atual:</span>
-              <div className="flex items-center space-x-2">
-                <PlanIcon className="h-4 w-4" />
-                <Badge variant="default" className={planDetails.color}>
-                  {planDetails.name}
-                </Badge>
-              </div>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                {planName}
+              </Badge>
             </div>
 
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-600">Preço:</span>
-              <span className="text-sm font-semibold">{planDetails.price}</span>
+              <span className="text-sm font-semibold">{planPrice}</span>
             </div>
 
             {subscriptionData.subscription_end && (
