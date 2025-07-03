@@ -1,5 +1,6 @@
 
 import SubscriptionManagement from '@/components/SubscriptionManagement';
+import StripeIntegrationValidator from '@/components/StripeIntegrationValidator';
 
 const SubscriptionPage = () => {
   return (
@@ -12,7 +13,10 @@ const SubscriptionPage = () => {
           </p>
         </div>
         
-        <SubscriptionManagement />
+        <div className="space-y-6">
+          <SubscriptionManagement />
+          <StripeIntegrationValidator />
+        </div>
       </div>
     </div>
   );
