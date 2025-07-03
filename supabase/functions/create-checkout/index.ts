@@ -57,11 +57,11 @@ serve(async (req) => {
 
     // Define prices based on plan type
     const priceConfig = planType === 'anual' ? {
-      unit_amount: 19990, // R$ 199.90 annually
+      unit_amount: 24900, // R$ 249.00 annually
       recurring: { interval: 'year' as const },
       product_name: 'Plano Anual - Gestor Raiz'
     } : {
-      unit_amount: 1990, // R$ 19.90 monthly
+      unit_amount: 2490, // R$ 24.90 monthly
       recurring: { interval: 'month' as const },
       product_name: 'Plano Mensal - Gestor Raiz'
     };
