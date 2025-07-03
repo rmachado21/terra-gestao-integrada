@@ -14,7 +14,7 @@ const PricingSection = () => {
     highlighted: false
   }, {
     name: "Mensal",
-    price: "R$ 19,90",
+    price: "R$ 24,90",
     period: "por mês",
     description: "Ideal para pequenos produtores",
     features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
@@ -22,9 +22,9 @@ const PricingSection = () => {
     highlighted: false
   }, {
     name: "Anual",
-    price: "R$ 199,90",
+    price: "R$ 249,00",
     period: "por ano",
-    originalPrice: "R$ 238,80",
+    originalPrice: "R$ 288,80",
     savings: "2 meses grátis",
     description: "",
     features: ["Áreas ilimitadas", "Plantios", "Controle de Produção", "Controle de Estoque", "Clientes", "Vendas", "Relatórios avançados", "Suporte", "Backup", "Acesso mobile"],
