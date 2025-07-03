@@ -46,7 +46,7 @@ const statusColors = {
 const statusLabels = {
   'planejado': 'Planejado',
   'plantado': 'Plantado',
-  'crescendo': 'Em Crescimento',
+  'crescendo': 'Crescendo',
   'pronto_colheita': 'Pronto para Colheita',
   'colhido': 'Colhido'
 } as const;
@@ -360,7 +360,7 @@ const PlantiosPage = () => {
                     <SelectContent>
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="plantado">Plantado</SelectItem>
-                      <SelectItem value="crescendo">Em Crescimento</SelectItem>
+                      <SelectItem value="crescendo">Crescendo</SelectItem>
                       <SelectItem value="pronto_colheita">Pronto para Colheita</SelectItem>
                       <SelectItem value="colhido">Colhido</SelectItem>
                     </SelectContent>
@@ -412,7 +412,7 @@ const PlantiosPage = () => {
                     <SelectContent>
                       <SelectItem value="planejado">Planejado</SelectItem>
                       <SelectItem value="plantado">Plantado</SelectItem>
-                      <SelectItem value="crescendo">Em Crescimento</SelectItem>
+                      <SelectItem value="crescendo">Crescendo</SelectItem>
                       <SelectItem value="pronto_colheita">Pronto para Colheita</SelectItem>
                       <SelectItem value="colhido">Colhido</SelectItem>
                     </SelectContent>
