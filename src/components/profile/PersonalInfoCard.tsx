@@ -70,20 +70,6 @@ const PersonalInfoCard = ({ form, email, updating, onSubmit, onCancel }: Persona
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="cargo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cargo/Função</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Seu cargo ou função" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex gap-3 pt-4">
               <Button 
                 type="submit" 

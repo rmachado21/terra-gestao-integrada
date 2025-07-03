@@ -10,7 +10,6 @@ const cnpjSchema = z.string()
 export const profileSchema = z.object({
   nome: nameSchema,
   telefone: phoneSchema,
-  cargo: z.string().max(100, 'Cargo muito longo').optional(),
   empresa_nome: z.string().max(200, 'Nome da empresa muito longo').optional(),
   cnpj: cnpjSchema,
   endereco: z.string().max(300, 'Endereço muito longo').optional(),

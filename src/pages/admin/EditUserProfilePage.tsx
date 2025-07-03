@@ -26,7 +26,6 @@ const EditUserProfilePage = () => {
     defaultValues: {
       nome: '',
       telefone: '',
-      cargo: '',
       empresa_nome: '',
       cnpj: '',
     },
@@ -56,7 +55,6 @@ const EditUserProfilePage = () => {
       form.reset({
         nome: data.nome || '',
         telefone: data.telefone || '',
-        cargo: data.cargo || '',
         empresa_nome: data.empresa_nome || '',
         cnpj: data.cnpj || '',
       });
@@ -185,7 +183,6 @@ const EditUserProfilePage = () => {
       form.reset({
         nome: profile.nome || '',
         telefone: profile.telefone || '',
-        cargo: profile.cargo || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
       });

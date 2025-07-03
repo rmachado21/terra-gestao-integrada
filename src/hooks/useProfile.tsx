@@ -10,7 +10,6 @@ interface Profile {
   nome: string;
   email: string;
   telefone?: string;
-  cargo?: string;
   avatar_url?: string;
   empresa_nome?: string;
   cnpj?: string;

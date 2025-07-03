@@ -17,7 +17,6 @@ const ProfileForm = () => {
     defaultValues: {
       nome: '',
       telefone: '',
-      cargo: '',
       empresa_nome: '',
       cnpj: '',
       endereco: '',
@@ -30,7 +29,6 @@ const ProfileForm = () => {
       form.reset({
         nome: profile.nome || '',
         telefone: profile.telefone || '',
-        cargo: profile.cargo || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
         endereco: profile.endereco || '',
@@ -50,7 +48,6 @@ const ProfileForm = () => {
       form.reset({
         nome: profile.nome || '',
         telefone: profile.telefone || '',
-        cargo: profile.cargo || '',
         empresa_nome: profile.empresa_nome || '',
         cnpj: profile.cnpj || '',
         endereco: profile.endereco || '',
