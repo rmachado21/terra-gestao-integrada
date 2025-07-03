@@ -22,6 +22,8 @@ import EstoquePage from "./pages/estoque/EstoquePage";
 import VendasPage from "./pages/vendas/VendasPage";
 import FinanceiroPage from "./pages/financeiro/FinanceiroPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutCancel from "./pages/CheckoutCancel";
 import AlertasPage from "./pages/alertas/AlertasPage";
 import UsersPage from "./pages/admin/UsersPage";
 import EditUserProfilePage from "./pages/admin/EditUserProfilePage";
@@ -87,6 +89,16 @@ const App = () => (
                       <AppLayout>
                         <SubscriptionPage />
                       </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/checkout/success" element={
+                    <ProtectedRoute>
+                      <CheckoutSuccess />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/checkout/cancel" element={
+                    <ProtectedRoute>
+                      <CheckoutCancel />
                     </ProtectedRoute>
                   } />
                   <Route path="/areas" element={

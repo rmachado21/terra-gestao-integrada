@@ -178,7 +178,7 @@ const PlanInfo = () => {
                 {stripeLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
                 ) : (
-                  <><Zap className="h-3 w-3 mr-1" /> Mensal R$ 7,99</>
+                  <><Zap className="h-3 w-3 mr-1" /> Mensal R$ 24,90</>
                 )}
               </Button>
               <Button
@@ -190,7 +190,7 @@ const PlanInfo = () => {
                 {stripeLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
                 ) : (
-                  <><CreditCard className="h-3 w-3 mr-1" /> Anual R$ 79,90</>
+                  <><CreditCard className="h-3 w-3 mr-1" /> Anual R$ 249,00</>
                 )}
               </Button>
             </div>
@@ -263,7 +263,7 @@ const PlanInfo = () => {
                 {stripeLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
                 ) : (
-                  <><Zap className="h-3 w-3 mr-1" /> Plano Mensal</>
+                  <><Zap className="h-3 w-3 mr-1" /> Mensal R$ 24,90</>
                 )}
               </Button>
               <Button
@@ -275,7 +275,7 @@ const PlanInfo = () => {
                 {stripeLoading ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processando...</>
                 ) : (
-                  <><CreditCard className="h-3 w-3 mr-1" /> Plano Anual (Melhor valor)</>
+                  <><CreditCard className="h-3 w-3 mr-1" /> Anual R$ 249,00 (Melhor valor)</>
                 )}
               </Button>
             </div>
