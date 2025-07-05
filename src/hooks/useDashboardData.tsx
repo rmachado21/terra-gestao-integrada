@@ -68,9 +68,12 @@ export const useDashboardData = () => {
         ? ((producaoMes - producaoMesAnterior) / producaoMesAnterior * 100).toFixed(1)
         : '0';
 
-      // Vendas do mês
+      // Vendas do mês (excluindo pedidos cancelados)
       const vendasMes = pedidos
-        .filter(pedido => new Date(pedido.data_pedido) >= inicioMes)
+        .filter(pedido => 
+          new Date(pedido.data_pedido) >= inicioMes && 
+          pedido.status !== 'cancelado'
+        )
         .reduce((sum, pedido) => sum + (pedido.valor_total || 0), 0);
 
       const pedidosEntreguesMes = pedidos
