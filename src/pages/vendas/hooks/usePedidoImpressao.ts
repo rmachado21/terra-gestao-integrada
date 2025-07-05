@@ -46,7 +46,7 @@ export const usePedidoImpressao = (pedidoId: string) => {
 
       // Preparar dados da empresa a partir do perfil
       const empresa = profile ? {
-        nome: profile.empresa_nome,
+        nome: profile.empresa_nome || profile.nome,
         cnpj: profile.cnpj,
         telefone: profile.telefone,
         email: profile.email,
