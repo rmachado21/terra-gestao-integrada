@@ -8,7 +8,7 @@ export const listUsers = async (supabaseClient: SupabaseClient) => {
     // Get all profiles first with telefone and cargo fields
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
-      .select('id, nome, email, ativo, created_at, telefone, cargo, empresa_nome');
+      .select('id, nome, email, ativo, created_at, telefone, empresa_nome');
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError);
