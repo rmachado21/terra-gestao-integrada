@@ -11,13 +11,61 @@ export const usePedidoMutations = () => {
   // Atualizar status do pedido
   const updateStatusMutation = useMutation({
     mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: 'pendente' | 'processando' | 'entregue' | 'cancelado' }) => {
-      const { error } = await supabase
-        .from('pedidos')
-        .update({ status })
-        .eq('id', pedidoId)
-        .eq('user_id', effectiveUserId!);
-      
-      if (error) throw error;
+      // Se mudando para entregue, buscar dados do pedido primeiro
+      if (status === 'entregue') {
+        const { data: pedido, error: fetchError } = await supabase
+          .from('pedidos')
+          .select('valor_total, data_entrega')
+          .eq('id', pedidoId)
+          .eq('user_id', effectiveUserId!)
+          .single();
+        
+        if (fetchError) throw fetchError;
+
+        // Verificar se já existe movimentação financeira para este pedido
+        const { data: existingMovement } = await supabase
+          .from('movimentacoes_financeiras')
+          .select('id')
+          .eq('pedido_id', pedidoId)
+          .eq('user_id', effectiveUserId!)
+          .eq('tipo', 'receita')
+          .single();
+
+        // Atualizar status do pedido
+        const { error: updateError } = await supabase
+          .from('pedidos')
+          .update({ status })
+          .eq('id', pedidoId)
+          .eq('user_id', effectiveUserId!);
+        
+        if (updateError) throw updateError;
+
+        // Criar movimentação financeira apenas se não existir
+        if (!existingMovement && pedido.valor_total > 0) {
+          const { error: financeError } = await supabase
+            .from('movimentacoes_financeiras')
+            .insert({
+              tipo: 'receita',
+              categoria: 'Vendas',
+              valor: pedido.valor_total,
+              data_movimentacao: pedido.data_entrega || new Date().toISOString().split('T')[0],
+              descricao: `Pedido #${pedidoId.slice(-8)}`,
+              pedido_id: pedidoId,
+              user_id: effectiveUserId!
+            });
+          
+          if (financeError) throw financeError;
+        }
+      } else {
+        // Para outros status, apenas atualizar
+        const { error } = await supabase
+          .from('pedidos')
+          .update({ status })
+          .eq('id', pedidoId)
+          .eq('user_id', effectiveUserId!);
+        
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -26,6 +74,8 @@ export const usePedidoMutations = () => {
       });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-financeiras'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
     onError: () => {
       toast({
