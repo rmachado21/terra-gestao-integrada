@@ -9,6 +9,7 @@ export const usePedidoImpressao = (pedidoId: string) => {
   return useQuery({
     queryKey: ['pedido-impressao', pedidoId],
     queryFn: async () => {
+      console.log('Profile for PDF:', profile);
       // Buscar dados do pedido com cliente
       const { data: pedidoData, error: pedidoError } = await supabase
         .from('pedidos')
@@ -46,12 +47,16 @@ export const usePedidoImpressao = (pedidoId: string) => {
 
       // Preparar dados da empresa a partir do perfil
       const empresa = profile ? {
-        nome: profile.empresa_nome || profile.nome,
+        nome: profile.empresa_nome || profile.nome || 'Empresa',
         cnpj: profile.cnpj,
         telefone: profile.telefone,
         email: profile.email,
         logo_url: profile.logo_url
-      } : undefined;
+      } : {
+        nome: 'Empresa'
+      };
+      
+      console.log('Empresa data for PDF:', empresa);
 
       return {
         pedido: {
@@ -62,6 +67,6 @@ export const usePedidoImpressao = (pedidoId: string) => {
         empresa
       };
     },
-    enabled: !!pedidoId
+    enabled: !!pedidoId && !!profile
   });
 };

@@ -82,7 +82,7 @@ const PedidoPDF = React.forwardRef<HTMLDivElement, PedidoPDFProps>(
                 />
               )}
               <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                {empresa?.nome || 'Empresa'}
+                {empresa?.nome}
               </h1>
               {empresa?.cnpj && (
                 <p className="text-gray-600">CNPJ: {empresa.cnpj}</p>
