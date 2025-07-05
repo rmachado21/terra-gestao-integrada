@@ -28,7 +28,7 @@ export const useDashboardData = () => {
         supabase.from('pedidos').select('id, valor_total, status, data_pedido, created_at').eq('user_id', effectiveUserId),
         supabase.from('movimentacoes_financeiras').select('id, valor, tipo, data_movimentacao, created_at').eq('user_id', effectiveUserId),
         supabase.from('alertas').select('id, titulo, mensagem, tipo, prioridade, lido, created_at').eq('user_id', effectiveUserId).eq('lido', false),
-        supabase.from('estoque').select('id, quantidade, quantidade_minima, data_validade').eq('user_id', effectiveUserId),
+        supabase.from('estoque').select('id, produto_id, quantidade, quantidade_minima, data_validade').eq('user_id', effectiveUserId),
         supabase.from('produtos').select('id, nome, ativo').eq('user_id', effectiveUserId).eq('ativo', true)
       ]);
 
@@ -136,7 +136,10 @@ export const useDashboardData = () => {
       // Ordenar por data mais recente e limitar a 5
       atividadesRecentes.sort((a, b) => 
         new Date(b.time).getTime() - new Date(a.time).getTime()
-      ).splice(5);
+      );
+      
+      // Limitar a 5 atividades mais recentes
+      const atividadesLimitadas = atividadesRecentes.slice(0, 5);
 
       // Alertas automáticos + alertas manuais
       const alertasCompletos = [...alertas];
@@ -144,11 +147,11 @@ export const useDashboardData = () => {
       // Verificar estoque baixo
       estoque.forEach(item => {
         if (item.quantidade_minima && item.quantidade <= item.quantidade_minima) {
-          const produto = produtos.find(p => p.id === item.id);
+          const produto = produtos.find(p => p.id === item.produto_id);
           alertasCompletos.push({
             id: `estoque-${item.id}`,
             titulo: "Estoque Crítico",
-            mensagem: `${produto?.nome || 'Produto'} - apenas ${item.quantidade} unidades`,
+            mensagem: `${produto?.nome || 'Produto não encontrado'} - apenas ${item.quantidade} unidades`,
             prioridade: item.quantidade === 0 ? "critica" as const : "alta" as const,
             tipo: "estoque",
             created_at: new Date().toISOString(),
@@ -185,8 +188,8 @@ export const useDashboardData = () => {
             subtitle: `${areas.filter(a => a.ativa).length} áreas ativas`
           },
           producaoMensal: {
-            value: `${producaoMes.toLocaleString()} kg`,
-            subtitle: `${crescimentoProducao}% vs mês anterior`
+            value: producaoMes > 0 ? `${producaoMes.toLocaleString()} kg` : "0 kg",
+            subtitle: producaoMes > 0 ? `${crescimentoProducao}% vs mês anterior` : "Nenhuma produção este mês"
           },
           vendasMes: {
             value: `R$ ${vendasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -197,7 +200,7 @@ export const useDashboardData = () => {
             subtitle: `Margem de ${margemLucro}%`
           }
         },
-        atividadesRecentes,
+        atividadesRecentes: atividadesLimitadas,
         alertas: alertasCompletos.slice(0, 5) // Limitar a 5 alertas
       };
     },
