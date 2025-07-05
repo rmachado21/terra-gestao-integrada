@@ -10,6 +10,15 @@ export const useEffectiveUser = () => {
   // Caso contrário, retorna o usuário atual
   const effectiveUserId = isImpersonating ? impersonatedUserId : user?.id;
 
+  // Logs detalhados para debugging
+  console.log('[EFFECTIVE_USER] Current state:', {
+    currentUserId: user?.id,
+    isImpersonating,
+    impersonatedUserId,
+    effectiveUserId,
+    timestamp: new Date().toISOString()
+  });
+
   return {
     user,
     effectiveUserId,

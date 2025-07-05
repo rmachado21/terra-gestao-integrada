@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye, AlertTriangle } from 'lucide-react';
+import { Eye, AlertTriangle, Loader2 } from 'lucide-react';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 
 interface ImpersonationDialogProps {
@@ -12,10 +12,10 @@ interface ImpersonationDialogProps {
 
 const ImpersonationDialog = ({ userId, userName }: ImpersonationDialogProps) => {
   const [open, setOpen] = useState(false);
-  const { startImpersonation, canImpersonate } = useImpersonation();
+  const { startImpersonation, canImpersonate, isTransitioning } = useImpersonation();
 
-  const handleConfirm = () => {
-    startImpersonation(userId);
+  const handleConfirm = async () => {
+    await startImpersonation(userId);
     setOpen(false);
   };
 
@@ -51,11 +51,22 @@ const ImpersonationDialog = ({ userId, userName }: ImpersonationDialogProps) => 
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={isTransitioning}>
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} className="bg-orange-600 hover:bg-orange-700">
-            Confirmar Impersonação
+          <Button 
+            onClick={handleConfirm} 
+            disabled={isTransitioning}
+            className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50"
+          >
+            {isTransitioning ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Iniciando...
+              </>
+            ) : (
+              'Confirmar Impersonação'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

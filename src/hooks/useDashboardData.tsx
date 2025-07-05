@@ -9,9 +9,15 @@ export const useDashboardData = () => {
   return useQuery({
     queryKey: ['dashboard-data', effectiveUserId],
     queryFn: async () => {
-      if (!effectiveUserId) return null;
+      console.log('[DASHBOARD_DATA] Starting query with effectiveUserId:', effectiveUserId);
+      
+      if (!effectiveUserId) {
+        console.log('[DASHBOARD_DATA] No effectiveUserId, returning null');
+        return null;
+      }
 
       // Buscar todas as estatísticas em paralelo
+      console.log('[DASHBOARD_DATA] Fetching data for user:', effectiveUserId);
       const [
         areasRes,
         plantiosRes, 
@@ -41,6 +47,17 @@ export const useDashboardData = () => {
       const alertas = alertasRes.data || [];
       const estoque = estoqueRes.data || [];
       const produtos = produtosRes.data || [];
+
+      console.log('[DASHBOARD_DATA] Data fetched for user:', effectiveUserId, {
+        areas: areas.length,
+        plantios: plantios.length,
+        colheitas: colheitas.length,
+        pedidos: pedidos.length,
+        movimentacoes: movimentacoes.length,
+        alertas: alertas.length,
+        estoque: estoque.length,
+        produtos: produtos.length
+      });
 
       // Área plantada total
       const areaTotal = areas
@@ -207,7 +224,9 @@ export const useDashboardData = () => {
         alertas: alertasCompletos.slice(0, 5) // Limitar a 5 alertas
       };
     },
-    enabled: !!effectiveUserId
+    enabled: !!effectiveUserId,
+    staleTime: 0, // Sempre buscar dados frescos
+    refetchOnMount: true // Sempre refetch quando componente montar
   });
 };
 
