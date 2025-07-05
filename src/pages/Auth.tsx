@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useSafeSecurity } from '@/components/SecurityProvider';
-import { emailSchema, passwordSchema, nameSchema, secureLogger } from '@/lib/security';
+import { emailSchema, passwordSchema, nameSchema, secureLogger, validateEmailSecurity } from '@/lib/security';
 import { z } from 'zod';
 import PasswordResetRequest from '@/components/PasswordResetRequest';
 import PasswordResetForm from '@/components/PasswordResetForm';
@@ -59,11 +59,22 @@ const Auth = () => {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     
+    // Validação de email com logging de segurança
     try {
       emailSchema.parse(email);
     } catch (error) {
       if (error instanceof z.ZodError) {
         newErrors.email = error.errors[0].message;
+        
+        // Log de segurança para emails rejeitados
+        const emailValidation = validateEmailSecurity(email);
+        if (!emailValidation.isValid) {
+          secureLogger.security('email_validation_failed', { 
+            email: email.split('@')[0] + '@***', // Ofuscar domínio para privacidade
+            reason: emailValidation.error,
+            mode 
+          });
+        }
       }
     }
 

@@ -8,13 +8,111 @@ export const SECURITY_CONFIG = {
   RATE_LIMIT_WINDOW: 15 * 60 * 1000, // 15 minutos
 };
 
+// Lista de domínios de email temporário bloqueados
+const BLOCKED_EMAIL_DOMAINS = [
+  '10minutemail.com', '10minutemail.net', '10minutemail.org',
+  'guerrillamail.com', 'guerrillamail.net', 'guerrillamail.org',
+  'mailinator.com', 'mailinator.net', 'mailinator.org',
+  'tempmail.org', 'temp-mail.org', 'temporarymail.com',
+  'yopmail.com', 'yopmail.net', 'yopmail.fr',
+  'throwaway.email', 'getnada.com', 'maildrop.cc',
+  'sharklasers.com', 'grr.la', 'guerrillamailblock.com',
+  'pokemail.net', 'spam4.me', 'tempail.com',
+  'dispostable.com', 'fakeinbox.com', 'mailnesia.com'
+];
+
+// Domínios comuns para sugestões
+const COMMON_DOMAINS = [
+  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
+  'uol.com.br', 'terra.com.br', 'ig.com.br', 'bol.com.br'
+];
+
+// Função para sugerir correção de domínio
+export const suggestEmailDomain = (email: string): string | null => {
+  const [localPart, domain] = email.split('@');
+  if (!domain) return null;
+
+  // Verificar se é uma variação comum de domínios conhecidos
+  const domainLower = domain.toLowerCase();
+  
+  if (domainLower.includes('gmail') && domainLower !== 'gmail.com') {
+    return `${localPart}@gmail.com`;
+  }
+  if (domainLower.includes('yahoo') && domainLower !== 'yahoo.com') {
+    return `${localPart}@yahoo.com`;
+  }
+  if (domainLower.includes('hotmail') && domainLower !== 'hotmail.com') {
+    return `${localPart}@hotmail.com`;
+  }
+  if (domainLower.includes('outlook') && domainLower !== 'outlook.com') {
+    return `${localPart}@outlook.com`;
+  }
+
+  return null;
+};
+
+// Validação avançada de segurança do email
+export const validateEmailSecurity = (email: string): { 
+  isValid: boolean; 
+  error?: string; 
+  suggestion?: string; 
+} => {
+  if (!email) return { isValid: false, error: 'Email é obrigatório' };
+
+  const normalizedEmail = email.toLowerCase().trim();
+  const [localPart, domain] = normalizedEmail.split('@');
+
+  if (!localPart || !domain) {
+    return { isValid: false, error: 'Formato de email inválido' };
+  }
+
+  // Verificar se o domínio está na lista de bloqueados
+  if (BLOCKED_EMAIL_DOMAINS.includes(domain)) {
+    return { 
+      isValid: false, 
+      error: 'Emails temporários não são permitidos. Use um email permanente.' 
+    };
+  }
+
+  // Verificar domínios suspeitos
+  if (domain.length < 4) {
+    return { isValid: false, error: 'Domínio do email parece inválido' };
+  }
+
+  // Verificar se tem pelo menos um ponto no domínio
+  if (!domain.includes('.')) {
+    return { isValid: false, error: 'Domínio do email deve conter um ponto' };
+  }
+
+  // Verificar caracteres suspeitos
+  if (/[<>\"'&]/.test(email)) {
+    return { isValid: false, error: 'Email contém caracteres não permitidos' };
+  }
+
+  // Sugerir correção se necessário
+  const suggestion = suggestEmailDomain(email);
+
+  return { 
+    isValid: true, 
+    suggestion: suggestion ? `Você quis dizer: ${suggestion}?` : undefined 
+  };
+};
+
 // Validação de email segura
 export const emailSchema = z
   .string()
   .email('Email inválido')
   .min(1, 'Email é obrigatório')
   .max(255, 'Email muito longo')
-  .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Formato de email inválido');
+  .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Formato de email inválido')
+  .refine((email) => {
+    const result = validateEmailSecurity(email);
+    return result.isValid;
+  }, (email) => {
+    const result = validateEmailSecurity(email);
+    return { message: result.error || 'Email inválido' };
+  })
+  .transform((email) => email.toLowerCase().trim());
 
 // Validação de senha robusta
 export const passwordSchema = z
