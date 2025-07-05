@@ -2,75 +2,49 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useEffectiveUser } from '@/hooks/useEffectiveUser';
+import { usePedidoFinanceSync } from './usePedidoFinanceSync';
 
 export const usePedidoMutations = () => {
   const { effectiveUserId } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { syncPedidoFinanceiro, removePedidoFinanceiro } = usePedidoFinanceSync();
 
-  // Atualizar status do pedido
+  // Atualizar status do pedido com sincronização financeira
   const updateStatusMutation = useMutation({
     mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: 'pendente' | 'processando' | 'entregue' | 'cancelado' }) => {
-      // Se mudando para entregue, buscar dados do pedido primeiro
-      if (status === 'entregue') {
-        const { data: pedido, error: fetchError } = await supabase
-          .from('pedidos')
-          .select('valor_total, data_entrega')
-          .eq('id', pedidoId)
-          .eq('user_id', effectiveUserId!)
-          .single();
-        
-        if (fetchError) throw fetchError;
+      // Buscar dados atuais do pedido
+      const { data: pedidoAtual, error: fetchError } = await supabase
+        .from('pedidos')
+        .select('valor_total, data_pedido, data_entrega, status')
+        .eq('id', pedidoId)
+        .eq('user_id', effectiveUserId!)
+        .single();
+      
+      if (fetchError) throw fetchError;
 
-        // Verificar se já existe movimentação financeira para este pedido
-        const { data: existingMovement } = await supabase
-          .from('movimentacoes_financeiras')
-          .select('id')
-          .eq('pedido_id', pedidoId)
-          .eq('user_id', effectiveUserId!)
-          .eq('tipo', 'receita')
-          .single();
+      // Atualizar status do pedido
+      const { error: updateError } = await supabase
+        .from('pedidos')
+        .update({ status })
+        .eq('id', pedidoId)
+        .eq('user_id', effectiveUserId!);
+      
+      if (updateError) throw updateError;
 
-        // Atualizar status do pedido
-        const { error: updateError } = await supabase
-          .from('pedidos')
-          .update({ status })
-          .eq('id', pedidoId)
-          .eq('user_id', effectiveUserId!);
-        
-        if (updateError) throw updateError;
-
-        // Criar movimentação financeira apenas se não existir
-        if (!existingMovement && pedido.valor_total > 0) {
-          const { error: financeError } = await supabase
-            .from('movimentacoes_financeiras')
-            .insert({
-              tipo: 'receita',
-              categoria: 'Vendas',
-              valor: pedido.valor_total,
-              data_movimentacao: pedido.data_entrega || new Date().toISOString().split('T')[0],
-              descricao: `Pedido #${pedidoId.slice(-8)}`,
-              pedido_id: pedidoId,
-              user_id: effectiveUserId!
-            });
-          
-          if (financeError) throw financeError;
-        }
-      } else {
-        // Para outros status, apenas atualizar
-        const { error } = await supabase
-          .from('pedidos')
-          .update({ status })
-          .eq('id', pedidoId)
-          .eq('user_id', effectiveUserId!);
-        
-        if (error) throw error;
-      }
+      // Sincronizar com movimentações financeiras
+      await syncPedidoFinanceiro(pedidoId, {
+        valor_total: pedidoAtual.valor_total,
+        status,
+        data_pedido: pedidoAtual.data_pedido,
+        data_entrega: pedidoAtual.data_entrega,
+        statusAnterior: pedidoAtual.status
+      });
     },
     onSuccess: () => {
       toast({
         title: 'Status atualizado',
-        description: 'Status do pedido atualizado com sucesso.'
+        description: 'Status do pedido e movimentações financeiras atualizados com sucesso.'
       });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
@@ -86,10 +60,13 @@ export const usePedidoMutations = () => {
     }
   });
 
-  // Deletar pedido
+  // Deletar pedido com limpeza financeira
   const deletePedidoMutation = useMutation({
     mutationFn: async (pedidoId: string) => {
-      // Primeiro deletar itens do pedido
+      // Remover movimentações financeiras associadas
+      await removePedidoFinanceiro(pedidoId);
+
+      // Deletar itens do pedido
       const { error: itensError } = await supabase
         .from('itens_pedido')
         .delete()
@@ -98,7 +75,7 @@ export const usePedidoMutations = () => {
       
       if (itensError) throw itensError;
 
-      // Depois deletar o pedido
+      // Deletar o pedido
       const { error } = await supabase
         .from('pedidos')
         .delete()
@@ -110,10 +87,12 @@ export const usePedidoMutations = () => {
     onSuccess: () => {
       toast({
         title: 'Pedido excluído',
-        description: 'Pedido excluído com sucesso.'
+        description: 'Pedido e movimentações financeiras removidos com sucesso.'
       });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-financeiras'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
     onError: () => {
       toast({
@@ -124,8 +103,60 @@ export const usePedidoMutations = () => {
     }
   });
 
+  // Nova mutação para atualizar pedido completo (valor, data, etc.)
+  const updatePedidoMutation = useMutation({
+    mutationFn: async (dados: {
+      pedidoId: string;
+      cliente_id?: string;
+      data_pedido: string;
+      status: 'pendente' | 'processando' | 'entregue' | 'cancelado';
+      observacoes?: string;
+      valor_total: number;
+      data_entrega?: string;
+      statusAnterior?: 'pendente' | 'processando' | 'entregue' | 'cancelado';
+    }) => {
+      const { pedidoId, statusAnterior, ...updateData } = dados;
+
+      // Atualizar pedido
+      const { error: updateError } = await supabase
+        .from('pedidos')
+        .update(updateData)
+        .eq('id', pedidoId)
+        .eq('user_id', effectiveUserId!);
+      
+      if (updateError) throw updateError;
+
+      // Sincronizar com movimentações financeiras
+      await syncPedidoFinanceiro(pedidoId, {
+        valor_total: updateData.valor_total,
+        status: updateData.status,
+        data_pedido: updateData.data_pedido,
+        data_entrega: updateData.data_entrega,
+        statusAnterior
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Pedido atualizado',
+        description: 'Pedido e movimentações financeiras atualizados com sucesso.'
+      });
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-financeiras'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+    onError: () => {
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível atualizar o pedido.',
+        variant: 'destructive'
+      });
+    }
+  });
+
   return {
     updateStatusMutation,
-    deletePedidoMutation
+    deletePedidoMutation,
+    updatePedidoMutation
   };
 };

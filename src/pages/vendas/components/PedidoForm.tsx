@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffectiveUser } from '@/hooks/useEffectiveUser';
 import { useToast } from '@/hooks/use-toast';
 import { Pedido } from '../types/pedido';
+import { usePedidoMutations } from '../hooks/usePedidoMutations';
 
 interface PedidoFormProps {
   pedido?: Pedido | null;
@@ -28,6 +29,7 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
   const { effectiveUserId } = useEffectiveUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { updatePedidoMutation } = usePedidoMutations();
 
   const [formData, setFormData] = useState({
     cliente_id: '',
@@ -108,24 +110,23 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
     }
   }, [pedido]);
 
-  // Criar/atualizar pedido
+  // Criar/atualizar pedido com sincronização financeira
   const savePedidoMutation = useMutation({
     mutationFn: async (data: any) => {
       if (pedido) {
-        // Atualizar pedido existente
-        const { error: pedidoError } = await supabase
-          .from('pedidos')
-          .update({
-            cliente_id: data.cliente_id,
-            data_pedido: data.data_pedido,
-            status: data.status,
-            observacoes: data.observacoes,
-            valor_total: data.valor_total
-          })
-          .eq('id', pedido.id)
-          .eq('user_id', effectiveUserId!);
-
-        if (pedidoError) throw pedidoError;
+        // Armazenar status anterior para sincronização
+        const statusAnterior = pedido.status;
+        
+        // Atualizar pedido usando a nova mutação
+        await updatePedidoMutation.mutateAsync({
+          pedidoId: pedido.id,
+          cliente_id: data.cliente_id,
+          data_pedido: data.data_pedido,
+          status: data.status,
+          observacoes: data.observacoes,
+          valor_total: data.valor_total,
+          statusAnterior
+        });
 
         // Deletar itens antigos
         const { error: deleteError } = await supabase
@@ -176,14 +177,29 @@ const PedidoForm = ({ pedido, onClose }: PedidoFormProps) => {
           );
 
         if (itensError) throw itensError;
+
+        // Sincronizar movimentações financeiras para pedidos novos entregues
+        if (data.status === 'entregue') {
+          await updatePedidoMutation.mutateAsync({
+            pedidoId: novoPedido.id,
+            cliente_id: data.cliente_id,
+            data_pedido: data.data_pedido,
+            status: data.status,
+            observacoes: data.observacoes,
+            valor_total: data.valor_total,
+            statusAnterior: 'pendente'
+          });
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       queryClient.invalidateQueries({ queryKey: ['vendas-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['movimentacoes-financeiras'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       toast({
         title: pedido ? 'Pedido atualizado' : 'Pedido criado',
-        description: `Pedido ${pedido ? 'atualizado' : 'criado'} com sucesso.`
+        description: `Pedido ${pedido ? 'atualizado' : 'criado'} com sucesso. Movimentações financeiras sincronizadas.`
       });
       onClose();
     },
